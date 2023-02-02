@@ -1,0 +1,150 @@
+---
+title: " "
+output: 
+  pdf_document:
+    number_sections: TRUE
+geometry: "left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm"
+fontsize: 11pt
+header-includes:
+  - \usepackage{float}
+  - \usepackage{sectsty}
+  - \usepackage{paralist}
+  - \usepackage{setspace}\spacing{1.5}
+  - \usepackage{fancyhdr}
+  - \usepackage{lastpage}
+  - \usepackage{dcolumn}
+  - \usepackage{natbib}\bibliographystyle{agsm}
+  - \usepackage[nottoc, numbib]{tocbibind}
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+#designed with help of: 
+#https://ourcodingclub.github.io/tutorials/rmarkdown-dissertation/
+
+knitr::opts_chunk$set(echo = TRUE)
+options(tinytex.verbose = TRUE)
+
+#install dependencies
+if (!requireNamespace("tinytex", quietly=TRUE))
+  install.packages("tinytex")
+
+library(tinytex)
+```
+
+
+\allsectionsfont{\centering}
+\subsectionfont{\raggedright}
+\subsubsectionfont{\raggedright}
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+\vspace{3cm}
+```{r uni_logo, echo=F, out.width="20%"}
+knitr::include_graphics("FHCW_logo.png")
+knitr::include_graphics("KI_logo.png")
+```
+
+\vspace{1cm}
+
+\Large
+\doublespacing
+{\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
+
+\vspace{1 cm}
+
+\normalsize
+\singlespacing
+By
+
+\vspace{0.5 cm}
+
+\Large
+
+{\bf Lukas Gamp}
+
+\vspace{1.5 cm}
+
+in partial fulfilment of the requirement \\for the degree of MSc with Honours \\in Bioinformatics
+
+\vspace{1.5 cm}
+
+\normalsize
+mm yy
+\end{centering}
+
+\newpage
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+{\bf Abstract}
+
+\end{centering}
+
+\spacing{1.5}
+
+(the spacing is set to 1.5)
+
+no more than 250 words for the abstract
+
+- a description of the research question/knowledge gap – what we know and what we don’t know
+- how your research has attempted to fill this gap
+- a brief description of the methods
+- brief results
+- key conclusions that put the research into a larger context
+
+\pagenumbering{roman}
+
+\newpage
+
+\centering
+\raggedright
+\newpage
+\tableofcontents
+
+
+\newpage
+
+```{r acknowledgments, child='acknowledgments.Rmd'}
+```
+
+\newpage
+
+```{r intro, child = 'introduction.Rmd'}
+```
+\pagenumbering{arabic}
+
+\newpage
+
+```{r methods, child = 'methods.Rmd'}
+```
+
+\newpage
+
+```{r results, child = 'results.Rmd'}
+```
+
+\newpage
+
+```{r discussion, child = 'discussion.Rmd'}
+```
+
+\newpage
+
+```{r conclusion, child = 'conclusion.Rmd'}
+```
+
+\newpage
+
+```{r biblio, child = 'bibliography.Rmd'}
+```
+
+\newpage
+
+```{r appendix, child = 'appendix.Rmd'}
+```
+
