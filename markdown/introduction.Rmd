@@ -5,7 +5,6 @@ header-includes:
   - \usepackage{float}
   - \usepackage{sectsty}
 ---
-
 # Introduction
 
 ## Mass Spectrometry
@@ -20,8 +19,22 @@ Every peptide is reflected by its` indivual fingerprint in the ms-spectrum. The 
 
 ### Interpretation of the data
 
-Since ms data has a high resoultuion, algorithms are used to convert peaks to interpretable form. These algorithms find local minima of the function to seperate peaks from each other. Peaks include all isotopes of the protein`s containing atoms. MaxQuant \citep{Cox2008} is one of the sofware packages to process the data and provides it for further analysis and statistical testing. 
+Since ms data has a high resoultuion, algorithms are used to convert peaks to an interpretable form. These algorithms find local minima of the function to seperate peaks from each other. Peaks include all isotopes of the protein`s containing atoms. 
+MaxQuant \citep{Cox2008} is one of the sofware packages to process the data and provides it for further analysis and statistical testing. To find the istopic distribution of a biomolecue, MaxQuant creates a vertex of every single peak and connects them with their possible isotopic counterparts by finding the proportion of mass of an average aminoacid to its` respective isotope (averagine \citep{Senko1995}). After this procedure a large amount of noise is reduced and a single peak reflects a small biomolecule. These biomolecules can now be searched in a database in forward and reverse direction. The peptide identification (P-) score indicates the fit of the data to the found sequence in the database according to the length of the peptide and is used to calculate the posterior error probability (FDR). The calculation of the false discovery rate is then calculated by taking FDR into contrast. After these calculation the peptide peaks are joined to a protein and can be quantified. 
 
+ 
+
+follow sctranscr. analysis pipe
+
+signatures of cell clustures
+
+monocyte data acvailiabe
+
+tmt label --> noise reduction
+
+tools for clustering
+
+	plst, knm, 
  
 
 follow sctranscr. analysis pipe
