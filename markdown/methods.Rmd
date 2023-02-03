@@ -7,4 +7,17 @@ output: pdf_document
 
 \vspace{0.5cm}
 
-Write your methods here. In this tutorial you can use this already made file\\to add examples of figures and tables and explore knitr and kableExtra functionalities!
+# Materials and Methods
+
+## Materials
+
+For analysis two types of cells were used. One type is the Jurkat-based cell line (J-lat) with integrated HIV. 
+
+The other type of cells are macrophages with a sample size of 72 cells. The analysis is done with two groups. A HIV negative (HIV-) control group and a HIV positive (HIV+) group. 
+
+
+## Data
+
+### Acquisition
+
+Analysis of the data was done with MaxQuant \citep{Cox2008}

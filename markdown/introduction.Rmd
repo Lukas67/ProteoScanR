@@ -8,10 +8,30 @@ header-includes:
 
 # Introduction
 
-- introduce the reader to the subject area and clarify the knowledge gap that the dissertation research will fill.
-- set the context for the dissertation by reviewing the relevant literature.
-- include relevant references to general (theoretical papers and reviews) and specific (specific to the particular question addressed) literature, to justify the research that has been undertaken and define the questions being addressed.
-- state the primary research questions and hypotheses in the final paragraph.
-- follow an ‘inverted triangle’ format, progressing from general scientific ideas and why they matter to the specific research questions addressed in the dissertation project. 
+## Mass Spectrometry
 
-*The introduction should not be just a ‘Literature Review’.*
+
+
+### MS-Spectrum
+
+Every peptide is reflected by its` indivual fingerprint in the ms-spectrum. The fingerprint is based on the chemical properties and modifications. In order to identify proteins, fingerprints are matched against a sequence database \citep{Cox2008}. 
+
+
+
+### Interpretation of the data
+
+Since ms data has a high resoultuion, algorithms are used to convert peaks to interpretable form. These algorithms find local minima of the function to seperate peaks from each other. Peaks include all isotopes of the protein`s containing atoms. MaxQuant \citep{Cox2008} is one of the sofware packages to process the data and provides it for further analysis and statistical testing. 
+
+ 
+
+follow sctranscr. analysis pipe
+
+signatures of cell clustures
+
+monocyte data acvailiabe
+
+tmt label --> noise reduction
+
+tools for clustering
+
+	plst, knm, 
