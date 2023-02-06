@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.2)  6 FEB 2023 10:25
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.6)  6 FEB 2023 15:27
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **Thesis.tex
 (./Thesis.tex
 LaTeX2e <2022-11-01> patch level 1
-L3 programming layer <2023-01-24> (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
+L3 programming layer <2023-02-02> (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/size11.clo
 File: size11.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
@@ -434,12 +434,12 @@ Package hyperref Info: Link coloring OFF on input line 78.
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=72, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=80, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 90.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=73, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=81, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 91.
@@ -484,15 +484,15 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write4
 \openout4 = `Thesis.toc'.
 
-[2] [3]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 193.
+[2] [3] [4] [5]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 305.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [4] [1] [2] [3] [4] [5] (./Thesis.bbl) [6] [7] [8] 
+) [6] [1] [2] [3] [4] [5] (./Thesis.bbl) [6] [7] [8] 
 AED: lastpage setting LastPage
 [9] (./Thesis.aux)
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 343605A6BA405F93C64F98D67A8B632A;2168.
+(rerunfilecheck)             Checksum: C009D1757D0EC978C3A6D97CF9E62836;2419.
  )
 (\end occurred inside a group at level 2)
 
@@ -500,18 +500,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 11750 strings out of 478025
- 182242 string characters out of 5840140
- 1856305 words of memory out of 5000000
- 31647 multiletter control sequences out of 15000+600000
+ 11804 strings out of 478024
+ 183129 string characters out of 5840101
+ 1857346 words of memory out of 5000000
+ 31674 multiletter control sequences out of 15000+600000
  547769 words of font info for 58 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,76p,571b,8312s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,76p,572b,8313s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on Thesis.pdf (14 pages, 191889 bytes).
+Output written on Thesis.pdf (16 pages, 201449 bytes).
 PDF statistics:
- 231 PDF objects out of 1000 (max. 8388607)
- 196 compressed objects within 2 object streams
- 52 named destinations out of 1000 (max. 500000)
- 147 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 294 PDF objects out of 1000 (max. 8388607)
+ 256 compressed objects within 3 object streams
+ 82 named destinations out of 1000 (max. 500000)
+ 163 words of extra memory for PDF output out of 10000 (max. 10000000)
 
