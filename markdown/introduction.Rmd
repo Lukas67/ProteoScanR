@@ -7,14 +7,32 @@ header-includes:
 ---
 # Introduction
 
+## Proteomics
+
+The proteome is referred to the sum of all proteins of a given sample at a given time. In the past several quantitative and qualitative assays were used to enlighten the protein composition of a sample. 
+
+
 ## Mass Spectrometry
+
+Mass spectrometry enables qualitative and quantitative analysis of the entire repertoire of a biological sample. The availability of gene sequences in databases and the ability to match proteins against those sequences with computational methods makes it possible to identify alterations of a sample on a protein level. These alterations can rely on the sequence level or could be to post-translational modifications (PTMs) such as phosphorylation, methylation or else \citep{Aebersold2003}.
+
+### Instrumentation
+
+#### Ionization
+
+In order to analyze a biological sample consisting of proteins in solution the liquid needs to be vaporized into gas phase. Two techniques are capable of this procedure. Electrospray ionization (ESI) pushes the analyte through a capillary and applies an electric current to the liquid, vaporizing the sample to a  charged aerosol. Biomolecules are fragmented according to their chemical properties and can be further handled in the mass spectrometer. The fragmented biomolecules are now in charged droplets separated by their charge on the surface, splitting further into smaller droplets until they become a gas phase ion. Two physical models describe the process from gas phase to ion called “The ion evaporation model” (IEM) and “The carge residue model” (CRM). 
+In the ion evaporation model (by Iribarne and Thomoson) the droplets shrink by evaporation until ions are expelled. The model had its limitation by explaining same evaporation rate constant among ions with different chemical properties. 
+In the charge residue model the assumption of one molecule per droplet leads to an ionization rate constant, which is independent of the ion itself and relies solely on the generation of the droplet and the efficiency of the solvent \citep{Wilm2011}.
+ 
+Matrix-assisted laser desorption/ionization (MALDI)
 
 
 
 ### MS-Spectrum
 
-Every peptide is reflected by its` indivual fingerprint in the ms-spectrum. The fingerprint is based on the chemical properties and modifications. In order to identify proteins, fingerprints are matched against a sequence database \citep{Cox2008}. 
+Each peptide is reflected by its` indivual fingerprint in the ms-spectrum. The fingerprint is based on the chemical properties and modifications. In order to identify proteins, fingerprints are matched against a sequence database \citep{Cox2008}. 
 
+### Labeling techniques
 
 
 ### Interpretation of the data
@@ -22,19 +40,6 @@ Every peptide is reflected by its` indivual fingerprint in the ms-spectrum. The 
 Since ms data has a high resoultuion, algorithms are used to convert peaks to an interpretable form. These algorithms find local minima of the function to seperate peaks from each other. Peaks include all isotopes of the protein`s containing atoms. 
 MaxQuant \citep{Cox2008} is one of the sofware packages to process the data and provides it for further analysis and statistical testing. To find the istopic distribution of a biomolecue, MaxQuant creates a vertex of every single peak and connects them with their possible isotopic counterparts by finding the proportion of mass of an average aminoacid to its` respective isotope (averagine \citep{Senko1995}). After this procedure a large amount of noise is reduced and a single peak reflects a small biomolecule. These biomolecules can now be searched in a database in forward and reverse direction. The peptide identification (P-) score indicates the fit of the data to the found sequence in the database according to the length of the peptide and is used to calculate the posterior error probability (FDR). The calculation of the false discovery rate is then calculated by taking FDR into contrast. After these calculation the peptide peaks are joined to a protein and can be quantified. 
 
- 
-
-follow sctranscr. analysis pipe
-
-signatures of cell clustures
-
-monocyte data acvailiabe
-
-tmt label --> noise reduction
-
-tools for clustering
-
-	plst, knm, 
  
 
 follow sctranscr. analysis pipe
