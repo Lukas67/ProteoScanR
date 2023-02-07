@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.6)  6 FEB 2023 15:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.6)  7 FEB 2023 09:55
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -485,7 +485,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \openout4 = `Thesis.toc'.
 
 [2] [3] [4] [5]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 305.
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 328.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [6] [1] [2] [3] [4] [5] (./Thesis.bbl) [6] [7] [8] 
@@ -500,18 +500,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 11804 strings out of 478024
- 183129 string characters out of 5840101
+ 11807 strings out of 478024
+ 183184 string characters out of 5840101
  1857346 words of memory out of 5000000
- 31674 multiletter control sequences out of 15000+600000
+ 31675 multiletter control sequences out of 15000+600000
  547769 words of font info for 58 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,76p,572b,8313s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,5n,76p,572b,8313s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on Thesis.pdf (16 pages, 201449 bytes).
+Output written on Thesis.pdf (16 pages, 202446 bytes).
 PDF statistics:
- 294 PDF objects out of 1000 (max. 8388607)
- 256 compressed objects within 3 object streams
- 82 named destinations out of 1000 (max. 500000)
+ 296 PDF objects out of 1000 (max. 8388607)
+ 258 compressed objects within 3 object streams
+ 84 named destinations out of 1000 (max. 500000)
  163 words of extra memory for PDF output out of 10000 (max. 10000000)
 
