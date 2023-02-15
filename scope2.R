@@ -12,7 +12,10 @@ library("dplyr")
 
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/combined/txt/evidence.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/evidence.txt")
+
+akos_data <- read.csv("/home/lukas/Downloads/20230202_HF2_08_Ujjwal_Monocytes_TMT12_proteins.csv")
+
 
 
 # create annotation file
@@ -31,14 +34,19 @@ generate_var = function(prefix, length) {
   paste(prefix, sprintf('%03d', seq_len(length)), sep = '_')
 }
 
-sampleAnnotation$SampleType <- c(generate_var("example", nrow(sampleAnnotation)))
+samplesA <- c(generate_var("A", 6))
+samplesB <- c(generate_var("B", 6))
+samples <- c(samplesA, samplesB)
+
+
+sampleAnnotation$SampleType <- samples
 
 
 scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
                channelCol = "Channel",
                batchCol = "Raw.file",
-               suffix = paste0("_TMT", 1:6),
+               suffix = paste0("_TMT", 1:12),
                removeEmptyCols = TRUE)
 
 # check data

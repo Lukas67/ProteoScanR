@@ -7,6 +7,8 @@ header-includes:
 ---
 # Introduction
 
+# Introduction
+
 ## Proteomics
 
 The proteome is referred to the sum of all proteins of a given sample at a given time. In the past several quantitative and qualitative assays were used to enlighten the protein composition of a sample. 
@@ -53,7 +55,7 @@ In order to enhance sequence identification, two MS devices are built in series.
 
 #### Labeling techniques
 
-For differential analysis proteins need to be labeled to compare mass to charge intensities. Since mass spectrometry is not a quantitative technique by itself, the peak height or area does not reflect the abundance of a peptide. Physicochemical properties of the proteins can change the ionization efficiency and detectability of the target. However, when comparing the same analyte between multiple runs of labeled proteins, differences in the mass spectrum reflect the abundance of those. Labels should be chosen to change solely the mass of the sample and to not affect folding or other inherent properties of the protein. 
+For differential analysis proteins need to be labeled to compare mass to charge intensities in order to quantify observed peptides. Since mass spectrometry is not a quantitative technique by itself, the peak height or area does not reflect the abundance of a peptide. Physicochemical properties of the proteins can change the ionization efficiency and detectability of the target. However, when comparing the same analyte between multiple runs of labeled proteins, differences in the mass spectrum reflect the abundance of those. Labels should be chosen to change solely the mass of the sample and to not affect folding or other inherent properties of the protein. 
 
 #### Metabolic labeling
 
@@ -65,19 +67,56 @@ Feeding cells with aminoacids containing heavy isotopes, is the method of choice
 ###### Tandem mass tag (TMT)
 
 Tandem mass tag (TMT) reagents enable to differentiate multiple samples analyzing in one MS run. 
-The samples are labeled individually and pooled afterwards, this procedure is called multiplexing. All TMTs have the same mass and can be found at the same peak in all samples, these peaks are called reporter ions (RI). The identification of these RI leads to an enrichment and identification of low abundance peptide ions which is common especially in single-cell techniques. With this technique it is possible to quantify proteins and differ low abundant proteins from background noise. 
-The disadvantage of isobaric labeling is, that the co-fragmentation signals can be observed in the spectrogram and the data needs to be normalized in order to remove unwanted contribution \citep{Marx2019, Budnik2018}. 
+The samples are labeled individually and pooled afterwards, this procedure is called multiplexing. TMTs have the same charge and differ only by their isotopic masses, the peaks found for each sample are called reporter ions (RI). Each RI and sample is interpreted as one channel in downstream analysis. The identification of these RI leads to an enrichment and identification of low abundance peptide ions which is common especially in single-cell techniques. With this technique it is possible to quantify proteins and differ low abundant proteins from background noise. 
+The disadvantage of isobaric labeling is, that the co-fragmentation signals can be observed in the spectrogram and the data needs to be normalized in order to remove unwanted contribution \citep{Marx2019, Budnik2018}. Furthermore TMTs have an isotopic distribution according to the distribution found in nature. This can be corrected during data-acquisition as a defined spread in other channels.
 
 ### MS-Spectrum
 
-Each peptide is reflected by its` indivual fingerprint in the ms-spectrum. The fingerprint is based on the chemical properties and modifications. In order to identify proteins, fingerprints are matched against a sequence database \citep{Cox2008}. 
+Each peptide is reflected by its` indivual fingerprint in the ms-spectrum. The fingerprint is based on the chemical properties and modifications of aminoacids. These aminoacids can be calculated through their m/z ration and after that interpreted as an aminoacid sequence. Due to fragmentation of the protein only peptide sequences are visible in the spectrum. In order to identify proteins, peptides are matched against a sequence database \citep{Cox2008}. Sequence Databases are simple .fasta files, which can be downloaded on the uniprot webpage (www.uniprot.org).
 
 ### Interpretation of the data
 
-Since ms data has a high resoultuion, algorithms are used to convert peaks to an interpretable form. These algorithms find local minima of the function to seperate peaks from each other. Peaks include all isotopes of the protein`s containing atoms. 
-MaxQuant \citep{Cox2008} is one of the sofware packages to process the data and provides it for further analysis and statistical testing. To find the istopic distribution of a biomolecule, MaxQuant creates a vertex of every single peak and connects them with their possible isotopic counterparts by finding the proportion of mass of an average aminoacid to its` respective isotope (averagine \citep{Senko1995}). After this procedure a large amount of noise is reduced and a single peak reflects a small biomolecule. These biomolecules can now be searched in a database in forward and reverse direction. The peptide identification (P-) score indicates the fit of the data to the found sequence in the database according to the length of the peptide and is used to calculate the posterior error probability (FDR). The calculation of the false discovery rate is then calculated by taking FDR into contrast. After these calculation the peptide peaks are joined to a protein and can be quantified. 
+#### Data acquisition
 
-#### Principle component analysis (PCA)
+Since ms data has a high resolution, algorithms are used to convert the raw signal to an interpretable form. 
+MaxQuant  is one of many sofware packages to process the data and provides it for further analysis and statistical testing. Other software solutions are Protein Discoverer Thermo Fisher or even packages for R. In this publication we will mainly focus on the data-acquisition with MaxQuant \citep{Cox2008}. 
+
+
+##### Three-dimensional peak detection
+
+The three dimensions of the data are: m/z ratio, intensity and retention time. The algorithm finds local minima of the function in order to seperate peaks from each other. The centroid of the peak is detected by fitting a so called gaussian peak shape fitting. This can be interpreted as finding the peaks of each m/z spectrum as a function of time.. The centroid of the peak refers to an isotope.
+
+
+##### Deisotoping 
+
+To decrypt the istopic distribution of a biomolecule, MaxQuant creates a vertex of every single peak and connects them with their possible isotopic counterparts by finding the proportion of mass of an average aminoacid to its` respective isotope (averagine \citep{Senko1995}). Isotoping is the term of such procedure and it is enabled with graph theory. After this procedure the amount of data points are reduced by a tenfold and a single peak reflects a small biomolecule. 
+
+##### Label detection
+
+The next step in data-acquisition is the detection of labels for quantification. Isotopic pairs of the label (e.g. N13, N14, N15) contained in the tag or aminoacid can be identified by convoluting the two measured isotope patterns with the theoretical isotope patterns. With a least-square method the best fit is found iteratively and the channel/sample can be identified.
+
+##### Improving peptide mass accuracy
+
+The intensity-weighted average of the ms peak centroids (as described in the 3D peak identification) refers to the mass of the peptide. Corrections highly depend on the analyzer, MaxQuant uses for an orbitrap typed analyzer a correction value of 1ppm. Autocorrelation between centroids is compensated by only using well-identified peptides. As published the mass precision within a ms experiment ranges around 10e-7.
+
+
+##### Peptide search 
+
+Biomolecules can now be searched in a database in forward and reverse direction. The peptide identification (P-) score indicates the fit of the data to the found sequence in the database according to the length of the peptide and is used to calculate the posterior error probability (FDR). The calculation of the false discovery rate is then calculated by taking FDR into contrast. 
+
+##### Protein assembly
+
+After these calculation the identified peptides can be aggregated according to it`s respective protein and  quantified. The mentioned metrics indicating the performance of the peptide search can be used in downstream analysis. A so called razor peptide indicates the group with the highest number of identified peptides. Quantification is enabled by taking only unique peptides into contrast. Posterior error probabilities, which refers to the chance that the found peptide is a random event, are multiplied and only distinct sequences with the highst-scoring are used.
+
+#### Downstream Analysis
+
+Further analysis is done with R and respective packages such as bioconductor. 
+
+##### Reading the data
+
+
+
+##### Principle component analysis (PCA)
 
 Protein levels can be projected to their principle components (PC) and clustered to their specific cell type. So cell types are distinguished by their proteinaceous composition. 
 
