@@ -1,3 +1,8 @@
+
+# workflow as per 
+# https://uclouvain-cbio.github.io/SCP.replication/articles/SCoPE2.html
+# and https://bioconductor.org/packages/release/bioc/vignettes/scp/inst/doc/scp.html
+
 # install scp package
 
 #BiocManager::install("scp")
@@ -13,7 +18,6 @@ library("dplyr")
 
 # read in MS result table
 mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/evidence.txt")
-
 akos_data <- read.csv("/home/lukas/Downloads/20230202_HF2_08_Ujjwal_Monocytes_TMT12_proteins.csv")
 
 
@@ -22,6 +26,7 @@ akos_data <- read.csv("/home/lukas/Downloads/20230202_HF2_08_Ujjwal_Monocytes_TM
 # this varies upon experimental design
 quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
 
+
 # create sample file
 # this needs to be done by the researcher
 sampleAnnotation <- as.data.frame(quantCols)
@@ -29,19 +34,14 @@ colnames(sampleAnnotation) <-c("Channel")
 sampleAnnotation$Raw.file = unique(mqScpData$Raw.file)
 
 
-# for example generated --> fix accordingly
-generate_var = function(prefix, length) {
-  paste(prefix, sprintf('%03d', seq_len(length)), sep = '_')
-}
-
-samplesA <- c(generate_var("A", 6))
-samplesB <- c(generate_var("B", 6))
+samplesA <- c(replicate(6, "Monocytes-A"))
+samplesB <- c(replicate(6, "Monocytes-B"))
 samples <- c(samplesA, samplesB)
 
 
 sampleAnnotation$SampleType <- samples
 
-
+# create QFeature object
 scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
                channelCol = "Channel",
@@ -49,160 +49,99 @@ scp <- readSCP(featureData = mqScpData,
                suffix = paste0("_TMT", 1:12),
                removeEmptyCols = TRUE)
 
-# check data
-head(colData(scp))
 
-#plot rawfile
-plot(scp)
+# plot runs (not needed - sample unfractionized)
+# only one run
+# plot(scp)
 
-# workflow as per 
-# https://uclouvain-cbio.github.io/SCP.replication/articles/SCoPE2.html
+# clean missing data
+scp <- zeroIsNA(scp, i=1:length(rowDataNames(scp)))
 
-peptides <- scp[["Peptides"]]
-proteins <- scp[["Proteins"]]
+# filter PSM
+# filter out potential contaminants
+# filter out matches to decoy database
+# keep PSMs with high PIF (parental ion fraction)
+scp <- filterFeatures(scp,
+                      ~ Reverse != "+" &
+                        Potential.contaminant != "+" &
+                        !is.na(PIF) & PIF > 0.8)
+
+# filter runs with too few features
+# however only one run is done
+keepAssay <- dims(scp)[1, ] > 150
+scp <- scp[, , keepAssay]
+
+# filter out based on SCP metric
+# sample to carrier ratio --> RI of single cell sample / RI carrier channel
+# carrier channel is meant to boost peptide id. rate
 
 
-#filter out failed runs, as per PSM content
-nPSMs <- dims(scp)[1, ]
+#however no carrier channel is used
+#scp <- computeSCR(scp,
+#                  i = 1:3,
+#                  colvar = "SampleType",
+#                  carrierPattern = "Carrier",
+#                  samplePattern = "Macrophage|Monocyte",
+#                  sampleFUN = "mean",
+#                  rowDataName = "MeanSCR")
+
+#rbindRowData(scp, i = 1:3) %>%
+#  data.frame %>%
+#  ggplot(aes(x = MeanSCR)) +
+#  geom_histogram() +
+#  geom_vline(xintercept = c(1/200, 0.1),
+#             lty = c(2, 1)) +
+#  scale_x_log10()
+
+#scp <- filterFeatures(scp,
+#                      ~ !is.na(MeanSCR) &
+#                        MeanSCR < 0.1)
+#> 'MeanSCR' found in 3 out of 3 assay(s)
 
 
-library(ggplot2)
-# plot the number of peptide sequence matches
-ggplot(data.frame(nPSMs)) +
-  aes(x = nPSMs) +
-  geom_histogram() +
-  geom_vline(xintercept = 500)
 
-# would drop all assays with a psm lower than 500
-scp <- scp[, , nPSMs > 500]
+
+
+# compute qvalues_PSMs to filter out by FDR
 
 scp <- pep2qvalue(scp,
-                  i = names(scp),
-                  PEP = "PEP",
-                  rowDataName = "qvalue_psm")
+                  i = 1:length(rowDataNames(scp)),
+                  PEP = "PEP", # by reference the dart_PEP value is used
+                  rowDataName = "qvalue_PSMs")
 
 scp <- pep2qvalue(scp,
-                  i = names(scp),
-                  groupBy = "Protein.names",
+                  i = 1:length(rowDataNames(scp)),
                   PEP = "PEP",
-                  rowDataName = "qvalue_protein")
-
-library(tidyr)
-
-rbindRowData(scp, i = names(scp)) %>%
-  data.frame %>%
-  pivot_longer(cols = c("PEP", "qvalue_psm", "qvalue_protein"),
-               names_to = "measure") %>%
-  
-  ggplot(aes(x = value)) +
-  geom_histogram() +
-  geom_vline(xintercept = 0.1) +
-  scale_x_log10() +
-  facet_grid(rows = vars(measure))
-
-# filter by 1% PSM and protein FDR
-
-scp <- filterFeatures(scp,
-                      ~ qvalue_psm < 0.01 & qvalue_protein < 0.01)
+                  groupBy = "Leading.razor.protein",
+                  rowDataName = "qvalue_proteins")
 
 
-#filter out contaminants (all proteins matching to contaminant (starting with CON) or decoy are deleted)
-scp <- filterFeatures(scp,
-                      ~ !grepl("REV|CON", protein))
+scp <- filterFeatures(scp, ~ qvalue_proteins < 0.01)
 
 
-#filter noisy spectra (PIF = parental ion fraction, co-isolated peptides)
 
-scp <- filterFeatures(scp,
-                      ~ !is.na(PIF) & PIF > 0.8)
-
-# compute SCR (sample to carrier ratio)
-scp <- computeSCR(scp,
-                  i = names(scp),
-                  colvar = "SampleType",
-                  carrierPattern = "Carrier",
-                  samplePattern = 4:16,
-                  rowDataName = "MeanSCR")
-
-# plot SCR rates as histogram
-
-rbindRowData(scp, i = names(scp)) %>%
-  data.frame %>%
-  ggplot(aes(x = MeanSCR)) +
-  geom_histogram() +
-  geom_vline(xintercept = c(1/200, 0.1),
-             lty = 2:1) +
-  scale_x_log10()
-
-scp <- filterFeatures(scp,
-                      ~ !is.na(MeanSCR) &
-                        !is.infinite(MeanSCR) &
-                        MeanSCR < 0.1)
-
-# normalize to reference
+# correct in between run variation 
+# when only one run observed --> not needed
 
 scp <- divideByReference(scp,
-                         i = names(scp),
+                         i = 1:length(rowDataNames(scp)),
                          colvar = "SampleType",
                          samplePattern = ".",
                          refPattern = "Reference")
 
+# aggregate PSMs to peptides
 
-# aggregate PSM 
-remove.duplicates <- function(x)
-  apply(x, 2, function(xx) xx[which(!is.na(xx))[1]] )
-
-
-# give name to the aggregated peptides
-peptideAssays <- paste0("peptides_", names(scp))
-
-# aggregate PSMs in different batches to peptides
 scp <- aggregateFeaturesOverAssays(scp,
-                                   i = names(scp),
-                                   fcol = "peptides",
-                                   name = peptideAssays,
-                                   fun = remove.duplicates)
-
-# join all sets into one assay
-# razor peptides (=found in different groups) will be assigned to the group with the most peptides
-rbindRowData(scp, i = names(scp)[1:173]) %>%
-  data.frame %>%
-  group_by(peptide) %>%
-  ## The majority vote happens here
-  mutate(protein = names(sort(table(protein),
-                              decreasing = TRUE))[1]) %>%
-  select(peptide, protein) %>%
-  filter(!duplicated(peptide, protein)) ->
-  ppMap
-consensus <- lapply(peptideAssays, function(i) {
-  ind <- match(rowData(scp[[i]])$peptide, ppMap$peptide)
-  DataFrame(protein = ppMap$protein[ind])
-})
-names(consensus) <- peptideAssays
-rowData(scp) <- consensus
-
-
-# clean missing data
-scp <- infIsNA(scp, i = peptideAssays)
-scp <- zeroIsNA(scp, i = peptideAssays)
-
-#join assays
-scp <- joinAssays(scp,
-                  i = peptideAssays,
-                  name = "peptides")
-
-#filter single-cells based on median CV
-scp <- medianCVperCell(scp,
-                       i = peptideAssays,
-                       groupBy = "protein",
-                       nobs = 6,
-                       na.rm = TRUE,
-                       colDataName = "MedianCV",
-                       norm = "SCoPE2")
+                                  i = 1:length(rowDataNames(scp)),
+                                  fcol = "Modified.sequence",
+                                  name = paste0("peptides_", names(scp)),
+                                  fun = matrixStats::colMedians, na.rm = TRUE)
+# filter per sample type
+# scp <- scp[, scp$SampleType %in% c("Blank", "Macrophage", "Monocyte"), ]
 
 
 
+# filter by median intensity
 
-
-
-
+medians <- colMedians(assay(scp[["peptides"]]), na.rm = TRUE)
+scp$MedianRI <- medians
