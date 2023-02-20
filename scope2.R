@@ -123,11 +123,11 @@ scp <- filterFeatures(scp, ~ qvalue_proteins < 0.01)
 # correct in between run variation 
 # when only one run observed --> not needed
 
-scp <- divideByReference(scp,
-                         i = 1:length(rowDataNames(scp)),
-                         colvar = "SampleType",
-                         samplePattern = ".",
-                         refPattern = "Reference")
+#scp <- divideByReference(scp,
+#                         i = 1:length(rowDataNames(scp)),
+#                         colvar = "SampleType",
+#                         samplePattern = ".",
+#                         refPattern = "Reference")
 
 # aggregate PSMs to peptides
 
@@ -139,9 +139,32 @@ scp <- aggregateFeaturesOverAssays(scp,
 # filter per sample type
 # scp <- scp[, scp$SampleType %in% c("Blank", "Macrophage", "Monocyte"), ]
 
-
+#scp <- joinAssays(scp,
+#                  i = 1:length(rowDataNames(scp)),
+#                  name = "Peptides")
 
 # filter by median intensity
+# calculation of median not applicable if only one run observed
 
-medians <- colMedians(assay(scp[["peptides"]]), na.rm = TRUE)
+library(stringr)
+
+find_peptide_list <- function(scp_object) {
+  scp_cols <- colnames(scp_object)
+  peptide_list <- str_extract(scp_cols, "^peptides_.+$")
+  return(peptide_list)
+}
+
+peptide_list <- find_peptide_list(scp)
+
+medians <- colMedians(assay(scp[[]]), na.rm = TRUE)
 scp$MedianRI <- medians
+
+
+colData(scp) %>%
+  data.frame %>%
+  ggplot() +
+  aes(x = MedianRI, 
+      y = SampleType,
+      fill = SampleType) +
+  geom_boxplot() +
+  scale_x_log10()
