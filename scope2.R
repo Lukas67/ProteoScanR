@@ -18,9 +18,6 @@ library("dplyr")
 
 # read in MS result table
 mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/evidence.txt")
-akos_data <- read.csv("/home/lukas/Downloads/20230202_HF2_08_Ujjwal_Monocytes_TMT12_proteins.csv")
-
-
 
 # create annotation file
 # this varies upon experimental design
@@ -64,10 +61,18 @@ scp <- zeroIsNA(scp, i=1:length(rowDataNames(scp)))
 scp <- filterFeatures(scp,
                       ~ Reverse != "+" &
                         Potential.contaminant != "+" &
-                        !is.na(PIF) & PIF > 0.8)
+                        !is.na(PIF) & PIF > 0.10)
+
+nPSMs <- dims(scp)[1, ]
+
+ggplot(data.frame(nPSMs)) +
+  aes(x = nPSMs) +
+  geom_histogram(binwidth = 50) +
+  geom_vline(xintercept = 500)
+
 
 # filter runs with too few features
-# however only one run is done
+# however only one run is done --> changes nothing
 keepAssay <- dims(scp)[1, ] > 150
 scp <- scp[, , keepAssay]
 
@@ -146,17 +151,10 @@ scp <- aggregateFeaturesOverAssays(scp,
 # filter by median intensity
 # calculation of median not applicable if only one run observed
 
-library(stringr)
+file_name <- sampleAnnotation$Raw.file[1]
+peptides <- paste("peptides_", as.character(file_name), sep = "")
 
-find_peptide_list <- function(scp_object) {
-  scp_cols <- colnames(scp_object)
-  peptide_list <- str_extract(scp_cols, "^peptides_.+$")
-  return(peptide_list)
-}
-
-peptide_list <- find_peptide_list(scp)
-
-medians <- colMedians(assay(scp[[]]), na.rm = TRUE)
+medians <- colMedians(assay(scp[[peptides]]), na.rm = TRUE)
 scp$MedianRI <- medians
 
 
@@ -168,3 +166,178 @@ colData(scp) %>%
       fill = SampleType) +
   geom_boxplot() +
   scale_x_log10()
+
+# calculate median CV (coefficient of variation)
+
+scp <- medianCVperCell(scp,
+                       i = 2,
+                       groupBy = "Leading.razor.protein",
+                       nobs = 5, 
+                       norm = "div.median",
+                       na.rm = TRUE,
+                       colDataName = "MedianCV")
+
+getWithColData(scp, peptides) %>%
+  colData %>%
+  data.frame %>%
+  ggplot(aes(x = MedianCV,
+             fill = SampleType)) +
+  geom_boxplot() +
+  geom_vline(xintercept = 0.65)
+
+# filter out all samples with coefficient of variation larger than 
+# variable can be adjusted!
+
+scp <- scp[, !is.na(scp$MedianCV) & scp$MedianCV < 0.65, ]
+
+# Normalization of peptide data
+# samples --> divide relative intensities by median relative intensities
+# peptides --> divide relative intensities by the mean relative intensities
+
+# divide column by median
+scp <-normalizeSCP(scp, 2, name="peptides_norm_col", method = "div.median")
+#divide rows my mean
+scp <-normalizeSCP(scp, 3, name="peptides_norm", method = "div.mean")
+
+# remove peptides with high missing rate
+
+scp <- filterNA(scp,
+                i = "peptides_norm",
+                pNA = 0.99)
+# log-transform 
+scp <- logTransform(scp,
+                    base = 2,
+                    i = "peptides_norm",
+                    name = "peptides_log")
+
+# aggregate peptide to protein
+
+scp <- aggregateFeatures(scp,
+                         i = "peptides_log",
+                         name = "proteins",
+                         fcol = "Leading.razor.protein",
+                         fun = matrixStats::colMedians, na.rm = TRUE)
+
+
+# normalization of protein data
+
+## Center columns with median
+scp <- sweep(scp, i = "proteins",
+             MARGIN = 2,
+             FUN = "-",
+             STATS = colMedians(assay(scp[["proteins"]]),
+                                na.rm = TRUE),
+             name = "proteins_norm_col")
+
+## Center rows with mean
+scp <- sweep(scp, i = "proteins_norm_col",
+             MARGIN = 1,
+             FUN = "-",
+             STATS = rowMeans(assay(scp[["proteins_norm_col"]]),
+                              na.rm = TRUE),
+             name = "proteins_norm")
+
+# missing value imputation
+
+# show missing values
+scp[["proteins_norm"]] %>%
+  assay %>%
+  is.na %>%
+  mean
+
+# use knn to impute missing values
+
+scp <- impute(scp,
+              i = "proteins_norm",
+              name = "proteins_imptd",
+              method = "knn",
+              k = 3, rowmax = 1, colmax= 1,
+              maxp = Inf, rng.seed = 1234)
+
+# show missing values again
+scp[["proteins_imptd"]] %>%
+  assay %>%
+  is.na %>%
+  mean
+
+# batch correction
+# upon multiple runs
+
+sce <- getWithColData(scp, "proteins_imptd")
+
+batch <- colData(sce)$Raw.file
+model <- model.matrix(~ SampleType, data = colData(sce))
+
+library(sva)
+assay(sce) <- ComBat(dat = assay(sce),
+                     batch = batch,
+                     mod = model)
+
+scp <- addAssay(scp,
+                y = sce,
+                name = "proteins_batchC")
+
+scp <- addAssayLinkOneToOne(scp, 
+                            from = "proteins_imptd",
+                            to = "proteins_batchC")
+
+
+
+# dimensionality reduction
+# changed from reference due no missing values
+
+library(scater)
+
+scp[["proteins_norm"]] <- runPCA(scp[["proteins_norm"]],
+                                   ncomponents = 5,
+                                   ntop = Inf,
+                                   scale = TRUE,
+                                   exprs_values = 1,
+                                   name = "PCA")
+
+plotReducedDim(scp[["proteins_norm"]],
+               dimred = "PCA",
+               colour_by = scp[["proteins_norm"]]$colnames,
+               point_alpha = 1)
+
+# UMAP
+scp[["proteins_norm"]] <- runUMAP(scp[["proteins_norm"]],
+                                   ncomponents = 2,
+                                   ntop = Inf,
+                                   scale = TRUE,
+                                   exprs_values = 1,
+                                   n_neighbors = 3,
+                                   dimred = "PCA",
+                                   name = "UMAP")
+
+plotReducedDim(scp[["proteins_norm"]],
+               dimred = "UMAP",
+               colour_by = "SampleType",
+               point_alpha = 1)
+
+
+## Get the features
+subsetByFeature(scp, "Q9ULV4") %>%
+  ## Format the `QFeatures` to a long format table
+  longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+  data.frame %>%
+  ## This is used to preserve ordering of the samples and assays in ggplot2
+  mutate(assay = factor(assay, levels = names(scp)),
+         Channel = sub("Reporter.intensity.", "TMT-", Channel),
+         Channel = factor(Channel, levels = unique(Channel))) %>%
+  ## Start plotting
+  ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+  geom_point() +
+  ## Plot every assay in a separate facet
+  facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+  ## Annotate plot
+  xlab("Channels") +
+  ylab("Intensity (arbitrary units)") +
+  ## Improve plot aspect
+  theme(axis.text.x = element_text(angle = 90),
+        strip.text = element_text(hjust = 0),
+        legend.position = "bottom")
+
+
+
+
