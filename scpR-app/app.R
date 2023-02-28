@@ -32,7 +32,7 @@ ui <- fluidPage(
       #create tabs
       tabsetPanel(type = "tabs",
                   tabPanel("Overview", plotOutput("overview_plot")),
-                  tabPanel("PSM")
+                  tabPanel("PSM", plotOutput("nPSMs"))
       )
     )
   )
@@ -41,29 +41,36 @@ ui <- fluidPage(
 # Define server logic required to draw a histogram
 server <- function(input, output) {
   options(shiny.maxRequestSize=10*1024^2)
-  
-  # handle the data
-  evidence_data <- reactive({
-    req(input$evidence_file)
-    read.delim(input$evidence_file$datapath)
-  })
-  meta_data <- reactive({
-    req(input$sample_annotation_file)
-    read.delim(input$sample_annotation_file$datapath)
-  })
-  label <- reactive({
-    req(input$label_suffix)
-  })
-  
-  
-  # read in the data into scp object
+
   scp <- reactive({
-    readSCP(featureData = evidence_data(),
-            colData = meta_data(),
-            channelCol = "Channel",
-            batchCol = "Raw.file",
-            suffix = paste0(label(), 1:nrow(meta_data())),
-            removeEmptyCols = TRUE)
+    
+    req(input$evidence_file)
+    req(input$sample_annotation_file)
+    req(input$label_suffix)
+    
+    evidence_data <- read.delim(input$evidence_file$datapath)
+    meta_data <- read.delim(input$sample_annotation_file$datapath)
+    
+    scp_0 <- readSCP(featureData = evidence_data,
+              colData = read.delim(input$sample_annotation_file$datapath),
+              channelCol = "Channel",
+              batchCol = "Raw.file",
+              suffix = paste0(input$label_suffix, 1:nrow(meta_data)),
+              removeEmptyCols = TRUE)
+  
+    # change zeros to NA, apply first filter
+    scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
+  
+    req(input$PIF_cutoff)
+    
+    # apply first filter
+    scp_0 <- filterFeatures(scp_0,
+                            ~ Reverse != "+" &
+                              Potential.contaminant != "+" &
+                              !is.na(PIF) & PIF > PIF_cutoff())
+  
+  
+    return(scp_0)
   })
   
   
@@ -72,32 +79,16 @@ server <- function(input, output) {
       plot(scp()) }
   })
   
-  # validation for variable
-  PIF_cutoff <- reactive({
-    req(input$PIF_cutoff)
-  })
   
-  # change zeros to NA, apply first filter
-    scp <- reactive((zeroIsNA(scp(),
-                 ~ Reverse != "+" &
-                   Potential.contaminant != "+" &
-                   !is.na(PIF) & PIF > PIF_cutoff())
-        ))
-  
-  
-  #  reactive({nPSMs <- dims(scp()[1,])})
-  
-  #  nPSM_bins <- reactive({
-  #    req(input$nPSM_bins)
-  #  })
-  
-  #  output$nPSMs <- renderPlot({
-  #      ggplot(data.frame(nPSMs())) +
-  #        aes(x = nPSMs()) +
-  #        geom_histogram(binwidth = nPSM_bins())
-  #  })
-  
-  
+    output$nPSMs <- renderPlot({
+      scp_0 <- scp()
+      print(scp_0)
+      nPSMs <- dims(scp_0[1,])
+      req(input$nPSM_bins)  
+      ggplot(data.frame(nPSMs)) +
+          aes(x = nPSMs) +
+          geom_histogram(binwidth = nPSM_bins)
+    })
 }
 
 
