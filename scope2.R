@@ -63,7 +63,10 @@ scp <- filterFeatures(scp,
                         Potential.contaminant != "+" &
                         !is.na(PIF) & PIF > 0.10)
 
+
 nPSMs <- dims(scp)[1, ]
+#nPSMs <- dims(scp)[1, 1]
+#nPeps <- dims(scp)[1, 2]
 
 ggplot(data.frame(nPSMs)) +
   aes(x = nPSMs) +
@@ -170,7 +173,7 @@ colData(scp) %>%
 # calculate median CV (coefficient of variation)
 
 scp <- medianCVperCell(scp,
-                       i = 2,
+                       i = length(rowDataNames(scp)),
                        groupBy = "Leading.razor.protein",
                        nobs = 5, 
                        norm = "div.median",
@@ -245,6 +248,14 @@ scp[["proteins_norm"]] %>%
   is.na %>%
   mean
 
+# longFormat(scp[, , "proteins_norm"]) %>%
+#   data.frame %>%
+#   group_by(colname) %>%
+#   summarize(missingness = mean(is.na(value))) %>%
+#   ggplot(aes(x = missingness)) +
+#   geom_histogram()
+# 
+
 # use knn to impute missing values
 
 scp <- impute(scp,
@@ -263,23 +274,23 @@ scp[["proteins_imptd"]] %>%
 # batch correction
 # upon multiple runs
 
-sce <- getWithColData(scp, "proteins_imptd")
+ sce <- getWithColData(scp, "proteins_norm")
 
-batch <- colData(sce)$Raw.file
-model <- model.matrix(~ SampleType, data = colData(sce))
+ batch <- colData(sce)$Raw.file
+ model <- model.matrix(~ SampleType, data = colData(sce))
+ # library(sva)
+ # assay(sce) <- ComBat(dat = assay(sce),
+ #                      batch = batch,
+ #                      mod = model)
+ # 
 
-library(sva)
-assay(sce) <- ComBat(dat = assay(sce),
-                     batch = batch,
-                     mod = model)
+ scp <- addAssay(scp,
+                 y = sce,
+                 name = "proteins_final")
 
-scp <- addAssay(scp,
-                y = sce,
-                name = "proteins_batchC")
-
-scp <- addAssayLinkOneToOne(scp, 
-                            from = "proteins_imptd",
-                            to = "proteins_batchC")
+ scp <- addAssayLinkOneToOne(scp,
+                             from = "proteins_norm",
+                             to = "proteins_final")
 
 
 
@@ -288,16 +299,17 @@ scp <- addAssayLinkOneToOne(scp,
 
 library(scater)
 
-scp[["proteins_norm"]] <- runPCA(scp[["proteins_norm"]],
+scp[["proteins_final"]] <- runPCA(scp[["proteins_final"]],
                                    ncomponents = 5,
                                    ntop = Inf,
                                    scale = TRUE,
                                    exprs_values = 1,
                                    name = "PCA")
 
-plotReducedDim(scp[["proteins_norm"]],
+
+plotReducedDim(scp[["proteins_final"]],
                dimred = "PCA",
-               colour_by = scp[["proteins_norm"]]$colnames,
+               colour_by = "SampleType",
                point_alpha = 1)
 
 # UMAP
@@ -316,6 +328,8 @@ plotReducedDim(scp[["proteins_norm"]],
                point_alpha = 1)
 
 
+
+
 ## Get the features
 subsetByFeature(scp, "Q9ULV4") %>%
   ## Format the `QFeatures` to a long format table
@@ -323,7 +337,7 @@ subsetByFeature(scp, "Q9ULV4") %>%
   data.frame %>%
   ## This is used to preserve ordering of the samples and assays in ggplot2
   mutate(assay = factor(assay, levels = names(scp)),
-         Channel = sub("Reporter.intensity.", "TMT-", Channel),
+         Channel = sub("Reporter.intensity.", "Label", Channel),
          Channel = factor(Channel, levels = unique(Channel))) %>%
   ## Start plotting
   ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +

@@ -4,6 +4,7 @@ library("ggplot2")
 library("magrittr")
 library("dplyr")
 library("reshape2")
+library(scater)
 
 
 reactlog::reactlog_enable()
@@ -18,7 +19,7 @@ ui <- fluidPage(
   sidebarLayout(
     sidebarPanel(
       # the button to rule them all
-      actionButton("update_button", "Press to update"),
+      actionButton("update_button", "Press to run/update"),
       
       # read in of the data
       fileInput("evidence_file", "Upload evidence.txt from MaxQuant", accept = c("text")),
@@ -31,7 +32,7 @@ ui <- fluidPage(
       numericInput("qvalue_cutoff", "Input cutoff value for q-value. PSMs with q-value smaller than the value remain", 0.01, min = 0, max=1, step = 0.0001),
       
       # minimal observation of a peptide within their corresponding razor protein
-      numericInput("nObs_pep_razrpr", "Input minimal observation of a peptide within their corresponding razor protein", 5, min = 1, max=100, step = 1),
+      numericInput("nObs_pep_razrpr", "Input minimal observation of a peptide within their corresponding razor peptide", 5, min = 1, max=100, step = 1),
       
       # max covariance accepted
       numericInput("MedCV_thresh", "Input maximal Covariance accepted", 0.65 , min = 0, max=1, step = 0.01),
@@ -51,7 +52,10 @@ ui <- fluidPage(
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
                   tabPanel("Reporter Ion Intensity", plotOutput("RI_intensity")),
                   tabPanel("Covariance across razor peptides", plotOutput("CV_median")),
-                  tabPanel("Missing Proteins", plotOutput("missing"))
+                  tabPanel("Principle Component Analysis", plotOutput("PCA")),
+                  tabPanel("Feature wise output", selectInput("selectedProtein", "Choose protein for observation", 
+                                                              choices=c(rowData(scp)[["proteins"]][,1])),
+                           plotOutput("feature_subset"))
       )
     )
   )
@@ -62,148 +66,166 @@ server <- function(input, output) {
   options(shiny.maxRequestSize=10*1024^2)
 
   scp <- eventReactive(input$update_button, {
+    withProgress(message= "running analysis", value=0, {
+      req(input$evidence_file)
+      req(input$sample_annotation_file)
+      req(input$label_suffix)
+      
+      evidence_data <- read.delim(input$evidence_file$datapath)
+      meta_data <- read.delim(input$sample_annotation_file$datapath)
+      
+      incProgress(1/17, detail = paste("read Data"))
+      scp_0 <- readSCP(featureData = evidence_data,
+                colData = meta_data,
+                channelCol = "Channel",
+                batchCol = "Raw.file",
+                suffix = paste0(input$label_suffix, 1:nrow(meta_data)),
+                removeEmptyCols = TRUE)
     
-    req(input$evidence_file)
-    req(input$sample_annotation_file)
-    req(input$label_suffix)
-    
-    evidence_data <- read.delim(input$evidence_file$datapath)
-    meta_data <- read.delim(input$sample_annotation_file$datapath)
-    
-    scp_0 <- readSCP(featureData = evidence_data,
-              colData = meta_data,
-              channelCol = "Channel",
-              batchCol = "Raw.file",
-              suffix = paste0(input$label_suffix, 1:nrow(meta_data)),
-              removeEmptyCols = TRUE)
+      # # change zeros to NA, apply first filter
+      incProgress(2/17, detail = paste("replacing zeros with NA"))
+      scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
   
-    # # change zeros to NA, apply first filter
-    scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
-
-    req(input$PIF_cutoff)
-   
-    # apply first filter
-    scp_0 <- filterFeatures(scp_0,
-                            ~ Reverse != "+" &
-                              Potential.contaminant != "+" &
-                              !is.na(PIF) & PIF > input$PIF_cutoff)
-
-    
-    # compute qvalues_PSMs to filter out by FDR
-    
-    scp_0 <- pep2qvalue(scp_0,
-                      i = 1:length(rowDataNames(scp_0)),
-                      PEP = "PEP", # by reference the dart_PEP value is used
-                      rowDataName = "qvalue_PSMs")
-    
-    scp_0 <- pep2qvalue(scp_0,
-                      i = 1:length(rowDataNames(scp_0)),
-                      PEP = "PEP",
-                      groupBy = "Leading.razor.protein",
-                      rowDataName = "qvalue_proteins")
-    
-    req(input$qvalue_cutoff)
-    scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < input$qvalue_cutoff)
-    
-    
-    # aggregate PSMS to peptides
-    
-    scp_0 <- aggregateFeaturesOverAssays(scp_0,
-                                       i = 1:length(rowDataNames(scp_0)),
-                                       fcol = "Modified.sequence",
-                                       name = paste0("peptides_", names(scp_0)),
-                                       fun = matrixStats::colMedians, na.rm = TRUE)
-    
-    file_name <- meta_data$Raw.file[1]
-    peptides <- paste("peptides_", as.character(file_name), sep = "")
-    
-    # calculate median reporter IO intensity
-    
-    medians <- colMedians(assay(scp_0[[peptides]]), na.rm = TRUE)
-    scp_0$MedianRI <- medians
-    
-    # Filter based on the median CV -> remove covariant peptides over multiple proteins
-    
-    req(input$nObs_pep_razrpr)
-    scp_0 <- medianCVperCell(scp_0,
-                           i = length(rowDataNames(scp_0)),
-                           groupBy = "Leading.razor.protein",
-                           nobs = input$nObs_pep_razrpr, 
-                           norm = "div.median",
-                           na.rm = TRUE,
-                           colDataName = "MedianCV")
-    
-    req(input$MedCV_thresh)
-    scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
-    
-    # divide column by median
-    scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
-    #divide rows my mean
-    scp_0 <-normalizeSCP(scp_0, 3, name="peptides_norm", method = "div.mean")
-    
-    # remove peptides with high missing rate
-    req(input$pNA)
-    scp_0 <- filterNA(scp_0,
-                    i = "peptides_norm",
-                    pNA = input$pNA)
-    
-    
-    # log-transform 
-    req(input$transform_base)
-    scp_0 <- logTransform(scp_0,
-                        base = as.integer(input$transform_base),
-                        i = "peptides_norm",
-                        name = "peptides_log")
-    
-    # aggregate peptides to proteins
-    scp_0 <- aggregateFeatures(scp_0,
-                             i = "peptides_log",
-                             name = "proteins",
-                             fcol = "Leading.razor.protein",
-                             fun = matrixStats::colMedians, na.rm = TRUE)
-    
-    # center cols
-    scp_0 <- sweep(scp_0, i = "proteins",
-                 MARGIN = 2,
-                 FUN = "-",
-                 STATS = colMedians(assay(scp_0[["proteins"]]),
+      req(input$PIF_cutoff)
+     
+      # apply first filter
+      incProgress(3/17, detail = paste("filter contaminants and PIF"))
+      scp_0 <- filterFeatures(scp_0,
+                              ~ Reverse != "+" &
+                                Potential.contaminant != "+" &
+                                !is.na(PIF) & PIF > input$PIF_cutoff)
+  
+      
+      # compute qvalues_PSMs to filter out by FDR
+      incProgress(4/17, detail=paste("calculate q-value for PSMs"))
+      scp_0 <- pep2qvalue(scp_0,
+                        i = 1:length(rowDataNames(scp_0)),
+                        PEP = "PEP", # by reference the dart_PEP value is used
+                        rowDataName = "qvalue_PSMs")
+      incProgress(5/17, detail=paste("calculate q value for proteins"))
+      scp_0 <- pep2qvalue(scp_0,
+                        i = 1:length(rowDataNames(scp_0)),
+                        PEP = "PEP",
+                        groupBy = "Leading.razor.protein",
+                        rowDataName = "qvalue_proteins")
+      
+      req(input$qvalue_cutoff)
+      incProgress(6/17, detail=paste("filter according to q-value"))
+      scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < input$qvalue_cutoff)
+      
+      
+      # aggregate PSMS to peptides
+      incProgress(7/17, detail=paste("aggregating features"))
+      scp_0 <- aggregateFeaturesOverAssays(scp_0,
+                                         i = 1:length(rowDataNames(scp_0)),
+                                         fcol = "Modified.sequence",
+                                         name = paste0("peptides_", names(scp_0)),
+                                         fun = matrixStats::colMedians, na.rm = TRUE)
+      
+      file_name <- meta_data$Raw.file[1]
+      peptides <- paste("peptides_", as.character(file_name), sep = "")
+      
+      # calculate median reporter IO intensity
+      incProgress(8/17, detail=paste("calculate reporter ion intensity"))
+      medians <- colMedians(assay(scp_0[[peptides]]), na.rm = TRUE)
+      scp_0$MedianRI <- medians
+      
+      # Filter based on the median CV -> remove covariant peptides over multiple proteins
+      
+      req(input$nObs_pep_razrpr)
+      incProgress(9/17, detail=paste("calculate covariance per cell"))
+      scp_0 <- medianCVperCell(scp_0,
+                             i = length(rowDataNames(scp_0)),
+                             groupBy = "Leading.razor.protein",
+                             nobs = input$nObs_pep_razrpr, 
+                             norm = "div.median",
+                             na.rm = TRUE,
+                             colDataName = "MedianCV")
+      
+      incProgress(10/17, detail=paste("filtering according to covariance"))
+      req(input$MedCV_thresh)
+      scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
+      
+      incProgress(11/17, detail=paste("normalizing peptide data"))
+      # divide column by median
+      scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
+      #divide rows my mean
+      scp_0 <-normalizeSCP(scp_0, 3, name="peptides_norm", method = "div.mean")
+      
+      
+      incProgress(12/17, detail=paste("remove peptides with high missing rate"))
+      req(input$pNA)
+      scp_0 <- filterNA(scp_0,
+                      i = "peptides_norm",
+                      pNA = input$pNA)
+      
+      
+      incProgress(13/17, detail=paste("log-transforming peptide data")) 
+      req(input$transform_base)
+      scp_0 <- logTransform(scp_0,
+                          base = as.integer(input$transform_base),
+                          i = "peptides_norm",
+                          name = "peptides_log")
+      
+      incProgress(14/17, detail=paste("aggregate peptides to proteins"))
+      scp_0 <- aggregateFeatures(scp_0,
+                               i = "peptides_log",
+                               name = "proteins",
+                               fcol = "Leading.razor.protein",
+                               fun = matrixStats::colMedians, na.rm = TRUE)
+      
+      incProgress(15/17, detail=paste("normalizing proteins"))
+      scp_0 <- sweep(scp_0, i = "proteins",
+                   MARGIN = 2,
+                   FUN = "-",
+                   STATS = colMedians(assay(scp_0[["proteins"]]),
+                                      na.rm = TRUE),
+                   name = "proteins_norm_col")
+      
+      # Center rows with mean
+      scp_0 <- sweep(scp_0, i = "proteins_norm_col",
+                   MARGIN = 1,
+                   FUN = "-",
+                   STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
                                     na.rm = TRUE),
-                 name = "proteins_norm_col")
+                   name = "proteins_norm")
+      
+      
+      sce <- getWithColData(scp_0, "proteins_norm")
+      
+      batch <- colData(sce)$Raw.file
+      model <- model.matrix(~ SampleType, data = colData(sce))
+      
+      scp_0 <- addAssay(scp_0,
+                      y = sce,
+                      name = "proteins_final")
+      
+      scp_0 <- addAssayLinkOneToOne(scp_0,
+                                  from = "proteins_norm",
+                                  to = "proteins_final")
+      
+      
+      
+      
+      incProgress(16/17, detail=paste("running PCA"))
+      scp_0[["proteins_final"]] <- runPCA(scp_0[["proteins_final"]],
+                                       ncomponents = 5,
+                                       ntop = Inf,
+                                       scale = TRUE,
+                                       exprs_values = 1,
+                                       name = "PCA")
     
-    ## Center rows with mean
-    scp_0 <- sweep(scp_0, i = "proteins_norm_col",
-                 MARGIN = 1,
-                 FUN = "-",
-                 STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
-                                  na.rm = TRUE),
-                 name = "proteins_norm")
-    
-    # # missing value imputation
-    # # bioc imputes feature space wise
-    # scp_0 <- impute(scp_0,
-    #               i = "proteins_norm",
-    #               name = "proteins_imptd",
-    #               method = "knn",
-    #               k = 3, rowmax = 1, colmax= 1,
-    #               maxp = Inf, rng.seed = 1234)
-    # 
-    # # can also be done with the Scope2 variant of KNN
-    # # imputes by sample space 
-    # scp <- imputeKnnSCoPE2(scp,
-    #                        i = "proteins_norm2",
-    #                        name = "proteins_impd",
-    #                        k = 3)
-    
+      incProgress(17/17, detail=paste("analysis finish"))
+    })
     return(scp_0)
   })
   
   
-  output$overview_plot <- renderPlot({
+    output$overview_plot <- renderPlot({
     if (!is.null(scp())) {
       plot(scp()) }
   })
   
-
     output$summary_bar <- renderPlot({
       scp_0 <- scp()
       
@@ -242,17 +264,39 @@ server <- function(input, output) {
         geom_boxplot()
     })
     
-    output$missing <- renderPlot({
+    output$PCA <- renderPlot({
       scp_0 <- scp()
-      longFormat(scp_0[, , "proteins_norm"]) %>%
-        data.frame %>%
-        group_by(colname) %>%
-        summarize(missingness = mean(is.na(value))) %>%
-        ggplot(aes(x = missingness)) +
-        geom_histogram()
+      plotReducedDim(scp_0[["proteins_final"]],
+                     dimred = "PCA",
+                     colour_by = "SampleType",
+                     point_alpha = 1)
       
     })
     
+    output$feature_subset <- renderPlot({
+      scp_0 <- scp()
+      label_suffix <- input$label_suffix
+      subsetByFeature(scp_0, input$selectedProtein) %>%
+        ## Format the `QFeatures` to a long format table
+        longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+        data.frame %>%
+        ## This is used to preserve ordering of the samples and assays in ggplot2
+        mutate(assay = factor(assay, levels = names(scp_0)),
+               Channel = sub("Reporter.intensity.", label_suffix, Channel),
+               Channel = factor(Channel, levels = unique(Channel))) %>%
+        ## Start plotting
+        ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+        geom_point() +
+        ## Plot every assay in a separate facet
+        facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+        ## Annotate plot
+        xlab("Channels") +
+        ylab("Intensity (arbitrary units)") +
+        ## Improve plot aspect
+        theme(axis.text.x = element_text(angle = 90),
+              strip.text = element_text(hjust = 0),
+              legend.position = "bottom")
+    })
     
 }
 
