@@ -313,7 +313,7 @@ plotReducedDim(scp[["proteins_final"]],
                point_alpha = 1)
 
 # UMAP
-scp[["proteins_norm"]] <- runUMAP(scp[["proteins_norm"]],
+scp[["proteins_final"]] <- runUMAP(scp[["proteins_final"]],
                                    ncomponents = 2,
                                    ntop = Inf,
                                    scale = TRUE,
@@ -322,7 +322,7 @@ scp[["proteins_norm"]] <- runUMAP(scp[["proteins_norm"]],
                                    dimred = "PCA",
                                    name = "UMAP")
 
-plotReducedDim(scp[["proteins_norm"]],
+plotReducedDim(scp[["proteins_final"]],
                dimred = "UMAP",
                colour_by = "SampleType",
                point_alpha = 1)

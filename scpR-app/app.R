@@ -20,7 +20,7 @@ ui <- fluidPage(
     sidebarPanel(
       # the button to rule them all
       actionButton("update_button", "Press to run/update"),
-      
+      actionButton("help", "Help"),
       # read in of the data
       fileInput("evidence_file", "Upload evidence.txt from MaxQuant", accept = c("text")),
       fileInput("sample_annotation_file", "Upload sample annotation file", accept = c("text")),
@@ -198,17 +198,17 @@ server <- function(input, output) {
       
       scp_0 <- addAssay(scp_0,
                       y = sce,
-                      name = "proteins_final")
+                      name = "proteins_dim_red")
       
       scp_0 <- addAssayLinkOneToOne(scp_0,
                                   from = "proteins_norm",
-                                  to = "proteins_final")
+                                  to = "proteins_dim_red")
       
       
       
       
       incProgress(16/17, detail=paste("running PCA"))
-      scp_0[["proteins_final"]] <- runPCA(scp_0[["proteins_final"]],
+      scp_0[["proteins_dim_red"]] <- runPCA(scp_0[["proteins_dim_red"]],
                                        ncomponents = 5,
                                        ntop = Inf,
                                        scale = TRUE,
@@ -220,7 +220,71 @@ server <- function(input, output) {
     return(scp_0)
   })
   
-  
+    observeEvent(input$help,{
+      showModal(modalDialog(easyClose = T, 
+        title = "Proteomics Workbench",
+        HTML("Created by Lukas Gamp.<br> <br>
+      Workflow as described in the publication: <br>
+      Multiplexed single-cell proteomics using SCoPE2 <br>
+             10.1038/s41596-021-00616-z <br>
+             <br>
+             <br>
+             1.) Read and filter Data <br>
+             zeros are replaced with NA <br>
+             Peptide sequence matches (PSMs) with parental ion fraction larger than the threshold will be kept. 
+             Contaminants (reverse matches in the database) will be excluded. <br>
+             PSMs will be shown in the summary barplot (first bar). <br>
+             <br>
+             <br>
+             2.) Posterior error probability to q-value transformation and filtering <br>
+             q-value reports significance of a match (against randomness). Adjust threshold accordingly <br>
+             <br>
+             <br>
+             3.) PSMs are aggregated to peptides.<br>
+             <br>
+             <br>
+             4.) Calculation of median reporter ion intensity (RI). <br>
+             visualization in RI plot. <br>
+             <br>
+             <br>
+             5.) Covariance across razor protein calculation and filtering according to n-observations (nobs) <br>
+             Adapt nobs and accepted covariance according to your preference of analysis in order to filter out noisy quantification. Visualization can be found in the CV plot. <br>
+             <br>
+             <br>
+             6.) Normalization of peptide data <br>
+             Relative intensities will be divided by the median relative intensities. <br>
+             <br>
+             <br> 
+             7.) Peptides with missing data deletion <br>
+             Accepted threshold peptides with missing data can be adjusted as a fraction. <br>
+             <br>
+             <br>
+             8.) Log transformation of the peptide data <br>
+             Log base can be chosen (2 or 10) <br>
+             <br>
+             <br>
+             9.) Peptide to protein aggregation <br>
+             <br>
+             <br>
+             10.) Normalzation of protein data <br>
+             Since log transformed --> subtractive method. <br>
+             <br>
+             <br>
+             11.) Dimensionality reduction. <br>
+             <br>
+             <br>
+             12.) Protein wise observation <br>
+             select your protein of interest. <br>
+             <br>
+             <br>
+             ")
+        
+        
+        
+        
+      ))
+    })
+    
     output$overview_plot <- renderPlot({
     if (!is.null(scp())) {
       plot(scp()) }
@@ -266,7 +330,7 @@ server <- function(input, output) {
     
     output$PCA <- renderPlot({
       scp_0 <- scp()
-      plotReducedDim(scp_0[["proteins_final"]],
+      plotReducedDim(scp_0[["proteins_dim_red"]],
                      dimred = "PCA",
                      colour_by = "SampleType",
                      point_alpha = 1)
