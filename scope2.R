@@ -352,6 +352,23 @@ subsetByFeature(scp, "Q9ULV4") %>%
         strip.text = element_text(hjust = 0),
         legend.position = "bottom")
 
+## limma analysis 
+# differential expression between two groups
+
+library(limma)
+data_to_aggregate <- data.frame(assay(scp[["proteins_final"]]))
+data_to_aggregate <- data.frame(t(data_to_aggregate))
+data_to_aggregate$SampleType <- scp$SampleType
+df <- aggregate(. ~ SampleType, data = data_to_aggregate, FUN = mean, na.rm = TRUE)
+df <- data.frame(t(df))
+
+names(df) <- df[1,]
+df <- df[-1,]
+
+
+cont_matrix <- makeContrasts(ST_comp = "Monocytes-A" - "Monocytes-B", levels=design)
+
+
 
 
 
