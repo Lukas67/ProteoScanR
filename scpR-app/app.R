@@ -5,7 +5,7 @@ library("magrittr")
 library("dplyr")
 library("reshape2")
 library(scater)
-
+library(limma)
 
 reactlog::reactlog_enable()
 
@@ -55,7 +55,15 @@ ui <- fluidPage(
                   tabPanel("Principle Component Analysis", plotOutput("PCA")),
                   tabPanel("Feature wise output", selectInput("selectedProtein", "Choose protein for observation", 
                                                               choices=c(rowData(scp)[["proteins"]][,1])),
-                           plotOutput("feature_subset"))
+                           plotOutput("feature_subset")),
+                  tabPanel("Statistics",
+                           actionButton("run_statistics", "Press to run statistics"), 
+                           selectInput("comp1", "Select comparison 1",choices=c(unique(scp$SampleType))),
+                           selectInput("comp2", "Select comparison 2", choices=c(unique(scp$SampleType))),
+                           plotOutput("volcano"),
+                           tableOutput("protein_table"),
+                           textOutput("summary")
+                           )
       )
     )
   )
@@ -215,10 +223,62 @@ server <- function(input, output) {
                                        exprs_values = 1,
                                        name = "PCA")
     
+      
       incProgress(17/17, detail=paste("analysis finish"))
     })
     return(scp_0)
   })
+  
+  
+  stat_result <- eventReactive(input$run_statistics, {
+    withProgress(message= "running statistical analysis", value=0, {
+      incProgress(1/6, detail=paste("read data"))
+      scp_0 <- scp()
+  
+      incProgress(2/6, detail=paste("creating expression matrix"))
+      exp_matrix <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+      colnames(exp_matrix) <- scp_0$SampleType
+      
+      factor_var <- factor(colnames(exp_matrix))
+      
+      # Create lookup table
+      levels <- unique(factor_var)
+      num_values <- seq_along(levels)
+      lookup_table <- data.frame(factor_var = levels, num_var = num_values)
+      
+    
+      # Convert factor variable to numeric
+      num_var <- sapply(factor_var, function(x) {
+        lookup_table$num_var[lookup_table$factor_var == x]
+      })
+      
+      # Replace original variable with numeric version
+      factor_var <- num_var
+      
+      incProgress(3/6, detail=paste("creating design matrix"))
+      # Create a design matrix
+      design <- model.matrix(~ 0+factor(factor_var))
+      # assign the column names
+      colnames(design) <- unique(scp_0$SampleType)
+      
+      req(input$comp1)
+      req(input$comp2)
+      
+      contrast = paste(input$comp1,"-",input$comp2)
+      
+      cont_matrix <- makeContrasts(AvsB = contrast, levels=design)
+      
+      incProgress(4/6, detail=paste("Fit the expression matrix to a linear model"))
+      fit <- lmFit(exp_matrix, design)
+      incProgress(5/6, detail=paste("Compute contrast"))
+      fit_contrast <- contrasts.fit(fit, cont_matrix)
+      incProgress(6/6, detail=paste("Bayes statistics of differential expression"))
+      # *There are several options to tweak!*
+      fit_contrast <- eBayes(fit_contrast)
+    })
+    return(fit_contrast)
+  })
+  
   
     observeEvent(input$help,{
       showModal(modalDialog(easyClose = T, 
@@ -360,6 +420,19 @@ server <- function(input, output) {
         theme(axis.text.x = element_text(angle = 90),
               strip.text = element_text(hjust = 0),
               legend.position = "bottom")
+    })
+    
+    output$volcano <- renderPlot({
+      volcanoplot(stat_result())
+    })
+    
+    output$protein_table <- renderTable({
+      top_genes <- topTable(stat_result(), number = 10, adjust = "BH")
+    })
+    
+    output$summary <- renderText({
+      result <- decideTests(stat_result())
+      summary(result)
     })
     
 }

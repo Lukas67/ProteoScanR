@@ -31,8 +31,8 @@ colnames(sampleAnnotation) <-c("Channel")
 sampleAnnotation$Raw.file = unique(mqScpData$Raw.file)
 
 
-samplesA <- c(replicate(6, "Monocytes-A"))
-samplesB <- c(replicate(6, "Monocytes-B"))
+samplesA <- c(replicate(6, "Monocytes_A"))
+samplesB <- c(replicate(6, "Monocytes_B"))
 samples <- c(samplesA, samplesB)
 
 
@@ -356,19 +356,67 @@ subsetByFeature(scp, "Q9ULV4") %>%
 # differential expression between two groups
 
 library(limma)
-data_to_aggregate <- data.frame(assay(scp[["proteins_final"]]))
-data_to_aggregate <- data.frame(t(data_to_aggregate))
-data_to_aggregate$SampleType <- scp$SampleType
-df <- aggregate(. ~ SampleType, data = data_to_aggregate, FUN = mean, na.rm = TRUE)
-df <- data.frame(t(df))
 
-names(df) <- df[1,]
-df <- df[-1,]
+# create expression matrix from protein data
+# Log-transformed expression data in a matrix:
+#  Each column represents an experiement, and each row represents a detected gene/probe.
+# not sure if the data should be aggregated
 
+exp_matrix <- data.frame(assay(scp[["proteins_final"]]))
+colnames(exp_matrix) <- scp$SampleType
 
-cont_matrix <- makeContrasts(ST_comp = "Monocytes-A" - "Monocytes-B", levels=design)
+# exp_matrix <- aggregate(. ~ SampleType, data = data_to_aggregate, FUN = mean, na.rm = TRUE)
+# exp_matrix <- data.frame(t(exp_matrix))
+# names(exp_matrix) <- exp_matrix[1,]
+# exp_matrix <- exp_matrix[-1,]
 
+# create design matrix 
+# return the count of individual colnames (Types of experiment)
+# Sample data
+factor_var <- factor(colnames(exp_matrix))
 
+# Create lookup table
+levels <- unique(factor_var)
+num_values <- seq_along(levels)
+lookup_table <- data.frame(factor_var = levels, num_var = num_values)
+
+# Convert factor variable to numeric
+num_var <- sapply(factor_var, function(x) {
+  lookup_table$num_var[lookup_table$factor_var == x]
+})
+
+# Replace original variable with numeric version
+factor_var <- num_var
+
+# Create a design matrix
+design <- model.matrix(~ 0+factor(factor_var))
+# assign the column names
+colnames(design) <- unique(scp$SampleType)
+
+user_input1 <- "Monocytes_A"
+user_input2 <- "Monocytes_B"
+
+col_index1 <- which(colnames(design) == user_input1)
+col_index2 <- which(colnames(design) == user_input2)
+
+contrast <- paste(user_input1,"-",user_input2)
+
+cont_matrix <- makeContrasts(AvsB = contrast, levels=design)
+
+# Fit the expression matrix to a linear model
+fit <- lmFit(exp_matrix, design)
+# Compute contrast
+fit_contrast <- contrasts.fit(fit, cont_matrix)
+# Bayes statistics of differential expression
+# *There are several options to tweak!*
+fit_contrast <- eBayes(fit_contrast)
+# Generate a vocalno plot to visualize differential expression
+volcanoplot(fit_contrast)
+# Generate a list of top 100 differentially expressed genes
+top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
+# Summary of results (number of differentially expressed genes)
+result <- decideTests(fit_contrast)
+summary(result)
 
 
 
