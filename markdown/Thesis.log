@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.15)  15 FEB 2023 15:15
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.2.15)  8 MAR 2023 14:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -434,12 +434,12 @@ Package hyperref Info: Link coloring OFF on input line 78.
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=84, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=60, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 90.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=85, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=61, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 91.
@@ -450,68 +450,21 @@ Package pdftex.def Info: KI_logo.png  used on input line 91.
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 140.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [1] (./Thesis.toc
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
-File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
-File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
-File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
-File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 3.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 3.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 3.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 3.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-))
+) [1] (./Thesis.toc)
 \tf@toc=\write4
 \openout4 = `Thesis.toc'.
 
-[2] [3] [4] [5] [6] [7]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 446.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [1] [2] [3] [4] [5] (./Thesis.bbl) [6] [7] [8] 
-AED: lastpage setting LastPage
-[9] (./Thesis.aux)
-Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 39FD92592F8FBDAEADF5C0E240C2310E;2523.
- )
-(\end occurred inside a group at level 2)
-
-### semi simple group (level 2) entered at line 131 (\begingroup)
-### semi simple group (level 1) entered at line 59 (\begingroup)
-### bottom level 
+[2] [3] [4] [5] [6] [7] [8] [9] [1] [2] [3] [4] [5] (./Thesis.bbl
+! Misplaced alignment tab character &.
+l.55   ionization', {\em Molecular &
+                                     Cellular Proteomics} {\bf 10},~M111.009... 
 Here is how much of TeX's memory you used:
- 11842 strings out of 477989
- 183969 string characters out of 5839365
+ 11691 strings out of 477989
+ 181015 string characters out of 5839365
  1857346 words of memory out of 5000000
- 31724 multiletter control sequences out of 15000+600000
- 547769 words of font info for 58 fonts, out of 8000000 for 9000
+ 31615 multiletter control sequences out of 15000+600000
+ 535194 words of font info for 41 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,5n,76p,311b,8318s stack positions out of 10000i,1000n,20000p,200000b,200000s
-{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb>
-Output written on Thesis.pdf (17 pages, 199243 bytes).
-PDF statistics:
- 330 PDF objects out of 1000 (max. 8388607)
- 291 compressed objects within 3 object streams
- 105 named destinations out of 1000 (max. 500000)
- 171 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 75i,5n,76p,311b,8313s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
+!  ==> Fatal error occurred, no output PDF file produced!
