@@ -24,7 +24,7 @@ ui <- fluidPage(
       # read in of the data
       fileInput("evidence_file", "Upload evidence.txt from MaxQuant", accept = c("text")),
       fileInput("sample_annotation_file", "Upload sample annotation file", accept = c("text")),
-      textInput("label_suffix", "Input the label suffix (e.g. _TMT"),
+      textInput("label_suffix", "Input the label suffix (e.g. _TMT)"),
       
       # cutoff for PIF
       numericInput("PIF_cutoff", "Input cutoff value for parental ion fraction. PSMs larger than the value remain", 0.1, min = 0, max=1, step = 0.1),
@@ -56,11 +56,13 @@ ui <- fluidPage(
                   tabPanel("Feature wise output", selectInput("selectedProtein", "Choose protein for observation", 
                                                               choices=c(rowData(scp)[["proteins"]][,1])),
                            plotOutput("feature_subset")),
+                  
                   tabPanel("Statistics",
-                           actionButton("run_statistics", "Press to run statistics"), 
-                           selectInput("comp1", "Select comparison 1",choices=c(unique(scp$SampleType))),
-                           selectInput("comp2", "Select comparison 2", choices=c(unique(scp$SampleType))),
-                           plotOutput("volcano"),
+                           actionButton("run_statistics", "Press to run statistics"),
+                           textOutput("model_design"),
+                           textInput("user_contrast", "Define your contrast model (w/o spaces)"),
+                           plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
+                           verbatimTextOutput("hover_info"),
                            tableOutput("protein_table"),
                            textOutput("summary")
                            )
@@ -261,12 +263,10 @@ server <- function(input, output) {
       # assign the column names
       colnames(design) <- unique(scp_0$SampleType)
       
-      req(input$comp1)
-      req(input$comp2)
-      
-      contrast = paste(input$comp1,"-",input$comp2)
-      
-      cont_matrix <- makeContrasts(AvsB = contrast, levels=design)
+      req(input$user_contrast)
+      contrast_0 <- strsplit(input$user_contrast, " ")
+      # calculates the mean difference between groups
+      cont_matrix <- makeContrasts(contrasts=contrast_0, levels=design)
       
       incProgress(4/6, detail=paste("Fit the expression matrix to a linear model"))
       fit <- lmFit(exp_matrix, design)
@@ -278,7 +278,6 @@ server <- function(input, output) {
     })
     return(fit_contrast)
   })
-  
   
     observeEvent(input$help,{
       showModal(modalDialog(easyClose = T, 
@@ -425,14 +424,37 @@ server <- function(input, output) {
     output$volcano <- renderPlot({
       volcanoplot(stat_result())
     })
+
+    displayed_text <- reactive({
+      req(input$plot_hover)
+      hover <- input$plot_hover
+      dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
+      
+      if(min(dist) < 0.3) {
+        rownames(stat_result())[which.min(dist)]
+      } else {
+        NULL
+      }
+    })
+    
+    output$hover_info <- renderPrint({
+      req(displayed_text())
+      
+      cat("UniProt-ID\n")
+      displayed_text()
+    })
     
     output$protein_table <- renderTable({
-      top_genes <- topTable(stat_result(), number = 10, adjust = "BH")
-    })
+      topTable(stat_result(), number = 10, adjust = "BH")
+    }, rownames = T)
     
     output$summary <- renderText({
       result <- decideTests(stat_result())
       summary(result)
+    })
+    
+    output$model_design <- renderText({
+      unique(scp()$SampleType)
     })
     
 }

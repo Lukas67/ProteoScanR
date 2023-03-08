@@ -400,8 +400,9 @@ col_index1 <- which(colnames(design) == user_input1)
 col_index2 <- which(colnames(design) == user_input2)
 
 contrast <- paste(user_input1,"-",user_input2)
+contrast = "AvsB = Monocytes_A - Monocytes_B"
 
-cont_matrix <- makeContrasts(AvsB = contrast, levels=design)
+cont_matrix <- makeContrasts(contrast, levels=design)
 
 # Fit the expression matrix to a linear model
 fit <- lmFit(exp_matrix, design)
