@@ -61,10 +61,10 @@ ui <- fluidPage(
                            actionButton("run_statistics", "Press to run statistics"),
                            textOutput("model_design"),
                            textInput("user_contrast", "Define your contrast model (w/o spaces)"),
+                           tableOutput("summary"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
-                           tableOutput("protein_table"),
-                           textOutput("summary")
+                           tableOutput("protein_table")
                            )
       )
     )
@@ -448,10 +448,10 @@ server <- function(input, output) {
       topTable(stat_result(), number = 10, adjust = "BH")
     }, rownames = T)
     
-    output$summary <- renderText({
-      result <- decideTests(stat_result())
-      summary(result)
-    })
+    output$summary <- renderTable({
+      req(stat_result())
+      summary(decideTests(stat_result()))
+    }, colnames = F)
     
     output$model_design <- renderText({
       unique(scp()$SampleType)
