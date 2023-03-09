@@ -26,17 +26,20 @@ quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
 
 # create sample file
 # this needs to be done by the researcher
-sampleAnnotation <- as.data.frame(quantCols)
-colnames(sampleAnnotation) <-c("Channel")
-sampleAnnotation$Raw.file = unique(mqScpData$Raw.file)
+# sampleAnnotation <- as.data.frame(quantCols)
+# colnames(sampleAnnotation) <-c("Channel")
+# sampleAnnotation$Raw.file = unique(mqScpData$Raw.file)
+# 
+# 
+# samplesA <- c(replicate(6, "Monocytes_A"))
+# samplesB <- c(replicate(6, "Monocytes_B"))
+# samples <- c(samplesA, samplesB)
+# 
+# 
+# sampleAnnotation$SampleType <- samples
 
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/sampleAnnotation.txt")
 
-samplesA <- c(replicate(6, "Monocytes_A"))
-samplesB <- c(replicate(6, "Monocytes_B"))
-samples <- c(samplesA, samplesB)
-
-
-sampleAnnotation$SampleType <- samples
 
 # create QFeature object
 scp <- readSCP(featureData = mqScpData,
@@ -388,21 +391,20 @@ num_var <- sapply(factor_var, function(x) {
 # Replace original variable with numeric version
 factor_var <- num_var
 
+
 # Create a design matrix
-design <- model.matrix(~ 0+factor(factor_var))
+design <- model.matrix(~ 0+factor(factor_var)+
+                         factor(c("C", "C", "C", "C", "C", "C", "T", "T", "T", "T", "T", "T")))
 # assign the column names
-colnames(design) <- unique(scp$SampleType)
+colnames(design) <- paste(c(as.character(unique(scp$SampleType)), "Treatment"))
+# 
+# contrast = "Monocytes_2 - Monocytes_1,
+# Monocytes_3 - Monocytes_2,
+# Monocytes_4 -Monocytes_5,
+# Monocytes_5 - Monocytes_6"
 
-user_input1 <- "Monocytes_A"
-user_input2 <- "Monocytes_B"
-
-col_index1 <- which(colnames(design) == user_input1)
-col_index2 <- which(colnames(design) == user_input2)
-
-contrast <- paste(user_input1,"-",user_input2)
-contrast = "AvsB = Monocytes_A - Monocytes_B"
-
-cont_matrix <- makeContrasts(contrast, levels=design)
+# 
+# cont_matrix <- makeContrasts(contrast, levels=design)
 
 # Fit the expression matrix to a linear model
 fit <- lmFit(exp_matrix, design)
@@ -418,6 +420,33 @@ top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
 # Summary of results (number of differentially expressed genes)
 result <- decideTests(fit_contrast)
 summary(result)
+
+
+# QQ-plots for differential expression
+
+ordinary.t <- fit$coef / fit$stdev.unscaled / fit$sigma
+
+par(mfrow=c(1,2))
+qqt(ordinary.t, df=fit$df.residual, main="Ordinary t")
+abline(0,1)
+qqt(fit$t, df=fit$df.total,main="Moderated t")
+abline(0,1)
+par(mfrow=c(1,1))
+
+
+# similar to eBayes but with fold change threshold
+treat(fit, lfc=0, trend=FALSE, robust=FALSE, winsor.tail.p=c(0.05,0.1))
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -52,7 +52,7 @@ ui <- fluidPage(
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
                   tabPanel("Reporter Ion Intensity", plotOutput("RI_intensity")),
                   tabPanel("Covariance across razor peptides", plotOutput("CV_median")),
-                  tabPanel("Principle Component Analysis", plotOutput("PCA")),
+                  tabPanel("Dimensionality reduction", plotOutput("PCA"), plotOutput("UMAP")),
                   tabPanel("Feature wise output", selectInput("selectedProtein", "Choose protein for observation", 
                                                               choices=c(rowData(scp)[["proteins"]][,1])),
                            plotOutput("feature_subset")),
@@ -217,13 +217,24 @@ server <- function(input, output) {
       
       
       
-      incProgress(16/17, detail=paste("running PCA"))
+      incProgress(16/17, detail=paste("running dimensionality reduction"))
+     
       scp_0[["proteins_dim_red"]] <- runPCA(scp_0[["proteins_dim_red"]],
                                        ncomponents = 5,
                                        ntop = Inf,
                                        scale = TRUE,
                                        exprs_values = 1,
                                        name = "PCA")
+      
+      scp_0[["proteins_dim_red"]] <- runUMAP(scp_0[["proteins_dim_red"]],
+                                         ncomponents = 2,
+                                         ntop = Inf,
+                                         scale = TRUE,
+                                         exprs_values = 1,
+                                         n_neighbors = 3,
+                                         dimred = "PCA",
+                                         name = "UMAP")
+      
     
       
       incProgress(17/17, detail=paste("analysis finish"))
@@ -393,7 +404,14 @@ server <- function(input, output) {
                      dimred = "PCA",
                      colour_by = "SampleType",
                      point_alpha = 1)
-      
+    })
+    
+    output$UMAP <- renderPlot({
+      scp_0 <- scp()
+      plotReducedDim(scp_0[["proteins_dim_red"]],
+                     dimred = "UMAP",
+                     colour_by = "SampleType",
+                     point_alpha = 1)
     })
     
     output$feature_subset <- renderPlot({
