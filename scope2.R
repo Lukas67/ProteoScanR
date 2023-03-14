@@ -21,7 +21,7 @@ mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combine
 
 # create annotation file
 # this varies upon experimental design
-quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
+#quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
 
 
 # create sample file
@@ -38,7 +38,7 @@ quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
 # 
 # sampleAnnotation$SampleType <- samples
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/sampleAnnotation.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/sampleAnnotation_two_groups.txt")
 
 
 # create QFeature object
@@ -389,12 +389,11 @@ num_var <- sapply(factor_var, function(x) {
 })
 
 # Replace original variable with numeric version
-factor_var <- num_var
+factor_var <- factor(num_var)
 
 
 # Create a design matrix
-design <- model.matrix(~ 0+factor(factor_var)+
-                         factor(c("C", "C", "C", "C", "C", "C", "T", "T", "T", "T", "T", "T")))
+design <- model.matrix(~0+factor_var)
 # assign the column names
 colnames(design) <- paste(c(as.character(unique(scp$SampleType)), "Treatment"))
 # 
@@ -409,16 +408,25 @@ colnames(design) <- paste(c(as.character(unique(scp$SampleType)), "Treatment"))
 # Fit the expression matrix to a linear model
 fit <- lmFit(exp_matrix, design)
 # Compute contrast
-fit_contrast <- contrasts.fit(fit, cont_matrix)
+# fit_contrast <- contrasts.fit(fit, cont_matrix)
 # Bayes statistics of differential expression
 # *There are several options to tweak!*
-fit_contrast <- eBayes(fit_contrast)
+# fit_contrast <- eBayes(fit_contrast)
+
+fit <- eBayes(fit)
 # Generate a vocalno plot to visualize differential expression
-volcanoplot(fit_contrast)
+#volcanoplot(fit_contrast)
+
+volcanoplot(fit)
 # Generate a list of top 100 differentially expressed genes
-top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
+# top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
+top_genes <- topTable(fit, number = 100, adjust = "fdr")
+
 # Summary of results (number of differentially expressed genes)
-result <- decideTests(fit_contrast)
+# result <- decideTests(fit_contrast)
+
+result <- decideTests(fit)
+
 summary(result)
 
 
@@ -439,14 +447,45 @@ treat(fit, lfc=0, trend=FALSE, robust=FALSE, winsor.tail.p=c(0.05,0.1))
 
 
 
+# define design matrix calculation for 4 different effects
+
+# --> Additive effect
+# --> Interaction effect
+# --> Nested Factor
+# --> mixed effect models
+
+
+## Studies with one comparative kind of explanatory variables
+# factor var need to be changed to a covariate as well
+
+# use intercept when comparing a treatment versus control
+# first column will be taken into intercept variable (0 point)
+# design <- model.matrix(~factor_var)
+
+# when performing pairwise comparisons
+# group several variables to one factor --> simplifies experiment
+# design <- model.matrix(~0+factor_var)
+
+## two or multiple treatment variables can be modelled with different approaches
+
+# additive model
+# design <- model.matrix(~factor_var + treatment)
+
+# interactive model
+# design <- model.matrix(~factor_var * treatment)
+
+## time models 
+# combination of time and treatment
+# design <- model.matrix(~factor_var * time)
+
+# linear series
+# design <- model.matrix(~time)
 
 
 
 
+# defining the linear model 
 
+# fit <- lmFit(exp_matrix ~ design)
 
-
-
-
-
-
+# in order to define 0 as the y intercept redefine design matrix
