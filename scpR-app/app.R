@@ -63,7 +63,8 @@ ui <- fluidPage(
                            textOutput("model_vars"),
                            selectInput("model_design", "Define your contrast model (w/o spaces)",
                                        choices = c("Comparative model without intercept",
-                                                   "Comparative model with intercept")),
+                                                   "Comparative model with intercept",
+                                                   "Paired model")),
                            plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
@@ -311,7 +312,7 @@ server <- function(input, output, session) {
   observe({
     updateSelectInput(session, "selectedProtein", choices = protein_list())
   })
-
+  
   observeEvent(input$help,{
     showModal(modalDialog(easyClose = T, 
                           title = "Proteomics Workbench",
@@ -504,6 +505,50 @@ server <- function(input, output, session) {
   output$model_vars <- renderText({
     req(scp())
     unique(scp()$SampleType)
+  })
+  
+  model_vals <- reactiveValues(data = NULL)
+
+  dataModal <- function(failed = FALSE) {
+    modalDialog(
+      textInput("factor_vector", "Insert character or number vector in the length of your sample size",
+                placeholder = 'Try "1,2,3,4,5,6,1,2,3..." or "C,C,T,T..."'
+      ),
+      span('(Try the name of a valid vector like "1,2,3,4", ',
+           'then a name of a non-valid vector like "abc-cde")'),
+      if (failed)
+        div(tags$b("Invalid vector", style = "color: red;")),
+      
+      footer = tagList(
+        modalButton("Cancel"),
+        actionButton("ok", "OK")
+      )
+    )
+  }
+
+  observeEvent(input$model_design, {
+    if (input$model_design == "Paired model") {
+      showModal(dataModal())
+    }
+  })
+  
+  observeEvent(input$ok, {
+    print(input$factor_vector)
+    if (!is.null(input$factor_vector) 
+        && is.vector(input$factor_vector) 
+        && length(input$factor_vector) == length(scp()$SampleType)) {
+      model_vals$factor_vector <- input$factor_vector
+      removeModal()
+    } else {
+      showModal(dataModal(failed = TRUE))
+    }
+  })
+  
+  output$dataInfo <- renderPrint({
+    if (is.null(model_vals$factor_vector))
+      "No vector selected"
+    else
+      model_vals$factor_vector
   })
   
 }
