@@ -291,7 +291,7 @@ server <- function(input, output, session) {
         colnames(design) <- c("Intercept", unique(scp_0$SampleType)[-1])
       }
       else if (input$model_design == "Paired model") {
-        design <- model.matrix(~factor(factor_var))
+        design <- model.matrix(~factor(factor_var) + model_vals$factor_vector)
       }
       
       incProgress(4/5, detail=paste("Fit the expression matrix to a linear model"))
@@ -511,7 +511,7 @@ server <- function(input, output, session) {
 
   dataModal <- function(failed = FALSE) {
     modalDialog(
-      textInput("factor_vector", "Insert character or number vector in the length of your sample size",
+      textInput("factor_vector", "Insert character or number vector in the length of your sample size (comma delim.)",
                 placeholder = 'Try "1,2,3,4,5,6,1,2,3..." or "C,C,T,T..."'
       ),
       span('(Try the name of a valid vector like "1,2,3,4", ',
@@ -533,23 +533,19 @@ server <- function(input, output, session) {
   })
   
   observeEvent(input$ok, {
-    print(input$factor_vector)
-    if (!is.null(input$factor_vector) 
-        && is.vector(input$factor_vector) 
-        && length(input$factor_vector) == length(scp()$SampleType)) {
-      model_vals$factor_vector <- input$factor_vector
+    factor_vect <- strsplit(input$factor_vector, ",\\s*")[[1]]
+    
+    if (!is.null(factor_vect) 
+        && is.vector(factor_vect) 
+        && length(factor_vect) == length(scp()$SampleType)) {
+      model_vals$factor_vector <- factor_vect
       removeModal()
     } else {
       showModal(dataModal(failed = TRUE))
     }
   })
   
-  output$dataInfo <- renderPrint({
-    if (is.null(model_vals$factor_vector))
-      "No vector selected"
-    else
-      model_vals$factor_vector
-  })
+
   
 }
 
