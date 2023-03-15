@@ -391,19 +391,16 @@ num_var <- sapply(factor_var, function(x) {
 # Replace original variable with numeric version
 factor_var <- factor(num_var)
 
-
-# Create a design matrix
+# define design without intercept
 design <- model.matrix(~0+factor_var)
 # assign the column names
-colnames(design) <- paste(c(as.character(unique(scp$SampleType)), "Treatment"))
-# 
-# contrast = "Monocytes_2 - Monocytes_1,
-# Monocytes_3 - Monocytes_2,
-# Monocytes_4 -Monocytes_5,
-# Monocytes_5 - Monocytes_6"
+colnames(design) <- c(unique(scp$SampleType))
 
-# 
-# cont_matrix <- makeContrasts(contrast, levels=design)
+# define design with intercept
+design <- model.matrix(~factor_var)
+# assign the column names
+colnames(design) <- c("Intercept", unique(scp$SampleType)[-1])
+
 
 # Fit the expression matrix to a linear model
 fit <- lmFit(exp_matrix, design)

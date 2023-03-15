@@ -7,6 +7,7 @@ library("reshape2")
 library(scater)
 library(limma)
 
+
 reactlog::reactlog_enable()
 
 # Define UI for application that draws a histogram
@@ -59,9 +60,11 @@ ui <- fluidPage(
                   
                   tabPanel("Statistics",
                            actionButton("run_statistics", "Press to run statistics"),
-                           textOutput("model_design"),
-                           textInput("user_contrast", "Define your contrast model (w/o spaces)"),
-                           tableOutput("summary"),
+                           textOutput("model_vars"),
+                           selectInput("model_design", "Define your contrast model (w/o spaces)",
+                                       choices = c("Comparative model without intercept",
+                                                   "Comparative model with intercept")),
+                           plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
                            tableOutput("protein_table")
@@ -250,10 +253,10 @@ server <- function(input, output, session) {
   
   stat_result <- eventReactive(input$run_statistics, {
     withProgress(message= "running statistical analysis", value=0, {
-      incProgress(1/6, detail=paste("read data"))
+      incProgress(1/5, detail=paste("read data"))
       scp_0 <- scp()
       
-      incProgress(2/6, detail=paste("creating expression matrix"))
+      incProgress(2/5, detail=paste("creating expression matrix"))
       exp_matrix <- data.frame(assay(scp_0[["proteins_dim_red"]]))
       colnames(exp_matrix) <- scp_0$SampleType
       
@@ -273,26 +276,30 @@ server <- function(input, output, session) {
       # Replace original variable with numeric version
       factor_var <- num_var
       
-      incProgress(3/6, detail=paste("creating design matrix"))
+      incProgress(3/5, detail=paste("creating design matrix"))
+      
+      req(input$model_design)
+      
       # Create a design matrix
-      design <- model.matrix(~ 0+factor(factor_var))
-      # assign the column names
-      colnames(design) <- unique(scp_0$SampleType)
+      if (input$model_design == "Comparative model without intercept") {
+        design <- model.matrix(~ 0+factor(factor_var))
+        colnames(design) <- unique(scp_0$SampleType)
+      }
+      else if (input$model_design == "Comparative model with intercept") {
+        design <- model.matrix(~factor(factor_var))
+        colnames(design) <- c("Intercept", unique(scp_0$SampleType)[-1])
+      }
+      else if (input$model_design == "Paired model") {
+        design <- model.matrix(~factor(factor_var))
+      }
       
-      req(input$user_contrast)
-      contrast_0 <- strsplit(input$user_contrast, " ")
-      # calculates the mean difference between groups
-      cont_matrix <- makeContrasts(contrasts=contrast_0, levels=design)
-      
-      incProgress(4/6, detail=paste("Fit the expression matrix to a linear model"))
+      incProgress(4/5, detail=paste("Fit the expression matrix to a linear model"))
       fit <- lmFit(exp_matrix, design)
-      incProgress(5/6, detail=paste("Compute contrast"))
-      fit_contrast <- contrasts.fit(fit, cont_matrix)
-      incProgress(6/6, detail=paste("Bayes statistics of differential expression"))
+      incProgress(5/5, detail=paste("Bayes statistics of differential expression"))
       # *There are several options to tweak!*
-      fit_contrast <- eBayes(fit_contrast)
+      fit <- eBayes(fit)
     })
-    return(fit_contrast)
+    return(fit)
   })
   
   protein_list <- reactive({
@@ -304,8 +311,7 @@ server <- function(input, output, session) {
   observe({
     updateSelectInput(session, "selectedProtein", choices = protein_list())
   })
-  
-  
+
   observeEvent(input$help,{
     showModal(modalDialog(easyClose = T, 
                           title = "Proteomics Workbench",
@@ -490,12 +496,13 @@ server <- function(input, output, session) {
     topTable(stat_result(), number = 10, adjust = "BH")
   }, rownames = T)
   
-  output$summary <- renderTable({
+  output$venn_diagram <- renderPlot({
     req(stat_result())
-    summary(decideTests(stat_result()))
-  }, colnames = F)
+    vennDiagram(decideTests(stat_result()))
+  })
   
-  output$model_design <- renderText({
+  output$model_vars <- renderText({
+    req(scp())
     unique(scp()$SampleType)
   })
   
