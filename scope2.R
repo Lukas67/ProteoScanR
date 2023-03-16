@@ -363,43 +363,46 @@ library(limma)
 # create expression matrix from protein data
 # Log-transformed expression data in a matrix:
 #  Each column represents an experiement, and each row represents a detected gene/probe.
-# not sure if the data should be aggregated
 
+
+# create expression matrix
 exp_matrix <- data.frame(assay(scp[["proteins_final"]]))
 colnames(exp_matrix) <- scp$SampleType
 
-# exp_matrix <- aggregate(. ~ SampleType, data = data_to_aggregate, FUN = mean, na.rm = TRUE)
-# exp_matrix <- data.frame(t(exp_matrix))
-# names(exp_matrix) <- exp_matrix[1,]
-# exp_matrix <- exp_matrix[-1,]
 
 # create design matrix 
 # return the count of individual colnames (Types of experiment)
 # Sample data
 factor_var <- factor(colnames(exp_matrix))
 
-# Create lookup table
-levels <- unique(factor_var)
-num_values <- seq_along(levels)
-lookup_table <- data.frame(factor_var = levels, num_var = num_values)
+factorize_var <- function(i_vector) {
+  fact_vect <- factor(i_vector)
+  levels <- unique(fact_vect)
+  num_values <- seq_along(levels)
+  lookup_table <- data.frame(fact_vect = levels, num_var = num_values)
+  
+  num_var <- sapply(fact_vect, function(x) {
+    lookup_table$num_var[lookup_table$fact_vect == x]
+  })
+  
+  fact_vect <- factor(num_var)
+  return(fact_vect)
+}
 
-# Convert factor variable to numeric
-num_var <- sapply(factor_var, function(x) {
-  lookup_table$num_var[lookup_table$factor_var == x]
-})
+factors_sample_type <- factorize_var(colnames(exp_matrix))
 
-# Replace original variable with numeric version
-factor_var <- factor(num_var)
+user_input <- c(1,2,3,4,5,6,1,2,3,4,5,6)
+user_chosen_name <- "patient"
+
+factors_patient <- factorize_var(user_input)
 
 # define design without intercept
-design <- model.matrix(~0+factor_var)
+design <- model.matrix(~0+factors_sample_type*factors_patient)
 # assign the column names
-colnames(design) <- c(unique(scp$SampleType))
+user_colnames <- sprintf(paste(as.character(user_chosen_name),"[%s]"), seq(2:length(unique(factors_patient)))+1)
 
-# define design with intercept
-design <- model.matrix(~factor_var)
-# assign the column names
-colnames(design) <- c("Intercept", unique(scp$SampleType)[-1])
+colnames(design) <- c(unique(scp$SampleType), user_colnames)
+
 
 
 # Fit the expression matrix to a linear model

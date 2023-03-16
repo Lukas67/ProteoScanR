@@ -61,10 +61,11 @@ ui <- fluidPage(
                   tabPanel("Statistics",
                            actionButton("run_statistics", "Press to run statistics"),
                            textOutput("model_vars"),
-                           selectInput("model_design", "Define your contrast model (w/o spaces)",
-                                       choices = c("Comparative model without intercept",
-                                                   "Comparative model with intercept",
-                                                   "Paired model")),
+                           selectInput("model_design", "Choose your study design",
+                                       choices = c("All pairwise comparison",
+                                                   "Treatment versus Control",
+                                                   "Additivity using a twofactor model",
+                                                   "Interaction using a twofactor model")),
                            plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
@@ -261,38 +262,50 @@ server <- function(input, output, session) {
       exp_matrix <- data.frame(assay(scp_0[["proteins_dim_red"]]))
       colnames(exp_matrix) <- scp_0$SampleType
       
-      factor_var <- factor(colnames(exp_matrix))
+      factorize_var <- function(i_vector) {
+        fact_vect <- factor(i_vector)
+        levels <- unique(fact_vect)
+        num_values <- seq_along(levels)
+        lookup_table <- data.frame(fact_vect = levels, num_var = num_values)
+        
+        num_var <- sapply(fact_vect, function(x) {
+          lookup_table$num_var[lookup_table$fact_vect == x]
+        })
+        
+        fact_vect <- factor(num_var)
+        return(fact_vect)
+      }
       
-      # Create lookup table
-      levels <- unique(factor_var)
-      num_values <- seq_along(levels)
-      lookup_table <- data.frame(factor_var = levels, num_var = num_values)
+      factors_sample_type <- factorize_var(colnames(exp_matrix))
       
-      
-      # Convert factor variable to numeric
-      num_var <- sapply(factor_var, function(x) {
-        lookup_table$num_var[lookup_table$factor_var == x]
-      })
-      
-      # Replace original variable with numeric version
-      factor_var <- num_var
       
       incProgress(3/5, detail=paste("creating design matrix"))
       
       req(input$model_design)
       
       # Create a design matrix
-      if (input$model_design == "Comparative model without intercept") {
-        design <- model.matrix(~ 0+factor(factor_var))
+      if (input$model_design == "All pairwise comparison") {
+        design <- model.matrix(~ 0+factors_sample_type)
         colnames(design) <- unique(scp_0$SampleType)
       }
-      else if (input$model_design == "Comparative model with intercept") {
-        design <- model.matrix(~factor(factor_var))
+      # treatment versus control
+      else if (input$model_design == "Treatment versus Control") {
+        design <- model.matrix(~factors_sample_type)
         colnames(design) <- c("Intercept", unique(scp_0$SampleType)[-1])
       }
-      else if (input$model_design == "Paired model") {
-        design <- model.matrix(~factor(factor_var) + model_vals$factor_vector)
+      else if (input$model_design == "Additivity using a twofactor model") {
+        factors_user_choice <- factorize_var(model_vals$factor_vector)
+        design <- model.matrix(~factors_sample_type + factors_user_choice)
+        user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
+        colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
       }
+      else if (input$model_design == "Interaction using a twofactor model") {
+        factors_user_choice <- factorize_var(model_vals$factor_vector)
+        design <- model.matrix(~factors_sample_type * factors_user_choice)
+        user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
+        colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
+      }
+      
       
       incProgress(4/5, detail=paste("Fit the expression matrix to a linear model"))
       fit <- lmFit(exp_matrix, design)
@@ -509,15 +522,19 @@ server <- function(input, output, session) {
   
   model_vals <- reactiveValues(data = NULL)
 
-  dataModal <- function(failed = FALSE) {
+  dataModal <- function(failed_1 = FALSE, failed_2=FALSE) {
     modalDialog(
       textInput("factor_vector", "Insert character or number vector in the length of your sample size (comma delim.)",
                 placeholder = 'Try "1,2,3,4,5,6,1,2,3..." or "C,C,T,T..."'
       ),
-      span('(Try the name of a valid vector like "1,2,3,4", ',
-           'then a name of a non-valid vector like "abc-cde")'),
-      if (failed)
-        div(tags$b("Invalid vector", style = "color: red;")),
+      span('(Try a valid vector like "1,2,3,4", ',
+           'then a non-valid vector like "abc-cde")'),
+      if (failed_1)
+        div(tags$b("Invalid vector!", style = "color: red;")),
+      
+      textInput("vector_name", "Insert name of your vector"),
+      if (failed_2)
+        div(tags$b("Name your vector!", style = "color: red;")),
       
       footer = tagList(
         modalButton("Cancel"),
@@ -527,7 +544,10 @@ server <- function(input, output, session) {
   }
 
   observeEvent(input$model_design, {
-    if (input$model_design == "Paired model") {
+    if (input$model_design == "Additivity using a twofactor model") {
+      showModal(dataModal())
+    }
+    else if (input$model_design == "Interaction using a twofactor model") {
       showModal(dataModal())
     }
   })
@@ -541,7 +561,14 @@ server <- function(input, output, session) {
       model_vals$factor_vector <- factor_vect
       removeModal()
     } else {
-      showModal(dataModal(failed = TRUE))
+      showModal(dataModal(failed_1 = TRUE))
+    }
+    
+    if (!is.null(input$vector_name)) {
+      model_vals$vector_name <- input$vector_name
+      removeModal()
+    } else {
+      showModal(dataModal(failed_2 = TRUE))
     }
   })
   
