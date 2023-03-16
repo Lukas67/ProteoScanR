@@ -66,6 +66,7 @@ ui <- fluidPage(
                                                    "Treatment versus Control",
                                                    "Additivity using a twofactor model",
                                                    "Interaction using a twofactor model")),
+                           selectInput("model_coeff", "choose the coefficient of observation", ""),
                            plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
@@ -302,8 +303,8 @@ server <- function(input, output, session) {
       else if (input$model_design == "Interaction using a twofactor model") {
         factors_user_choice <- factorize_var(model_vals$factor_vector)
         design <- model.matrix(~factors_sample_type * factors_user_choice)
-        user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
-        colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
+        # user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
+        # colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
       }
       
       
@@ -314,16 +315,6 @@ server <- function(input, output, session) {
       fit <- eBayes(fit)
     })
     return(fit)
-  })
-  
-  protein_list <- reactive({
-    scp_0 <- scp()
-    list <- rowData(scp_0)[["proteins"]][,1]
-    return(list)
-  })
-  
-  observe({
-    updateSelectInput(session, "selectedProtein", choices = protein_list())
   })
   
   observeEvent(input$help,{
@@ -447,7 +438,8 @@ server <- function(input, output, session) {
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "PCA",
                    colour_by = "SampleType",
-                   point_alpha = 1)
+                   point_alpha = 1,
+                   point_size=3)
   })
   
   output$UMAP <- renderPlot({
@@ -455,7 +447,18 @@ server <- function(input, output, session) {
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "UMAP",
                    colour_by = "SampleType",
-                   point_alpha = 1)
+                   point_alpha = 1,
+                   point_size = 3)
+  })
+  
+  protein_list <- reactive({
+    scp_0 <- scp()
+    list <- rowData(scp_0)[["proteins"]][,1]
+    return(list)
+  })
+  
+  observe({
+    updateSelectInput(session, "selectedProtein", choices = protein_list())
   })
   
   output$feature_subset <- renderPlot({
@@ -483,20 +486,48 @@ server <- function(input, output, session) {
             legend.position = "bottom")
   })
   
+  model_coeff_list <- reactive({
+    fit_0 <- stat_result()
+    list <- c("All", colnames(fit_0$coefficients))
+    return(list)
+  })
+  
+  observe({
+    updateSelectInput(session, "model_coeff", choices = model_coeff_list())
+  })
+  
   output$volcano <- renderPlot({
-    volcanoplot(stat_result())
+    if (input$model_coeff == "All") {
+      volcanoplot(stat_result(), cex = 0.5) 
+    }  
+    else {
+      volcanoplot(stat_result(), cex = 0.5, coef = input$model_coeff)
+    }  
   })
   
   displayed_text <- reactive({
     req(input$plot_hover)
     hover <- input$plot_hover
-    dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
     
-    if(min(dist) < 0.3) {
-      rownames(stat_result())[which.min(dist)]
-    } else {
-      NULL
+    if (input$model_coeff == "All") {
+      dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
+      
+      if(min(dist) < 0.3) {
+        rownames(stat_result())[which.min(dist)]
+      } else {
+        NULL
+      }
     }
+    else {
+      dist <- sqrt((hover$x - stat_result()$coef[, input$model_coeff])^2 + (hover$y - -log10(stat_result()$p.value[, input$model_coeff]))^2)
+      
+      if(min(dist) < 0.3) {
+        rownames(stat_result()[, input$model_coeff])[which.min(dist)]
+      } else {
+        NULL
+      }
+    }
+    
   })
   
   output$hover_info <- renderPrint({
@@ -507,7 +538,12 @@ server <- function(input, output, session) {
   })
   
   output$protein_table <- renderTable({
-    topTable(stat_result(), number = 10, adjust = "BH")
+    if (input$model_coeff == "All") {
+      topTable(stat_result(), number = 10, adjust = "BH")
+    }
+    else {
+      topTable(stat_result(), number = 10, adjust = "BH", coef = input$model_coeff)
+    }
   }, rownames = T)
   
   output$venn_diagram <- renderPlot({

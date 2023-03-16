@@ -397,7 +397,7 @@ user_chosen_name <- "patient"
 factors_patient <- factorize_var(user_input)
 
 # define design without intercept
-design <- model.matrix(~0+factors_sample_type*factors_patient)
+design <- model.matrix(~0+factors_sample_type+factors_patient)
 # assign the column names
 user_colnames <- sprintf(paste(as.character(user_chosen_name),"[%s]"), seq(2:length(unique(factors_patient)))+1)
 
@@ -421,6 +421,8 @@ volcanoplot(fit)
 # Generate a list of top 100 differentially expressed genes
 # top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
 top_genes <- topTable(fit, number = 100, adjust = "fdr")
+
+
 
 # Summary of results (number of differentially expressed genes)
 # result <- decideTests(fit_contrast)
