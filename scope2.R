@@ -420,7 +420,7 @@ fit <- eBayes(fit)
 volcanoplot(fit)
 # Generate a list of top 100 differentially expressed genes
 # top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
-top_genes <- topTable(fit, number = 100, adjust = "fdr")
+top_genes <- topTable(fit, number = 100, adjust = "fdr", coef = "Monocytes_A")
 
 
 

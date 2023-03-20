@@ -66,8 +66,8 @@ ui <- fluidPage(
                                                    "Treatment versus Control",
                                                    "Additivity using a twofactor model",
                                                    "Interaction using a twofactor model")),
-                           selectInput("model_coeff", "choose the coefficient of observation", ""),
                            plotOutput("venn_diagram"),
+                           selectInput("model_coeff", "choose the coefficient of observation", ""),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
                            tableOutput("protein_table")
@@ -286,6 +286,7 @@ server <- function(input, output, session) {
       
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
+        # groupwise --> delete duplicates
         design <- model.matrix(~ 0+factors_sample_type)
         colnames(design) <- unique(scp_0$SampleType)
       }
@@ -537,6 +538,9 @@ server <- function(input, output, session) {
     displayed_text()
   })
   
+  # cutoff for the p-adj, foldchange
+  # qlucor 
+  # contrasts 
   output$protein_table <- renderTable({
     if (input$model_coeff == "All") {
       topTable(stat_result(), number = 10, adjust = "BH")
