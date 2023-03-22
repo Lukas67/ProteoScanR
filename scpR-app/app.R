@@ -60,6 +60,7 @@ ui <- fluidPage(
                   
                   tabPanel("Statistics",
                            actionButton("run_statistics", "Press to run statistics"),
+                           actionButton("qqplot", "check dependencies for linear model"),
                            textOutput("model_vars"),
                            selectInput("model_design", "Choose your study design",
                                        choices = c("All pairwise comparison",
@@ -67,7 +68,6 @@ ui <- fluidPage(
                                                    "Additivity using a twofactor model",
                                                    "Interaction using a twofactor model")),
                            plotOutput("venn_diagram"),
-                           selectInput("model_coeff", "choose the coefficient of observation", ""),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
                            tableOutput("protein_table")
@@ -81,12 +81,15 @@ ui <- fluidPage(
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=10*1024^2)
   
+  ## Data structures and objects
+  # sample_annotation needs to be accessible for plots
   meta_data <- reactive({
     req(input$sample_annotation_file)
     meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
     return(meta_data_0)
   })
   
+  # result of analysis pipleline
   scp <- eventReactive(input$update_button, {
     withProgress(message= "running analysis", value=0, {
       req(input$evidence_file)
@@ -254,14 +257,21 @@ server <- function(input, output, session) {
     return(scp_0)
   })
   
+  # expression matrix is used by plot funcitons & stat pipeline
+  exp_matrix <- reactive({
+    scp_0 <- scp()
+    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+    colnames(exp_matrix_0) <- scp_0$SampleType  
+    return(exp_matrix_0)
+  })
+  
+  # statistical pipeline
   stat_result <- eventReactive(input$run_statistics, {
     withProgress(message= "running statistical analysis", value=0, {
       incProgress(1/5, detail=paste("read data"))
-      scp_0 <- scp()
       
-      incProgress(2/5, detail=paste("creating expression matrix"))
-      exp_matrix <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-      colnames(exp_matrix) <- scp_0$SampleType
+      incProgress(2/5, detail=paste("reading expression matrix"))
+      exp_matrix_0 <- exp_matrix()
       
       factorize_var <- function(i_vector) {
         fact_vect <- factor(i_vector)
@@ -277,7 +287,7 @@ server <- function(input, output, session) {
         return(fact_vect)
       }
       
-      factors_sample_type <- factorize_var(colnames(exp_matrix))
+      factors_sample_type <- factorize_var(colnames(exp_matrix_0))
       
       
       incProgress(3/5, detail=paste("creating design matrix"))
@@ -310,7 +320,7 @@ server <- function(input, output, session) {
       
       
       incProgress(4/5, detail=paste("Fit the expression matrix to a linear model"))
-      fit <- lmFit(exp_matrix, design)
+      fit <- lmFit(exp_matrix_0, design)
       incProgress(5/5, detail=paste("Bayes statistics of differential expression"))
       # *There are several options to tweak!*
       fit <- eBayes(fit)
@@ -318,6 +328,10 @@ server <- function(input, output, session) {
     return(fit)
   })
   
+  ### graphical outputs and user interface
+  
+  ## reactive events and observers
+  # Help Button and content of the help menu
   observeEvent(input$help,{
     showModal(modalDialog(easyClose = T, 
                           title = "Proteomics Workbench",
@@ -383,11 +397,44 @@ server <- function(input, output, session) {
     ))
   })
   
+  # observer for protein list
+  observe({
+    updateSelectInput(session, "selectedProtein", choices = protein_list())
+  })
+  
+  # reactive element for the protein list --> update if the scp object changes
+  protein_list <- reactive({
+    scp_0 <- scp()
+    list <- rowData(scp_0)[["proteins"]][,1]
+    return(list)
+  })
+  
+  # reactive element for hover function of volcano plot
+  displayed_text <- reactive({
+    req(input$plot_hover)
+    hover <- input$plot_hover
+    dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
+    
+    if(min(dist) < 0.3) {
+      rownames(stat_result())[which.min(dist)]
+    } else {
+      NULL
+    }
+  })
+
+  # observer for qqplot interface
+  observeEvent(input$qqplot, {
+    showModal(qqModal())
+  })
+  
+  ## Plots 
+  # pathway of the data first tab
   output$overview_plot <- renderPlot({
     if (!is.null(scp())) {
       plot(scp()) }
   })
   
+  # summary barchart second tab
   output$summary_bar <- renderPlot({
     scp_0 <- scp()
     
@@ -403,6 +450,7 @@ server <- function(input, output, session) {
       scale_fill_manual(values = c("darkblue", "darkgreen", "darkred"))
   })
   
+  # Boxplot of reporter ion intensity third tab
   output$RI_intensity <- renderPlot({
     scp_0 <- scp()
     
@@ -416,6 +464,7 @@ server <- function(input, output, session) {
       scale_x_log10()
   })
   
+  # covariance across razor peptides fourth tab
   output$CV_median <- renderPlot({
     req(scp())
     req(meta_data())
@@ -434,6 +483,7 @@ server <- function(input, output, session) {
       geom_boxplot()
   })
   
+  # principle component analysis in fifth tab
   output$PCA <- renderPlot({
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
@@ -443,6 +493,7 @@ server <- function(input, output, session) {
                    point_size=3)
   })
   
+  # Umap dimensionality reduction in fith tab
   output$UMAP <- renderPlot({
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
@@ -452,16 +503,7 @@ server <- function(input, output, session) {
                    point_size = 3)
   })
   
-  protein_list <- reactive({
-    scp_0 <- scp()
-    list <- rowData(scp_0)[["proteins"]][,1]
-    return(list)
-  })
-  
-  observe({
-    updateSelectInput(session, "selectedProtein", choices = protein_list())
-  })
-  
+  # protein wise visualisation 
   output$feature_subset <- renderPlot({
     scp_0 <- scp()
     label_suffix <- input$label_suffix
@@ -487,50 +529,12 @@ server <- function(input, output, session) {
             legend.position = "bottom")
   })
   
-  model_coeff_list <- reactive({
-    fit_0 <- stat_result()
-    list <- c("All", colnames(fit_0$coefficients))
-    return(list)
-  })
-  
-  observe({
-    updateSelectInput(session, "model_coeff", choices = model_coeff_list())
-  })
-  
+  # volcanoplot in statistic tab
   output$volcano <- renderPlot({
-    if (input$model_coeff == "All") {
-      volcanoplot(stat_result(), cex = 0.5) 
-    }  
-    else {
-      volcanoplot(stat_result(), cex = 0.5, coef = input$model_coeff)
-    }  
+    volcanoplot(stat_result(), cex = 0.5) 
   })
   
-  displayed_text <- reactive({
-    req(input$plot_hover)
-    hover <- input$plot_hover
-    
-    if (input$model_coeff == "All") {
-      dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
-      
-      if(min(dist) < 0.3) {
-        rownames(stat_result())[which.min(dist)]
-      } else {
-        NULL
-      }
-    }
-    else {
-      dist <- sqrt((hover$x - stat_result()$coef[, input$model_coeff])^2 + (hover$y - -log10(stat_result()$p.value[, input$model_coeff]))^2)
-      
-      if(min(dist) < 0.3) {
-        rownames(stat_result()[, input$model_coeff])[which.min(dist)]
-      } else {
-        NULL
-      }
-    }
-    
-  })
-  
+  # hover output below volcano chart
   output$hover_info <- renderPrint({
     req(displayed_text())
     
@@ -541,15 +545,13 @@ server <- function(input, output, session) {
   # cutoff for the p-adj, foldchange
   # qlucor 
   # contrasts 
+  
+  # show significant proteins in the table
   output$protein_table <- renderTable({
-    if (input$model_coeff == "All") {
-      topTable(stat_result(), number = 10, adjust = "BH")
-    }
-    else {
-      topTable(stat_result(), number = 10, adjust = "BH", coef = input$model_coeff)
-    }
+    topTable(stat_result(), number = 10, adjust = "BH")
   }, rownames = T)
   
+  # venn diagram for significant proteins
   output$venn_diagram <- renderPlot({
     req(stat_result())
     vennDiagram(decideTests(stat_result()))
@@ -578,11 +580,65 @@ server <- function(input, output, session) {
       
       footer = tagList(
         modalButton("Cancel"),
-        actionButton("ok", "OK")
+        actionButton("ok", "OK") 
       )
     )
   }
 
+  # plot qqnorm of all variables in the model 
+  qq_count <- 0
+  
+  output$qqPlot <- renderPlot({
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
+  })
+  
+  observeEvent(input$next_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    qq_count <<- qq_count + 1
+    print(qq_count)
+    if (qq_count <= length(sample_types)) {
+      output$qqPlot <- renderPlot(
+        qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
+      )
+    }
+    else {
+      print("else condition")
+      qq_count <- 1
+    }
+  })    
+  
+  observeEvent(input$previous_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    qq_count <<- qq_count - 1 
+    print(qq_count)
+    if (qq_count >= 1) {
+      output$qqPlot <- renderPlot(
+        qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
+      )
+    }
+    else {
+      print("else condition")
+      qq_count <- 1
+    }
+  })
+  # create interface for the qqmodal dialog
+  qqModal <- function() {
+    modalDialog(
+      actionButton("previous_plot", "Show previous"),
+      actionButton("next_plot", "Show next"),
+      plotOutput("qqPlot"),
+      footer = tagList(
+        modalButton("Dismiss")
+      )
+    )
+  }
+  
   observeEvent(input$model_design, {
     if (input$model_design == "Additivity using a twofactor model") {
       showModal(dataModal())
@@ -612,7 +668,6 @@ server <- function(input, output, session) {
     }
   })
   
-
   
 }
 

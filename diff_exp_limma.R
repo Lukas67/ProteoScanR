@@ -8,17 +8,17 @@ design_matrix <- read.delim("/home/lukas/Downloads/Design.txt")
 # log transform expression values
 exp_matrix[,-1] <- log10(exp_matrix[,-1]) 
 
-#normalize colwise
-exp_matrix_norm <- sweep(exp_matrix[,-1], 2, colSums(exp_matrix[,-1]), FUN="/")
-#normalize rowwise
-exp_matrix_norm <- sweep(exp_matrix[,-1], 1, rowSums(exp_matrix[,-1]), FUN="/")
-
+# #normalize colwise
+# exp_matrix_norm <- sweep(exp_matrix[,-1], 2, colSums(exp_matrix[,-1]), FUN="-")
+# #normalize rowwise
+# exp_matrix_norm <- sweep(exp_matrix[,-1], 1, rowSums(exp_matrix[,-1]), FUN="-")
+# 
 library('corrr')
 library(ggcorrplot)
 library("FactoMineR")
 library(factoextra)
 
-corr_matrix <- cor(exp_matrix_norm)
+corr_matrix <- cor(exp_matrix[,-1])
 ggcorrplot(corr_matrix)
 
 # in this case a correlation within the batches can be clearly observed 

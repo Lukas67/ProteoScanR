@@ -359,7 +359,6 @@ subsetByFeature(scp, "Q9ULV4") %>%
 # differential expression between two groups
 
 library(limma)
-
 # create expression matrix from protein data
 # Log-transformed expression data in a matrix:
 #  Each column represents an experiement, and each row represents a detected gene/probe.
@@ -369,6 +368,10 @@ library(limma)
 exp_matrix <- data.frame(assay(scp[["proteins_final"]]))
 colnames(exp_matrix) <- scp$SampleType
 
+# check if the data is normal distributed
+sample_types <- unique(colnames(exp_matrix))
+
+qqnorm(exp_matrix[[sample_types[1]]], main = paste("QQ-plot of ", sample_types[1]))
 
 # create design matrix 
 # return the count of individual colnames (Types of experiment)
