@@ -328,6 +328,9 @@ server <- function(input, output, session) {
     return(fit)
   })
   
+  # initial qq counter for the first plot 
+  qq_count <- reactiveVal(1)
+  
   ### graphical outputs and user interface
   
   ## reactive events and observers
@@ -426,6 +429,41 @@ server <- function(input, output, session) {
   observeEvent(input$qqplot, {
     showModal(qqModal())
   })
+  
+  
+  # observer for the next button to increment the counter and show next qq
+  observeEvent(input$next_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    i <- qq_count()
+    
+    if(i < length(sample_types)) {
+      j <- i + 1
+    }
+    else {
+      j <- 1
+    }
+    
+    qq_count(j)
+  })  
+  
+  # observer for the previous button to increment the counter and show previous qq
+  observeEvent(input$previous_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    i <- qq_count()
+    
+    if(i > 1) {
+      j <- i - 1
+    }
+    else {
+      j <- 1
+    }
+    
+    qq_count(j)
+  })  
   
   ## Plots 
   # pathway of the data first tab
@@ -584,49 +622,16 @@ server <- function(input, output, session) {
       )
     )
   }
-
-  # plot qqnorm of all variables in the model 
-  qq_count <- 0
   
+  # plot the qq_count-th column
   output$qqPlot <- renderPlot({
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
-    qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
+    i <- qq_count()
+    qqnorm(exp_matrix_0[[sample_types[i]]], main=paste("QQ-plot of ", sample_types[i]))
+    qqline(exp_matrix_0[[sample_types[i]]])
   })
   
-  observeEvent(input$next_plot, {
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    
-    qq_count <<- qq_count + 1
-    print(qq_count)
-    if (qq_count <= length(sample_types)) {
-      output$qqPlot <- renderPlot(
-        qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
-      )
-    }
-    else {
-      print("else condition")
-      qq_count <- 1
-    }
-  })    
-  
-  observeEvent(input$previous_plot, {
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    
-    qq_count <<- qq_count - 1 
-    print(qq_count)
-    if (qq_count >= 1) {
-      output$qqPlot <- renderPlot(
-        qqnorm(exp_matrix_0[[sample_types[qq_count]]], main=paste("QQ-plot of ", sample_types[qq_count]))
-      )
-    }
-    else {
-      print("else condition")
-      qq_count <- 1
-    }
-  })
   # create interface for the qqmodal dialog
   qqModal <- function() {
     modalDialog(
