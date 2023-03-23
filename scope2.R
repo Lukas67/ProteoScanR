@@ -373,6 +373,8 @@ sample_types <- unique(colnames(exp_matrix))
 
 qqnorm(exp_matrix[[sample_types[1]]], main = paste("QQ-plot of ", sample_types[1]))
 qqline(exp_matrix[[sample_types[1]]])
+
+hist(exp_matrix[[sample_types[1]]])
 # create design matrix 
 # return the count of individual colnames (Types of experiment)
 # Sample data

@@ -632,12 +632,20 @@ server <- function(input, output, session) {
     qqline(exp_matrix_0[[sample_types[i]]])
   })
   
+  output$hist <- renderPlot({
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    i <- qq_count()
+    hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]))
+  })
+  
   # create interface for the qqmodal dialog
   qqModal <- function() {
     modalDialog(
       actionButton("previous_plot", "Show previous"),
       actionButton("next_plot", "Show next"),
       plotOutput("qqPlot"),
+      plotOutput("hist"),
       footer = tagList(
         modalButton("Dismiss")
       )
