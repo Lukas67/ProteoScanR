@@ -269,6 +269,7 @@ server <- function(input, output, session) {
   stat_result <- eventReactive(input$run_statistics, {
     withProgress(message= "running statistical analysis", value=0, {
       incProgress(1/5, detail=paste("read data"))
+      scp_0 <- scp()
       
       incProgress(2/5, detail=paste("reading expression matrix"))
       exp_matrix_0 <- exp_matrix()
@@ -636,7 +637,7 @@ server <- function(input, output, session) {
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
     i <- qq_count()
-    hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]))
+    hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
   })
   
   # create interface for the qqmodal dialog

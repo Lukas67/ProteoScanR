@@ -210,17 +210,25 @@ scp <-normalizeSCP(scp, 3, name="peptides_norm", method = "div.mean")
 scp <- filterNA(scp,
                 i = "peptides_norm",
                 pNA = 0.99)
-# log-transform 
+
+# sqrt transformation
+scp <- sweep(scp, i="peptides_norm",
+             MARGIN = 2,
+             FUN="^",
+             STATS=2,
+             name="peptide_sqrt")
+
+#log-transform
 scp <- logTransform(scp,
                     base = 2,
                     i = "peptides_norm",
                     name = "peptides_log")
 
-# aggregate peptide to protein
 
+# aggregate peptide to protein
 scp <- aggregateFeatures(scp,
-                         i = "peptides_log",
-                         name = "proteins",
+                         i = "peptide_sqrt",
+                         name = "proteins_sqrt",
                          fcol = "Leading.razor.protein",
                          fun = matrixStats::colMedians, na.rm = TRUE)
 
