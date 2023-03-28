@@ -14,6 +14,7 @@ library("scp")
 library("ggplot2")
 library("magrittr")
 library("dplyr")
+library("CONSTANd")
 
 
 # read in MS result table
@@ -201,60 +202,106 @@ scp <- scp[, !is.na(scp$MedianCV) & scp$MedianCV < 0.65, ]
 # peptides --> divide relative intensities by the mean relative intensities
 
 # divide column by median
-scp <-normalizeSCP(scp, 2, name="peptides_norm_col", method = "div.median")
-#divide rows my mean
-scp <-normalizeSCP(scp, 3, name="peptides_norm", method = "div.mean")
+# scp <-normalizeSCP(scp, 2, name="peptides_norm_col", method = "div.median")
+# #divide rows my mean
+# scp <-normalizeSCP(scp, 3, name="peptides_norm", method = "div.mean")
 
 # remove peptides with high missing rate
 
 scp <- filterNA(scp,
-                i = "peptides_norm",
+                i = peptides, #_norm",
                 pNA = 0.99)
 
-# sqrt transformation
-scp <- sweep(scp, i="peptides_norm",
-             MARGIN = 2,
-             FUN="^",
-             STATS=2,
-             name="peptide_sqrt")
-
-#log-transform
-scp <- logTransform(scp,
-                    base = 2,
-                    i = "peptides_norm",
-                    name = "peptides_log")
-
+# # sqrt transformation
+# scp <- sweep(scp, i="peptides_norm",
+#              MARGIN = 2,
+#              FUN="^",
+#              STATS=2,
+#              name="peptide_sqrt")
+# 
+# #log-transform
+# scp <- logTransform(scp,
+#                     base = 2,
+#                     i = "peptides_norm",
+#                     name = "peptides_log")
+# 
 
 # aggregate peptide to protein
 scp <- aggregateFeatures(scp,
-                         i = "peptide_sqrt",
-                         name = "proteins_sqrt",
+                         i = peptides,
+                         name = "proteins",
                          fcol = "Leading.razor.protein",
                          fun = matrixStats::colMedians, na.rm = TRUE)
 
 
 # normalization of protein data
 
-## Center columns with median
-scp <- sweep(scp, i = "proteins",
-             MARGIN = 2,
-             FUN = "-",
-             STATS = colMedians(assay(scp[["proteins"]]),
-                                na.rm = TRUE),
-             name = "proteins_norm_col")
+## SCoPE2 normalization
 
-## Center rows with mean
-scp <- sweep(scp, i = "proteins_norm_col",
-             MARGIN = 1,
-             FUN = "-",
-             STATS = rowMeans(assay(scp[["proteins_norm_col"]]),
-                              na.rm = TRUE),
-             name = "proteins_norm")
+# # Center columns with median
+#  scp <- sweep(scp, i = "proteins",
+#               MARGIN = 2,
+#               FUN = "-",
+#               STATS = colMedians(assay(scp[["proteins"]]),
+#                                  na.rm = TRUE),
+#               name = "proteins_norm_col")
+# 
+# ## Center rows with mean
+#  scp <- sweep(scp, i = "proteins_norm_col",
+#               MARGIN = 1,
+#               FUN = "-",
+#               STATS = rowMeans(assay(scp[["proteins_norm_col"]]),
+#                                na.rm = TRUE),
+#               name = "proteins_norm")
+
+ 
+ # CONSTANd normalization method
+
+# make MA plot first
+MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
+  # make an MA plot of y vs. x that shows the rolling average,
+  M <- log2(y/x)
+  xlab = 'A'
+  if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
+  A <- (log2(y/r)+log2(x/r))/2
+  if (use.order) {
+    orig.order <- order(A)
+    A <- orig.order
+    M <- M[orig.order]
+    xlab = "original rank of feature magnitude within IPS"
+  }
+  # select only finite values
+  use <- is.finite(M)
+  A <- A[use]
+  M <- M[use]
+  # plot
+  print(var(M))
+  plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
+  # rolling average
+  if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
+}
+
+MAplot(assay(scp[["proteins_norm"]])[,1:6], assay(scp[["proteins_norm"]])[,7:12])
+
+protein_matrix <- assay(scp[["proteins"]])
+protein_matrix <- CONSTANd(protein_matrix)
+
+sce <- getWithColData(scp, "proteins")
+
+scp <- addAssay(scp,
+                y = sce,
+                name = "proteins_norm")
+
+scp <- addAssayLinkOneToOne(scp,
+                            from = "proteins",
+                            to = "proteins_norm")
+
+assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 
 # missing value imputation
 
 # show missing values
-scp[["proteins_norm"]] %>%
+scp[["proteins"]] %>%
   assay %>%
   is.na %>%
   mean
@@ -269,26 +316,26 @@ scp[["proteins_norm"]] %>%
 
 # use knn to impute missing values
 
-scp <- impute(scp,
-              i = "proteins_norm",
-              name = "proteins_imptd",
-              method = "knn",
-              k = 3, rowmax = 1, colmax= 1,
-              maxp = Inf, rng.seed = 1234)
+# scp <- impute(scp,
+#               i = "proteins_norm",
+#               name = "proteins_imptd",
+#               method = "knn",
+#               k = 3, rowmax = 1, colmax= 1,
+#               maxp = Inf, rng.seed = 1234)
 
 # show missing values again
-scp[["proteins_imptd"]] %>%
-  assay %>%
-  is.na %>%
-  mean
+# scp[["proteins_imptd"]] %>%
+#   assay %>%
+#   is.na %>%
+#   mean
 
 # batch correction
 # upon multiple runs
 
- sce <- getWithColData(scp, "proteins_norm")
-
- batch <- colData(sce)$Raw.file
- model <- model.matrix(~ SampleType, data = colData(sce))
+sce <- getWithColData(scp, "proteins_norm")
+# 
+#  batch <- colData(sce)$Raw.file
+#  model <- model.matrix(~ SampleType, data = colData(sce))
  # library(sva)
  # assay(sce) <- ComBat(dat = assay(sce),
  #                      batch = batch,

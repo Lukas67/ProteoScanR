@@ -6,7 +6,7 @@ library("dplyr")
 library("reshape2")
 library(scater)
 library(limma)
-
+library(CONSTANd)
 
 reactlog::reactlog_enable()
 
@@ -40,6 +40,8 @@ ui <- fluidPage(
       
       # remove peptides with missing data
       numericInput("pNA", "Input percentage threshold for peptide data", 0.99 , min = 0, max=1, step = 0.01),
+      # normalization method 
+      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
       
       # choose log transform base
       selectInput("transform_base", "Choose log base for peptide data transformation", choices = c("2", "10"))
@@ -171,66 +173,106 @@ server <- function(input, output, session) {
       req(input$MedCV_thresh)
       scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
       
-      incProgress(11/17, detail=paste("normalizing peptide data"))
-      # divide column by median
-      scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
-      #divide rows my mean
-      scp_0 <-normalizeSCP(scp_0, 3, name="peptides_norm", method = "div.mean")
+      # incProgress(11/17, detail=paste("normalizing peptide data"))
+      # # divide column by median
+      # scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
+      # #divide rows my mean
+      # scp_0 <-normalizeSCP(scp_0, 3, name="peptides_norm", method = "div.mean")
       
       
       incProgress(12/17, detail=paste("remove peptides with high missing rate"))
       req(input$pNA)
       scp_0 <- filterNA(scp_0,
-                        i = "peptides_norm",
+                        i = peptides, #_norm",
                         pNA = input$pNA)
       
       
-      incProgress(13/17, detail=paste("log-transforming peptide data")) 
-      req(input$transform_base)
-      scp_0 <- logTransform(scp_0,
-                            base = as.integer(input$transform_base),
-                            i = "peptides_norm",
-                            name = "peptides_log")
+      # incProgress(13/17, detail=paste("log-transforming peptide data")) 
+      # req(input$transform_base)
+      # scp_0 <- logTransform(scp_0,
+      #                       base = as.integer(input$transform_base),
+      #                       i = "peptides_norm",
+      #                       name = "peptides_log")
       
       incProgress(14/17, detail=paste("aggregate peptides to proteins"))
       scp_0 <- aggregateFeatures(scp_0,
-                                 i = "peptides_log",
+                                 i = peptides, #_log",
                                  name = "proteins",
                                  fcol = "Leading.razor.protein",
                                  fun = matrixStats::colMedians, na.rm = TRUE)
       
       incProgress(15/17, detail=paste("normalizing proteins"))
-      scp_0 <- sweep(scp_0, i = "proteins",
-                     MARGIN = 2,
-                     FUN = "-",
-                     STATS = colMedians(assay(scp_0[["proteins"]]),
+      req(input$norm_method)
+      if (input$norm_method == "SCoPE2") {
+        # center cols with median
+        scp_0 <- sweep(scp_0, i = "proteins",
+                       MARGIN = 2,
+                       FUN = "-",
+                       STATS = colMedians(assay(scp_0[["proteins"]]),
+                                          na.rm = TRUE),
+                       name = "proteins_norm_col")
+  
+        # Center rows with mean
+        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
+                       MARGIN = 1,
+                       FUN = "-",
+                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
                                         na.rm = TRUE),
-                     name = "proteins_norm_col")
-      
-      # Center rows with mean
-      scp_0 <- sweep(scp_0, i = "proteins_norm_col",
-                     MARGIN = 1,
-                     FUN = "-",
-                     STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
-                                      na.rm = TRUE),
-                     name = "proteins_norm")
-      
-      
-      sce <- getWithColData(scp_0, "proteins_norm")
-      
-      batch <- colData(sce)$Raw.file
-      model <- model.matrix(~ SampleType, data = colData(sce))
-      
-      scp_0 <- addAssay(scp_0,
+                       name = "proteins_norm")
+        
+        sce <- getWithColData(scp_0, "proteins_norm")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_dim_red")
+        
+        
+      }
+      else if (input$norm_method == "None") {
+        # apply nothing and return the original data as new object
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins",
+                                      to = "proteins_dim_red")
+        
+      }
+      else if (input$norm_method == "CONSTANd") {
+        # apply matrix raking --> row means and col means equal Nrows and Ncols  
+        protein_matrix <- assay(scp_0[["proteins"]])
+        protein_matrix <- CONSTANd(protein_matrix)
+        
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
                         y = sce,
-                        name = "proteins_dim_red")
-      
-      scp_0 <- addAssayLinkOneToOne(scp_0,
-                                    from = "proteins_norm",
-                                    to = "proteins_dim_red")
-      
-      
-      
+                        name = "proteins_norm")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                    from = "proteins",
+                                    to = "proteins_norm")
+        
+        assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
+        
+        sce <- getWithColData(scp_0, "proteins_norm")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_dim_red")
+        
+      }
       
       incProgress(16/17, detail=paste("running dimensionality reduction"))
       
@@ -332,6 +374,8 @@ server <- function(input, output, session) {
   # initial qq counter for the first plot 
   qq_count <- reactiveVal(1)
   
+  # trigger for the CONSTANd dependency MA plot
+  CONSTANd_trigger <- reactive(list(input$update_button, input$norm_method))
   ### graphical outputs and user interface
   
   ## reactive events and observers
@@ -466,6 +510,11 @@ server <- function(input, output, session) {
     qq_count(j)
   })  
   
+  # observeEvent(CONSTANd_trigger(), {
+  #   if (CONSTANd_trigger()[2] == "CONSTANd") {
+  #     showModal(CONSTANdModal)
+  #   }
+  # })
   ## Plots 
   # pathway of the data first tab
   output$overview_plot <- renderPlot({
@@ -633,11 +682,19 @@ server <- function(input, output, session) {
     qqline(exp_matrix_0[[sample_types[i]]])
   })
   
+  # plot hist for linear model
   output$hist <- renderPlot({
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
     i <- qq_count()
     hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
+  })
+  
+  # plot MA plot for the constand method
+  
+  output$MAplot <- renderPlot({
+    scp_0 <- scp()
+    plot(scp_0)
   })
   
   # create interface for the qqmodal dialog
@@ -647,6 +704,15 @@ server <- function(input, output, session) {
       actionButton("next_plot", "Show next"),
       plotOutput("qqPlot"),
       plotOutput("hist"),
+      footer = tagList(
+        modalButton("Dismiss")
+      )
+    )
+  }
+  
+  CONSTANdModal <- function() {
+    modalDialog(
+      plotOutput("MAPlot"),
       footer = tagList(
         modalButton("Dismiss")
       )
