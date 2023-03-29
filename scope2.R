@@ -281,7 +281,23 @@ MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
   if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
 }
 
-MAplot(assay(scp[["proteins_norm"]])[,1:6], assay(scp[["proteins_norm"]])[,7:12])
+MAplot(assay(scp[["proteins"]])[,1:6], assay(scp[["proteins"]])[,7:12])
+
+#find all pairwise indeces
+st_indeces <- split(seq_along(scp$SampleType), scp$SampleType)
+
+comp_list <- apply(combn(unique(scp$SampleType),2),2,paste, collapse="-")
+
+index_combis <- apply(combn(st_indeces,2),2,paste)
+
+user_choice <- comp_list[1]
+user_choice_vector <- strsplit(user_choice, split = "-")
+choice_A <- user_choice_vector[[1]][1]
+choice_B <- user_choice_vector[[1]][2]
+index_A <- st_indeces[choice_A]
+index_B <- st_indeces[choice_B]
+
+MAplot(assay(scp[["proteins"]][,index_A[[1]]]), assay(scp[["proteins"]][,index_B[[1]]]))
 
 protein_matrix <- assay(scp[["proteins"]])
 protein_matrix <- CONSTANd(protein_matrix)

@@ -509,12 +509,26 @@ server <- function(input, output, session) {
     
     qq_count(j)
   })  
+
+  # observer for the CONSTANd normalization dependency to check before analysis
+  observeEvent(ignoreInit=TRUE, CONSTANd_trigger(), {
+    if (CONSTANd_trigger()[2] == "CONSTANd" && CONSTANd_trigger()[1] >= 0) {
+      showModal(CONSTANdModal())
+    }
+  })
   
-  # observeEvent(CONSTANd_trigger(), {
-  #   if (CONSTANd_trigger()[2] == "CONSTANd") {
-  #     showModal(CONSTANdModal)
-  #   }
-  # })
+  # observer for comparison between sample types
+  observe({
+    updateSelectInput(session, "selectedComp", choices = comp_list())
+  })
+  
+  # reactive element for the comp list --> update if the scp object changes
+  comp_list <- reactive({
+    scp_0 <- scp()
+    list <- apply(combn(unique(scp_0$SampleType),2),2,paste, collapse="-")
+    return(list)
+  })
+  
   ## Plots 
   # pathway of the data first tab
   output$overview_plot <- renderPlot({
@@ -693,10 +707,44 @@ server <- function(input, output, session) {
   # plot MA plot for the constand method
   
   output$MAplot <- renderPlot({
-    scp_0 <- scp()
-    plot(scp_0)
+    user_choice <- input$selectedComp
+    
+    # split user choice of comp back to sample types
+    user_choice_vector <- strsplit(user_choice, split = "-")
+    # and assign them to a variable
+    choice_A <- user_choice_vector[[1]][1]
+    choice_B <- user_choice_vector[[1]][2]
+    
+    #find the row indeces of corresponding to the individual sample types
+    st_indeces <- split(seq_along(scp()$SampleType), scp()$SampleType)
+    index_A <- st_indeces[choice_A]
+    index_B <- st_indeces[choice_B]
+    
+    MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
+      # make an MA plot of y vs. x that shows the rolling average,
+      M <- log2(y/x)
+      xlab = 'A'
+      if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
+      A <- (log2(y/r)+log2(x/r))/2
+      if (use.order) {
+        orig.order <- order(A)
+        A <- orig.order
+        M <- M[orig.order]
+        xlab = "original rank of feature magnitude within IPS"
+      }
+      # select only finite values
+      use <- is.finite(M)
+      A <- A[use]
+      M <- M[use]
+      # plot
+      print(var(M))
+      plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
+      # rolling average
+      if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
+    }
+    MAplot(assay(scp()[["proteins"]][,index_A[[1]]]), assay(scp()[["proteins"]][,index_B[[1]]]))
   })
-  
+
   # create interface for the qqmodal dialog
   qqModal <- function() {
     modalDialog(
@@ -712,7 +760,20 @@ server <- function(input, output, session) {
   
   CONSTANdModal <- function() {
     modalDialog(
-      plotOutput("MAPlot"),
+      selectInput("selectedComp", "Choose comparison for observation", ""),
+      plotOutput("MAplot"),
+      HTML(paste("
+        <h2> Data assumptions </h2>
+        <p>To warrant that the normalization procedure itself is not biased, three assumptions about the data are made (as for any type of data-driven normalization method) which may be verified by making MA-plots.
+        <ul>
+        <li><strong>The majority of features (peptides/genes/…) are not differentially expressed</strong>, to avoid a bias in the estimate of the mean value. It is assumed that up-down shifts are not due to biological causes. The reference set used in the normalization step is the set of all peptides identified in the experiment.<br>
+        <em>MA-plot: the observations form a single ‘cloud’ with a dense center and less dense edges, as opposed to, for instance, two clouds or a cloud with uniform density</em>.</li>
+        <li><strong>The number of up-regulated features is roughly equal to the number of down-regulated ones</strong>. If the data were skewed, this would lead to a bias in the normalization result.<br>
+        <em>MA-plot: the cloud of observations exhibits a bilateral symmetry about some axis (usually horizontal, but inclinations may occur)</em>.</li>
+        <li><strong>Any systematic bias present is linearly proportional to the magnitude of the quantification values</strong>. Only this way it is possible to find one appropriate normalization factor for each quantification sample.<br>
+        <em>MA-plot: the axis of bilateral symmetry is a straight line (which may be inclined), i.e., the moving average M-values of the central cloud form an approximately <strong>straight</strong> line</em>.</li>
+        </ul>
+      ")),
       footer = tagList(
         modalButton("Dismiss")
       )
