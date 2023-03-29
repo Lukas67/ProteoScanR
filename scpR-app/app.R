@@ -512,7 +512,8 @@ server <- function(input, output, session) {
 
   # observer for the CONSTANd normalization dependency to check before analysis
   observeEvent(ignoreInit=TRUE, CONSTANd_trigger(), {
-    if (CONSTANd_trigger()[2] == "CONSTANd" && CONSTANd_trigger()[1] >= 0) {
+    if (CONSTANd_trigger()[2] == "CONSTANd" && !is.null(comp_list())){
+      validate(need(input$update_button > 0, ''))
       showModal(CONSTANdModal())
     }
   })
@@ -707,8 +708,8 @@ server <- function(input, output, session) {
   # plot MA plot for the constand method
   
   output$MAplot <- renderPlot({
+    req(input$selectedComp)
     user_choice <- input$selectedComp
-    
     # split user choice of comp back to sample types
     user_choice_vector <- strsplit(user_choice, split = "-")
     # and assign them to a variable
@@ -745,6 +746,8 @@ server <- function(input, output, session) {
     MAplot(assay(scp()[["proteins"]][,index_A[[1]]]), assay(scp()[["proteins"]][,index_B[[1]]]))
   })
 
+  
+  
   # create interface for the qqmodal dialog
   qqModal <- function() {
     modalDialog(
