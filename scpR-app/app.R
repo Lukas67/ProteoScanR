@@ -40,11 +40,11 @@ ui <- fluidPage(
       
       # remove peptides with missing data
       numericInput("pNA", "Input percentage threshold for peptide data", 0.99 , min = 0, max=1, step = 0.01),
-      # normalization method 
-      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
-      
       # choose log transform base
-      selectInput("transform_base", "Choose log base for peptide data transformation", choices = c("2", "10"))
+      selectInput("transform_base", "Choose log base for protein data transformation", choices = c("2", "10")),
+      # normalization method 
+      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd"))
+      
     ),
     
     # Main Panel for the output
@@ -187,28 +187,30 @@ server <- function(input, output, session) {
                         pNA = input$pNA)
       
       
-      # incProgress(13/17, detail=paste("log-transforming peptide data")) 
-      # req(input$transform_base)
-      # scp_0 <- logTransform(scp_0,
-      #                       base = as.integer(input$transform_base),
-      #                       i = "peptides_norm",
-      #                       name = "peptides_log")
       
-      incProgress(14/17, detail=paste("aggregate peptides to proteins"))
+      incProgress(13/17, detail=paste("aggregate peptides to proteins"))
       scp_0 <- aggregateFeatures(scp_0,
                                  i = peptides, #_log",
                                  name = "proteins",
                                  fcol = "Leading.razor.protein",
                                  fun = matrixStats::colMedians, na.rm = TRUE)
+
+      incProgress(14/17, detail=paste("log-transforming protein data"))
+      req(input$transform_base)
+      scp_0 <- logTransform(scp_0,
+                            base = as.integer(input$transform_base),
+                            i = "proteins",
+                            name = "proteins_transf")
       
+            
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
       if (input$norm_method == "SCoPE2") {
         # center cols with median
-        scp_0 <- sweep(scp_0, i = "proteins",
+        scp_0 <- sweep(scp_0, i = "proteins_transf",
                        MARGIN = 2,
                        FUN = "-",
-                       STATS = colMedians(assay(scp_0[["proteins"]]),
+                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
                                           na.rm = TRUE),
                        name = "proteins_norm_col")
   
@@ -234,30 +236,30 @@ server <- function(input, output, session) {
       }
       else if (input$norm_method == "None") {
         # apply nothing and return the original data as new object
-        sce <- getWithColData(scp_0, "proteins")
+        sce <- getWithColData(scp_0, "proteins_transf")
         
         scp_0 <- addAssay(scp_0,
                           y = sce,
                           name = "proteins_dim_red")
         
         scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins",
+                                      from = "proteins_transf",
                                       to = "proteins_dim_red")
         
       }
       else if (input$norm_method == "CONSTANd") {
         # apply matrix raking --> row means and col means equal Nrows and Ncols  
-        protein_matrix <- assay(scp_0[["proteins"]])
+        protein_matrix <- assay(scp_0[["proteins_transf"]])
         protein_matrix <- CONSTANd(protein_matrix)
         
-        sce <- getWithColData(scp_0, "proteins")
+        sce <- getWithColData(scp_0, "proteins_transf")
         
         scp_0 <- addAssay(scp_0,
                         y = sce,
                         name = "proteins_norm")
         
         scp_0 <- addAssayLinkOneToOne(scp_0,
-                                    from = "proteins",
+                                    from = "proteins_transf",
                                     to = "proteins_norm")
         
         assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
@@ -743,7 +745,7 @@ server <- function(input, output, session) {
       # rolling average
       if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
     }
-    MAplot(assay(scp()[["proteins"]][,index_A[[1]]]), assay(scp()[["proteins"]][,index_B[[1]]]))
+    MAplot(assay(scp()[["proteins_transf"]][,index_A[[1]]]), assay(scp()[["proteins_transf"]][,index_B[[1]]]))
   })
 
   
