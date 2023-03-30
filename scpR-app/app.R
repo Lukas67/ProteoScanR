@@ -41,7 +41,7 @@ ui <- fluidPage(
       # remove peptides with missing data
       numericInput("pNA", "Input percentage threshold for peptide data", 0.99 , min = 0, max=1, step = 0.01),
       # choose log transform base
-      selectInput("transform_base", "Choose log base for protein data transformation", choices = c("2", "10")),
+      selectInput("transform_base", "Choose method for protein data transformation", choices = c("log2", "log10", "sqrt", "quadratic", "BoxCox", "None")),
       # normalization method 
       selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd"))
       
@@ -195,14 +195,51 @@ server <- function(input, output, session) {
                                  fcol = "Leading.razor.protein",
                                  fun = matrixStats::colMedians, na.rm = TRUE)
 
-      incProgress(14/17, detail=paste("log-transforming protein data"))
+      incProgress(14/17, detail=paste("transforming protein data"))
       req(input$transform_base)
-      scp_0 <- logTransform(scp_0,
-                            base = as.integer(input$transform_base),
-                            i = "proteins",
-                            name = "proteins_transf")
       
-            
+      if (input$transform_base == "log2") {
+        scp_0 <- logTransform(scp_0,
+                              base = 2,
+                              i = "proteins",
+                              name = "proteins_transf")
+      }
+      else if (input$transform_base == "log10") {
+        scp_0 <- logTransform(scp_0,
+                              base = 10,
+                              i = "proteins",
+                              name = "proteins_transf")
+      }
+      else if (input$transform_base == "sqrt") {
+        scp_0 <- sweep(scp_0, i="proteins",
+                     MARGIN = 2,
+                     FUN="^",
+                     STATS=1/2,
+                     name="proteins_transf")
+        
+      }
+      else if (input$transform_base == "quadratic") {
+        scp_0 <- sweep(scp_0, i="proteins",
+                       MARGIN = 2,
+                       FUN="^",
+                       STATS=2,
+                       name="proteins_transf")
+      }  
+      else if (input$transform_base == "BoxCox") {
+        
+      }
+      else if (input$transform_base == "None") {
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_transf")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins",
+                                      to = "proteins_transf")        
+      }
+          
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
       if (input$norm_method == "SCoPE2") {

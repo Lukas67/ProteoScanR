@@ -15,6 +15,7 @@ library("ggplot2")
 library("magrittr")
 library("dplyr")
 library("CONSTANd")
+library("MASS")
 
 
 # read in MS result table
@@ -233,6 +234,58 @@ scp <- aggregateFeatures(scp,
                          fcol = "Leading.razor.protein",
                          fun = matrixStats::colMedians, na.rm = TRUE)
 
+#log-transform
+# scp <- logTransform(scp,
+#                     base = 2,
+#                     i = "proteins",
+#                     name = "proteins_transf")
+
+# box cox transf
+
+
+
+protein_matrix <- assay(scp[["proteins"]])
+
+b <- boxcox(lm(protein_matrix ~ 1))
+
+# Exact lambda
+lambda <- b$x[which.max(b$y)]
+
+
+if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
+  protein_matrix <- 1/protein_matrix**2
+}
+if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
+  protein_matrix <- 1/protein_matrix
+}
+if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
+  protein_matrix <- 1/protein_matrix**2
+}
+if (round(lambda, digits = 1) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
+  protein_matrix <- log(protein_matrix)
+}
+if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
+  protein_matrix <- protein_matrix**1/2
+}
+if (round(lambda, digits = 1) == 1 || lambda > 0.75 && lamdba < 1.5) {
+  protein_matrix <- protein_matrix
+}
+if (round(lambda, digits = 1) == 2 || lambda > 1.5) {
+  protein_matrix <- protein_matrix**2
+}
+
+
+sce <- getWithColData(scp, "proteins")
+
+scp <- addAssay(scp,
+                y = sce,
+                name = "proteins_transf")
+
+scp <- addAssayLinkOneToOne(scp,
+                            from = "proteins",
+                            to = "proteins_transf")
+
+assay(scp[["proteins_transf"]]) <- protein_matrix
 
 # normalization of protein data
 
@@ -281,7 +334,7 @@ MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
   if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
 }
 
-MAplot(assay(scp[["proteins"]])[,1:6], assay(scp[["proteins"]])[,7:12])
+MAplot(assay(scp[["proteins_transf"]])[,1:6], assay(scp[["proteins_transf"]])[,7:12])
 
 #find all pairwise indeces
 st_indeces <- split(seq_along(scp$SampleType), scp$SampleType)
@@ -297,9 +350,9 @@ choice_B <- user_choice_vector[[1]][2]
 index_A <- st_indeces[choice_A]
 index_B <- st_indeces[choice_B]
 
-MAplot(assay(scp[["proteins"]][,index_A[[1]]]), assay(scp[["proteins"]][,index_B[[1]]]))
+MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
 
-protein_matrix <- assay(scp[["proteins"]])
+protein_matrix <- assay(scp[["proteins_transf"]])
 protein_matrix <- CONSTANd(protein_matrix)
 
 sce <- getWithColData(scp, "proteins")
