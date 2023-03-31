@@ -254,24 +254,31 @@ lambda <- b$x[which.max(b$y)]
 
 if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
   protein_matrix <- 1/protein_matrix**2
+  print("1/protein_matrix**2")
 }
 if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
   protein_matrix <- 1/protein_matrix
+  print("1/protein_matrix")
 }
 if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
   protein_matrix <- 1/protein_matrix**2
+  print("1/protein_matrix**2")
 }
-if (round(lambda, digits = 1) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
-  protein_matrix <- log(protein_matrix)
+if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
+  protein_matrix <- log10(protein_matrix)
+  print("log10(protein_matrix)")
 }
 if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
   protein_matrix <- protein_matrix**1/2
+  print("protein_matrix**1/2")
 }
-if (round(lambda, digits = 1) == 1 || lambda > 0.75 && lamdba < 1.5) {
+if (round(lambda, digits = 0) == 1 || lambda > 0.75 && lamdba < 1.5) {
   protein_matrix <- protein_matrix
+  print("protein_matrix")
 }
-if (round(lambda, digits = 1) == 2 || lambda > 1.5) {
+if (round(lambda, digits = 0) == 2 || lambda > 1.5) {
   protein_matrix <- protein_matrix**2
+  print("protein_matrix**2")
 }
 
 
@@ -370,7 +377,7 @@ assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 # missing value imputation
 
 # show missing values
-scp[["proteins"]] %>%
+scp[["proteins_transf"]] %>%
   assay %>%
   is.na %>%
   mean
@@ -401,7 +408,7 @@ scp[["proteins"]] %>%
 # batch correction
 # upon multiple runs
 
-sce <- getWithColData(scp, "proteins_norm")
+sce <- getWithColData(scp, "proteins_transf")
 # 
 #  batch <- colData(sce)$Raw.file
 #  model <- model.matrix(~ SampleType, data = colData(sce))
@@ -416,7 +423,7 @@ sce <- getWithColData(scp, "proteins_norm")
                  name = "proteins_final")
 
  scp <- addAssayLinkOneToOne(scp,
-                             from = "proteins_norm",
+                             from = "proteins_transf",
                              to = "proteins_final")
 
 

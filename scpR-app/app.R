@@ -7,6 +7,7 @@ library("reshape2")
 library(scater)
 library(limma)
 library(CONSTANd)
+library("MASS")
 
 reactlog::reactlog_enable()
 
@@ -114,7 +115,6 @@ server <- function(input, output, session) {
       scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
       
       req(input$PIF_cutoff)
-      
       # apply first filter
       incProgress(3/17, detail = paste("filter contaminants and PIF"))
       scp_0 <- filterFeatures(scp_0,
@@ -122,13 +122,13 @@ server <- function(input, output, session) {
                                 Potential.contaminant != "+" &
                                 !is.na(PIF) & PIF > input$PIF_cutoff)
       
-      
       # compute qvalues_PSMs to filter out by FDR
       incProgress(4/17, detail=paste("calculate q-value for PSMs"))
       scp_0 <- pep2qvalue(scp_0,
                           i = 1:length(rowDataNames(scp_0)),
                           PEP = "PEP", # by reference the dart_PEP value is used
                           rowDataName = "qvalue_PSMs")
+      
       incProgress(5/17, detail=paste("calculate q value for proteins"))
       scp_0 <- pep2qvalue(scp_0,
                           i = 1:length(rowDataNames(scp_0)),
@@ -139,7 +139,6 @@ server <- function(input, output, session) {
       req(input$qvalue_cutoff)
       incProgress(6/17, detail=paste("filter according to q-value"))
       scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < input$qvalue_cutoff)
-      
       
       # aggregate PSMS to peptides
       incProgress(7/17, detail=paste("aggregating features"))
@@ -172,7 +171,6 @@ server <- function(input, output, session) {
       incProgress(10/17, detail=paste("filtering according to covariance"))
       req(input$MedCV_thresh)
       scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
-      
       # incProgress(11/17, detail=paste("normalizing peptide data"))
       # # divide column by median
       # scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
@@ -187,7 +185,6 @@ server <- function(input, output, session) {
                         pNA = input$pNA)
       
       
-      
       incProgress(13/17, detail=paste("aggregate peptides to proteins"))
       scp_0 <- aggregateFeatures(scp_0,
                                  i = peptides, #_log",
@@ -197,7 +194,6 @@ server <- function(input, output, session) {
 
       incProgress(14/17, detail=paste("transforming protein data"))
       req(input$transform_base)
-      
       if (input$transform_base == "log2") {
         scp_0 <- logTransform(scp_0,
                               base = 2,
@@ -226,7 +222,54 @@ server <- function(input, output, session) {
                        name="proteins_transf")
       }  
       else if (input$transform_base == "BoxCox") {
+        protein_matrix <- assay(scp_0[["proteins"]])
         
+        b <- boxcox(lm(protein_matrix ~ 1))
+        
+        # Exact lambda
+        lambda <- b$x[which.max(b$y)]
+        
+        
+        if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
+          protein_matrix <- 1/protein_matrix**2
+          print("1/protein_matrix**2")
+        }
+        if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
+          protein_matrix <- 1/protein_matrix
+          print("1/protein_matrix")
+        }
+        if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
+          protein_matrix <- 1/protein_matrix**2
+          print("1/protein_matrix**2")
+        }
+        if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
+          protein_matrix <- log10(protein_matrix)
+          print("log10(protein_matrix)")
+        }
+        if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
+          protein_matrix <- protein_matrix**1/2
+          print("protein_matrix**1/2")
+        }
+        if (round(lambda, digits = 0) == 1 || lambda > 0.75 && lamdba < 1.5) {
+          protein_matrix <- protein_matrix
+          print("protein_matrix")
+        }
+        if (round(lambda, digits = 0) == 2 || lambda > 1.5) {
+          protein_matrix <- protein_matrix**2
+          print("protein_matrix**2")
+        }        
+        
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
+                        y = sce,
+                        name = "proteins_transf")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                    from = "proteins",
+                                    to = "proteins_transf")
+        
+        assay(scp_0[["proteins_transf"]]) <- protein_matrix
       }
       else if (input$transform_base == "None") {
         sce <- getWithColData(scp_0, "proteins")
@@ -239,7 +282,7 @@ server <- function(input, output, session) {
                                       from = "proteins",
                                       to = "proteins_transf")        
       }
-          
+      
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
       if (input$norm_method == "SCoPE2") {
@@ -486,14 +529,21 @@ server <- function(input, output, session) {
   
   # observer for protein list
   observe({
+    req(protein_list())
     updateSelectInput(session, "selectedProtein", choices = protein_list())
   })
   
   # reactive element for the protein list --> update if the scp object changes
   protein_list <- reactive({
-    scp_0 <- scp()
-    list <- rowData(scp_0)[["proteins"]][,1]
-    return(list)
+    req(scp())
+    req(scp()[["proteins"]])
+    if (!is.na(scp()[["proteins"]])) {
+      scp_0 <- scp()
+      list <- rowData(scp_0)[["proteins"]][,1]
+      return(list)
+    } else {
+      return(NULL)
+    }
   })
   
   # reactive element for hover function of volcano plot
