@@ -9,16 +9,16 @@ design_matrix <- read.delim("/home/lukas/Downloads/Design.txt")
 exp_matrix[,-1] <- log10(exp_matrix[,-1]) 
 
 # #normalize colwise
-# exp_matrix_norm <- sweep(exp_matrix[,-1], 2, colSums(exp_matrix[,-1]), FUN="-")
+exp_matrix_norm <- sweep(exp_matrix[,-1], 2, colSums(exp_matrix[,-1]), FUN="-")
 # #normalize rowwise
-# exp_matrix_norm <- sweep(exp_matrix[,-1], 1, rowSums(exp_matrix[,-1]), FUN="-")
-# 
+exp_matrix_norm <- sweep(exp_matrix[,-1], 1, rowSums(exp_matrix[,-1]), FUN="-")
+ 
 library('corrr')
 library(ggcorrplot)
 library("FactoMineR")
 library(factoextra)
 
-corr_matrix <- cor(exp_matrix[,-1])
+corr_matrix <- cor(exp_matrix_norm[,-1])
 ggcorrplot(corr_matrix)
 
 # in this case a correlation within the batches can be clearly observed 
@@ -60,7 +60,7 @@ boxplot(as.data.frame(combat_edata1),main="Batch corrected with Combat", ylim=c(
 # Perform differential expression analysis between each of the two groups
 
 # drop pool columns
-exp_matrix_de <- data.frame(combat_edata1) %>% select(-starts_with('Control'))
+exp_matrix_de <- data.frame(combat_edata1) %>% dplyr::select(-starts_with('Control'))
 exp_matrix_de <- as.matrix(exp_matrix_de)
 rownames(exp_matrix_de) <- (exp_matrix$ID)
 
@@ -117,8 +117,8 @@ summary(result_3)
 
 # perform paired group-wise analysis between EC and VP
 # exclude HC
-exp_matrix_de_paired <- data.frame(exp_matrix_de) %>% select(-starts_with('HC'))
-design_samples_paired <- design_samples %>%  filter(Group!='HC')
+exp_matrix_de_paired <- data.frame(exp_matrix_de) %>% dplyr::select(-starts_with('HC'))
+design_samples_paired <- design_samples %>%  dplyr::filter(Group!='HC')
 
 # define pairs --> assuming integers indicate pairs
 pairs <- factor(c(seq(1,9),seq(1,9)))
@@ -137,6 +137,15 @@ fit_2 <- eBayes(fit_2)
 topTable(fit_2, coef="groupVP")
 volcanoplot(fit_2, main="EC versus VP")
 
+
+
+fetched_factor <- design_samples_paired[c("Batch", "Gender")]
+
+factors <- lapply(fetched_factor, factor)
+
+factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+")
+
+paired_design <- model.matrix(~ factors$Batch + factors$Gender + group)
 
 
 

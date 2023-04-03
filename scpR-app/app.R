@@ -67,9 +67,10 @@ ui <- fluidPage(
                            textOutput("model_vars"),
                            selectInput("model_design", "Choose your study design",
                                        choices = c("All pairwise comparison",
-                                                   "Treatment versus Control",
-                                                   "Additivity using a twofactor model",
-                                                   "Interaction using a twofactor model")),
+                                                   "Differential Expression with defined Contrasts",
+                                                   "Multi factor additivity")),
+                           uiOutput("contrast"),
+                           uiOutput("add_factor"),
                            plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
@@ -392,61 +393,56 @@ server <- function(input, output, session) {
   # statistical pipeline
   stat_result <- eventReactive(input$run_statistics, {
     withProgress(message= "running statistical analysis", value=0, {
-      incProgress(1/5, detail=paste("read data"))
+      incProgress(1/4, detail=paste("read data"))
       scp_0 <- scp()
       
-      incProgress(2/5, detail=paste("reading expression matrix"))
+      incProgress(2/4, detail=paste("reading expression matrix"))
       exp_matrix_0 <- exp_matrix()
-      
-      factorize_var <- function(i_vector) {
-        fact_vect <- factor(i_vector)
-        levels <- unique(fact_vect)
-        num_values <- seq_along(levels)
-        lookup_table <- data.frame(fact_vect = levels, num_var = num_values)
-        
-        num_var <- sapply(fact_vect, function(x) {
-          lookup_table$num_var[lookup_table$fact_vect == x]
-        })
-        
-        fact_vect <- factor(num_var)
-        return(fact_vect)
-      }
-      
-      factors_sample_type <- factorize_var(colnames(exp_matrix_0))
-      
-      
-      incProgress(3/5, detail=paste("creating design matrix"))
+
+      incProgress(3/4, detail=paste("creating linear model"))
       
       req(input$model_design)
-      
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
         # groupwise --> delete duplicates
-        design <- model.matrix(~ 0+factors_sample_type)
+        # design <- model.matrix(~ 0+factors_sample_type)
+        design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
+        fit <- lmFit(exp_matrix_0, design)
+        }
+      #Differential Expression with defined Contrasts
+      else if (input$model_design == "Differential Expression with defined Contrasts") {
+        req(input$selectedComp_stat)
+        
+        scp_0 <- scp_0[scp_0$SampleType %in%  input$selectedComp_stat, ]
+        
+        design <- model.matrix(~0+factor(scp_0$SampleType))
+        
+        colnames(design) <- unique(scp_0$SampleType)
+        
+        fit <- lmFit(exp_matrix_0, design)
+        
+        user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=design)
+        
+        fit <- contrasts.fit(fit, cont_matrix)
       }
-      # treatment versus control
-      else if (input$model_design == "Treatment versus Control") {
-        design <- model.matrix(~factors_sample_type)
-        colnames(design) <- c("Intercept", unique(scp_0$SampleType)[-1])
+      else if (input$model_design == "Multi factor additivity") {
+        req(input$col_factors)
+        req(input$selectedComp_stat)
+        
+        scp_0 <- scp_0[scp_0$SampleType %in%  input$selectedComp_stat, ]
+        
+        fetched_factor <- colData(scp_0)[[input$col_factors]]
+  
+        factors <- lapply(fetched_factor, factor)
+
+        factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+")        
+        design <- model.matrix(~factor_character + factor(scp_0$SampleType))
+        fit <- lmFit(exp_matrix_0, design)
       }
-      else if (input$model_design == "Additivity using a twofactor model") {
-        factors_user_choice <- factorize_var(model_vals$factor_vector)
-        design <- model.matrix(~factors_sample_type + factors_user_choice)
-        user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
-        colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
-      }
-      else if (input$model_design == "Interaction using a twofactor model") {
-        factors_user_choice <- factorize_var(model_vals$factor_vector)
-        design <- model.matrix(~factors_sample_type * factors_user_choice)
-        # user_colnames <- sprintf(paste(as.character(model_vals$vector_name),"[%s]"), seq(2:length(unique(factors_user_choice)))+1)
-        # colnames(design) <- c(unique(scp_0$SampleType), user_colnames)
-      }
-      
-      
-      incProgress(4/5, detail=paste("Fit the expression matrix to a linear model"))
-      fit <- lmFit(exp_matrix_0, design)
-      incProgress(5/5, detail=paste("Bayes statistics of differential expression"))
+
+      incProgress(4/4, detail=paste("Bayes statistics of differential expression"))
       # *There are several options to tweak!*
       fit <- eBayes(fit)
     })
@@ -537,13 +533,9 @@ server <- function(input, output, session) {
   protein_list <- reactive({
     req(scp())
     req(scp()[["proteins"]])
-    if (!is.na(scp()[["proteins"]])) {
-      scp_0 <- scp()
-      list <- rowData(scp_0)[["proteins"]][,1]
-      return(list)
-    } else {
-      return(NULL)
-    }
+    scp_0 <- scp()
+    list <- rowData(scp_0)[["proteins"]][,1]
+    return(list)
   })
   
   # reactive element for hover function of volcano plot
@@ -563,7 +555,6 @@ server <- function(input, output, session) {
   observeEvent(input$qqplot, {
     showModal(qqModal())
   })
-  
   
   # observer for the next button to increment the counter and show next qq
   observeEvent(input$next_plot, {
@@ -612,13 +603,37 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selectedComp", choices = comp_list())
   })
   
+  observe({
+    updateSelectInput(session, "selectedComp_stat", choices = sample_types())
+  })
+  
+  observe({
+    updateSelectInput(session, "col_factors", choices = columns())
+  })
+  
+  
+  
   # reactive element for the comp list --> update if the scp object changes
   comp_list <- reactive({
+    req(scp())
     scp_0 <- scp()
     list <- apply(combn(unique(scp_0$SampleType),2),2,paste, collapse="-")
     return(list)
   })
+
+  columns <- reactive({
+    req(scp())
+    scp_0 <- scp()
+    list <- colnames(colData(scp_0))
+    return(list)
+  })
   
+  sample_types <- reactive({
+    req(scp())
+    scp_0 <- scp()
+    list <- scp_0$SampleType
+    return(list)
+  })
   ## Plots 
   # pathway of the data first tab
   output$overview_plot <- renderPlot({
@@ -734,10 +749,6 @@ server <- function(input, output, session) {
     displayed_text()
   })
   
-  # cutoff for the p-adj, foldchange
-  # qlucor 
-  # contrasts 
-  
   # show significant proteins in the table
   output$protein_table <- renderTable({
     topTable(stat_result(), number = 10, adjust = "BH")
@@ -756,27 +767,6 @@ server <- function(input, output, session) {
   
   model_vals <- reactiveValues(data = NULL)
 
-  dataModal <- function(failed_1 = FALSE, failed_2=FALSE) {
-    modalDialog(
-      textInput("factor_vector", "Insert character or number vector in the length of your sample size (comma delim.)",
-                placeholder = 'Try "1,2,3,4,5,6,1,2,3..." or "C,C,T,T..."'
-      ),
-      span('(Try a valid vector like "1,2,3,4", ',
-           'then a non-valid vector like "abc-cde")'),
-      if (failed_1)
-        div(tags$b("Invalid vector!", style = "color: red;")),
-      
-      textInput("vector_name", "Insert name of your vector"),
-      if (failed_2)
-        div(tags$b("Name your vector!", style = "color: red;")),
-      
-      footer = tagList(
-        modalButton("Cancel"),
-        actionButton("ok", "OK") 
-      )
-    )
-  }
-  
   # plot the qq_count-th column
   output$qqPlot <- renderPlot({
     exp_matrix_0 <- exp_matrix()
@@ -795,7 +785,6 @@ server <- function(input, output, session) {
   })
   
   # plot MA plot for the constand method
-  
   output$MAplot <- renderPlot({
     req(input$selectedComp)
     user_choice <- input$selectedComp
@@ -835,7 +824,17 @@ server <- function(input, output, session) {
     MAplot(assay(scp()[["proteins_transf"]][,index_A[[1]]]), assay(scp()[["proteins_transf"]][,index_B[[1]]]))
   })
 
+  # additional ui for statistic module
+  output$contrast <- renderUI({
+    req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
+    selectInput("selectedComp_stat", "choose your contrasts of interest", "", multiple = T)
+  })
   
+  
+  output$add_factor <- renderUI({
+    req(input$model_design == "Multi factor additivity")
+    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
+  })
   
   # create interface for the qqmodal dialog
   qqModal <- function() {
@@ -850,6 +849,7 @@ server <- function(input, output, session) {
     )
   }
   
+  #create interface for the constand normalization method
   CONSTANdModal <- function() {
     modalDialog(
       selectInput("selectedComp", "Choose comparison for observation", ""),
@@ -872,35 +872,7 @@ server <- function(input, output, session) {
     )
   }
   
-  observeEvent(input$model_design, {
-    if (input$model_design == "Additivity using a twofactor model") {
-      showModal(dataModal())
-    }
-    else if (input$model_design == "Interaction using a twofactor model") {
-      showModal(dataModal())
-    }
-  })
-  
-  observeEvent(input$ok, {
-    factor_vect <- strsplit(input$factor_vector, ",\\s*")[[1]]
-    
-    if (!is.null(factor_vect) 
-        && is.vector(factor_vect) 
-        && length(factor_vect) == length(scp()$SampleType)) {
-      model_vals$factor_vector <- factor_vect
-      removeModal()
-    } else {
-      showModal(dataModal(failed_1 = TRUE))
-    }
-    
-    if (!is.null(input$vector_name)) {
-      model_vals$vector_name <- input$vector_name
-      removeModal()
-    } else {
-      showModal(dataModal(failed_2 = TRUE))
-    }
-  })
-  
+
   
 }
 

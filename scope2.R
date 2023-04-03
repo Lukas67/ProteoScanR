@@ -42,7 +42,6 @@ mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combine
 
 sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/sampleAnnotation_two_groups.txt")
 
-
 # create QFeature object
 scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
