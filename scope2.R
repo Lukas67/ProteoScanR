@@ -626,3 +626,32 @@ treat(fit, lfc=0, trend=FALSE, robust=FALSE, winsor.tail.p=c(0.05,0.1))
 # fit <- lmFit(exp_matrix ~ design)
 
 # in order to define 0 as the y intercept redefine design matrix
+
+
+# read the object
+scp_0 <- scp
+
+# fetch user input for contrasts
+selectedComp_stat <- c("Monocytes_A", "Monocytes_B")
+# update dataframe according to user selection
+scp_0 <- scp_0[, scp_0$SampleType %in%  selectedComp_stat]
+# update expression matrix according to user selection
+exp_matrix_0 <- assay(scp_0[["proteins_final"]])
+
+# fetch multiple factors for analysis
+user_choice <- c("Pair", "Technician")
+
+# fetch the metadata to factorize
+fetched_factor <- colData(scp_0)[user_choice]
+
+if (length(user_choice) < 2){
+  col_factors <- factor(fetched_factor)
+  design <- model.matrix(~col_factors + factor(scp_0$SampleType))
+  colnames(design) <- c("Intercept", sprintf(paste(as.character(user_choice[1]),"[%s]"),seq(2:length(unique(col_factors)))+1), selectedComp_stat[-1])
+} else {
+  factors <- lapply(fetched_factor, factor)
+  factor_character <- paste0("factors$", names(fetched_factor), collapse = "+") 
+  design <- model.matrix(~ factor_character + factor(scp_0$SampleType))
+}
+
+fit <- lmFit(exp_matrix_0, design)

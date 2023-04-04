@@ -406,7 +406,7 @@ server <- function(input, output, session) {
     return(scp_0)
   })
   
-  # expression matrix is used by plot funcitons & stat pipeline
+  # expression matrix is used by plot functions
   exp_matrix <- reactive({
     scp_0 <- scp()
     exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
@@ -417,19 +417,14 @@ server <- function(input, output, session) {
   # statistical pipeline
   stat_result <- eventReactive(input$run_statistics, {
     withProgress(message= "running statistical analysis", value=0, {
-      incProgress(1/4, detail=paste("read data"))
+      incProgress(1/3, detail=paste("read data"))
       scp_0 <- scp()
       
-      incProgress(2/4, detail=paste("reading expression matrix"))
-      exp_matrix_0 <- exp_matrix()
-
-      incProgress(3/4, detail=paste("creating linear model"))
-      
+      incProgress(2/3, detail=paste("creating linear model"))
       req(input$model_design)
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
-        # groupwise --> delete duplicates
-        # design <- model.matrix(~ 0+factors_sample_type)
+        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
         fit <- lmFit(exp_matrix_0, design)
@@ -437,11 +432,9 @@ server <- function(input, output, session) {
       #Differential Expression with defined Contrasts
       else if (input$model_design == "Differential Expression with defined Contrasts") {
         req(input$selectedComp_stat)
-        
-        scp_0 <- scp_0[scp_0$SampleType %in%  input$selectedComp_stat, ]
-        
+        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
         design <- model.matrix(~0+factor(scp_0$SampleType))
-        
         colnames(design) <- unique(scp_0$SampleType)
         
         fit <- lmFit(exp_matrix_0, design)
@@ -455,15 +448,23 @@ server <- function(input, output, session) {
         req(input$col_factors)
         req(input$selectedComp_stat)
         
-        scp_0 <- scp_0[scp_0$SampleType %in%  input$selectedComp_stat, ]
-        
+        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
         fetched_factor <- colData(scp_0)[[input$col_factors]]
   
-        factors <- lapply(fetched_factor, factor)
-
-        factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+")        
-        design <- model.matrix(~factor_character + factor(scp_0$SampleType))
+        if (length(input$col_factors) < 2){
+          col_factors <- factor(fetched_factor)
+          design <- model.matrix(~col_factors + factor(scp_0$SampleType))
+          colnames(design) <- c("Intercept", sprintf(paste(as.character(input$col_factors[1]),"[%s]"),seq(2:length(unique(col_factors)))+1), input$selectedComp_stat[-1])
+        } else {
+          factors <- lapply(fetched_factor, factor)
+          factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+") 
+          design <- model.matrix(~factor_character + factor(scp_0$SampleType))
+        }
+        
         fit <- lmFit(exp_matrix_0, design)
+        
+        
       }
 
       incProgress(4/4, detail=paste("Bayes statistics of differential expression"))
