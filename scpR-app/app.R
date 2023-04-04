@@ -1,19 +1,19 @@
-library(shiny)
+library("shiny")
 library("scp")
 library("ggplot2")
 library("magrittr")
 library("dplyr")
 library("reshape2")
-library(scater)
-library(limma)
-library(CONSTANd)
+library("scater")
+library("limma")
+library("CONSTANd")
 library("MASS")
 
 reactlog::reactlog_enable()
 
 # Define UI for application that draws a histogram
 ui <- fluidPage(
-  
+  # useShinyjs(),
   # Application title
   titlePanel("Proteomics Workbench"),
   
@@ -80,6 +80,7 @@ ui <- fluidPage(
     )
   )
 )
+
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
@@ -172,13 +173,7 @@ server <- function(input, output, session) {
       incProgress(10/17, detail=paste("filtering according to covariance"))
       req(input$MedCV_thresh)
       scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
-      # incProgress(11/17, detail=paste("normalizing peptide data"))
-      # # divide column by median
-      # scp_0 <-normalizeSCP(scp_0, 2, name="peptides_norm_col", method = "div.median")
-      # #divide rows my mean
-      # scp_0 <-normalizeSCP(scp_0, 3, name="peptides_norm", method = "div.mean")
-      
-      
+
       incProgress(12/17, detail=paste("remove peptides with high missing rate"))
       req(input$pNA)
       scp_0 <- filterNA(scp_0,
@@ -223,13 +218,13 @@ server <- function(input, output, session) {
                        name="proteins_transf")
       }  
       else if (input$transform_base == "BoxCox") {
+        
         protein_matrix <- assay(scp_0[["proteins"]])
-        
-        b <- boxcox(lm(protein_matrix ~ 1))
-        
+        prot_lm <- lm(protein_matrix ~ 1)
+        b <- boxcox(prot_lm, plotit=F)
         # Exact lambda
         lambda <- b$x[which.max(b$y)]
-        
+
         
         if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
           protein_matrix <- 1/protein_matrix**2
@@ -286,7 +281,7 @@ server <- function(input, output, session) {
       
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
-      if (input$norm_method == "SCoPE2") {
+      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10") {
         # center cols with median
         scp_0 <- sweep(scp_0, i = "proteins_transf",
                        MARGIN = 2,
@@ -299,6 +294,35 @@ server <- function(input, output, session) {
         scp_0 <- sweep(scp_0, i = "proteins_norm_col",
                        MARGIN = 1,
                        FUN = "-",
+                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
+                                        na.rm = TRUE),
+                       name = "proteins_norm")
+        
+        sce <- getWithColData(scp_0, "proteins_norm")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_dim_red")
+        
+        
+      }
+      else if (input$norm_method == "SCoPE2" && input$transform_base != "log2" | input$transform_base != "log10") {
+        # center cols with median
+        scp_0 <- sweep(scp_0, i = "proteins_transf",
+                       MARGIN = 2,
+                       FUN = "/",
+                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
+                                          na.rm = TRUE),
+                       name = "proteins_norm_col")
+        
+        # Center rows with mean
+        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
+                       MARGIN = 1,
+                       FUN = "/",
                        STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
                                         na.rm = TRUE),
                        name = "proteins_norm")
@@ -599,15 +623,15 @@ server <- function(input, output, session) {
   })
   
   # observer for comparison between sample types
-  observe({
+  observeEvent(input$norm_method, {
     updateSelectInput(session, "selectedComp", choices = comp_list())
   })
   
-  observe({
+  observeEvent(input$model_design, {
     updateSelectInput(session, "selectedComp_stat", choices = sample_types())
   })
   
-  observe({
+  observeEvent(input$model_design, {
     updateSelectInput(session, "col_factors", choices = columns())
   })
   

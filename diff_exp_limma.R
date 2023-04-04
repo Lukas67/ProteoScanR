@@ -145,7 +145,7 @@ factors <- lapply(fetched_factor, factor)
 
 factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+")
 
-paired_design <- model.matrix(~ factors$Batch + factors$Gender + group)
+paired_design <- model.matrix(~factors$Gender + group)
 
 
 

@@ -245,7 +245,7 @@ scp <- aggregateFeatures(scp,
 
 protein_matrix <- assay(scp[["proteins"]])
 
-b <- boxcox(lm(protein_matrix ~ 1))
+b <- boxcox(lm(protein_matrix ~ 1), plotit=F)
 
 # Exact lambda
 lambda <- b$x[which.max(b$y)]
