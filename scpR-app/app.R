@@ -447,24 +447,18 @@ server <- function(input, output, session) {
       else if (input$model_design == "Multi factor additivity") {
         req(input$col_factors)
         req(input$selectedComp_stat)
-        
+
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
         exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
-        fetched_factor <- colData(scp_0)[[input$col_factors]]
-  
-        if (length(input$col_factors) < 2){
-          col_factors <- factor(fetched_factor)
-          design <- model.matrix(~col_factors + factor(scp_0$SampleType))
-          colnames(design) <- c("Intercept", sprintf(paste(as.character(input$col_factors[1]),"[%s]"),seq(2:length(unique(col_factors)))+1), input$selectedComp_stat[-1])
-        } else {
-          factors <- lapply(fetched_factor, factor)
-          factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+") 
-          design <- model.matrix(~factor_character + factor(scp_0$SampleType))
-        }
+        fetched_factor <- colData(scp_0)[input$col_factors]
+        print(fetched_factor)
+        
+        design_frame <- cbind(fetched_factor, scp_0$SampleType)
+        print(design_frame)
+        print(type(design))
+        design <- model.matrix(~ . , data=design_frame)
         
         fit <- lmFit(exp_matrix_0, design)
-        
-        
       }
 
       incProgress(4/4, detail=paste("Bayes statistics of differential expression"))

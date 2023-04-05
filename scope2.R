@@ -643,15 +643,7 @@ user_choice <- c("Pair", "Technician")
 
 # fetch the metadata to factorize
 fetched_factor <- colData(scp_0)[user_choice]
-
-if (length(user_choice) < 2){
-  col_factors <- factor(fetched_factor)
-  design <- model.matrix(~col_factors + factor(scp_0$SampleType))
-  colnames(design) <- c("Intercept", sprintf(paste(as.character(user_choice[1]),"[%s]"),seq(2:length(unique(col_factors)))+1), selectedComp_stat[-1])
-} else {
-  factors <- lapply(fetched_factor, factor)
-  factor_character <- paste0("factors$", names(fetched_factor), collapse = "+") 
-  design <- model.matrix(~ factor_character + factor(scp_0$SampleType))
-}
+design_frame <- cbind(fetched_factor, scp_0$SampleType)
+design <- model.matrix(~ . , data=design_frame)
 
 fit <- lmFit(exp_matrix_0, design)
