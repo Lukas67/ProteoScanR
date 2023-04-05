@@ -69,7 +69,7 @@ ui <- fluidPage(
                                        choices = c("All pairwise comparison",
                                                    "Differential Expression with defined Contrasts",
                                                    "Multi factor additivity")),
-                           uiOutput("contrast"),
+                           uiOutput("sample_select"),
                            uiOutput("add_factor"),
                            plotOutput("venn_diagram"),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
@@ -221,6 +221,7 @@ server <- function(input, output, session) {
         
         protein_matrix <- assay(scp_0[["proteins"]])
         prot_lm <- lm(protein_matrix ~ 1)
+
         b <- boxcox(prot_lm, plotit=F)
         # Exact lambda
         lambda <- b$x[which.max(b$y)]
@@ -451,13 +452,8 @@ server <- function(input, output, session) {
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
         exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
         fetched_factor <- colData(scp_0)[input$col_factors]
-        print(fetched_factor)
-        
         design_frame <- cbind(fetched_factor, scp_0$SampleType)
-        print(design_frame)
-        print(type(design))
         design <- model.matrix(~ . , data=design_frame)
-        
         fit <- lmFit(exp_matrix_0, design)
       }
 
@@ -618,7 +614,7 @@ server <- function(input, output, session) {
   })
   
   # observer for comparison between sample types
-  observeEvent(input$norm_method, {
+  observeEvent(CONSTANd_trigger(), {
     updateSelectInput(session, "selectedComp", choices = comp_list())
   })
   
@@ -844,10 +840,11 @@ server <- function(input, output, session) {
   })
 
   # additional ui for statistic module
-  output$contrast <- renderUI({
+  output$sample_select <- renderUI({
     req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
-    selectInput("selectedComp_stat", "choose your contrasts of interest", "", multiple = T)
+    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
   })
+  
   
   
   output$add_factor <- renderUI({
