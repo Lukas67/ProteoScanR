@@ -156,8 +156,6 @@ scp <- aggregateFeaturesOverAssays(scp,
 #                  name = "Peptides")
 
 # filter by median intensity
-# calculation of median not applicable if only one run observed
-
 file_name <- sampleAnnotation$Raw.file[1]
 peptides <- paste("peptides_", as.character(file_name), sep = "")
 
@@ -359,7 +357,7 @@ index_B <- st_indeces[choice_B]
 MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
 
 protein_matrix <- assay(scp[["proteins_transf"]])
-protein_matrix <- CONSTANd(protein_matrix)
+#protein_matrix <- CONSTANd(protein_matrix)
 
 sce <- getWithColData(scp, "proteins")
 
@@ -371,7 +369,8 @@ scp <- addAssayLinkOneToOne(scp,
                             from = "proteins",
                             to = "proteins_norm")
 
-assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
+assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
+#assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 
 # missing value imputation
 
@@ -508,79 +507,84 @@ hist(exp_matrix[[sample_types[1]]])
 # create design matrix 
 # return the count of individual colnames (Types of experiment)
 # Sample data
-factor_var <- factor(colnames(exp_matrix))
+# factor_var <- factor(colnames(exp_matrix))
+# 
+# factorize_var <- function(i_vector) {
+#   fact_vect <- factor(i_vector)
+#   levels <- unique(fact_vect)
+#   num_values <- seq_along(levels)
+#   lookup_table <- data.frame(fact_vect = levels, num_var = num_values)
+#   
+#   num_var <- sapply(fact_vect, function(x) {
+#     lookup_table$num_var[lookup_table$fact_vect == x]
+#   })
+#   
+#   fact_vect <- factor(num_var)
+#   return(fact_vect)
+# }
+# 
+# factors_sample_type <- factorize_var(colnames(exp_matrix))
+# 
+# user_input <- c(1,2,3,4,5,6,1,2,3,4,5,6)
+# user_chosen_name <- "patient"
+# 
+# factors_patient <- factorize_var(user_input)
+# 
+# patient <- c(1,2,3,4,5,6,1,2,3,4,5,6)
+# 
+# design_frame <- data.frame(cbind(patient, scp$SampleType))
+# # define design without intercept
+# design <- model.matrix(~ 0 +  ., data=design_frame)
+# # assign the column names
+# user_colnames <- sprintf(paste(as.character(user_chosen_name),"[%s]"), seq(2:length(unique(factors_patient)))+1)
+# 
+# colnames(design) <- c(unique(scp$SampleType), user_colnames)
 
-factorize_var <- function(i_vector) {
-  fact_vect <- factor(i_vector)
-  levels <- unique(fact_vect)
-  num_values <- seq_along(levels)
-  lookup_table <- data.frame(fact_vect = levels, num_var = num_values)
-  
-  num_var <- sapply(fact_vect, function(x) {
-    lookup_table$num_var[lookup_table$fact_vect == x]
-  })
-  
-  fact_vect <- factor(num_var)
-  return(fact_vect)
-}
-
-factors_sample_type <- factorize_var(colnames(exp_matrix))
-
-user_input <- c(1,2,3,4,5,6,1,2,3,4,5,6)
-user_chosen_name <- "patient"
-
-factors_patient <- factorize_var(user_input)
-
-# define design without intercept
-design <- model.matrix(~0+factors_sample_type+factors_patient)
-# assign the column names
-user_colnames <- sprintf(paste(as.character(user_chosen_name),"[%s]"), seq(2:length(unique(factors_patient)))+1)
-
-colnames(design) <- c(unique(scp$SampleType), user_colnames)
 
 
-
-# Fit the expression matrix to a linear model
-fit <- lmFit(exp_matrix, design)
-# Compute contrast
-# fit_contrast <- contrasts.fit(fit, cont_matrix)
-# Bayes statistics of differential expression
-# *There are several options to tweak!*
-# fit_contrast <- eBayes(fit_contrast)
-
-fit <- eBayes(fit)
-# Generate a vocalno plot to visualize differential expression
-#volcanoplot(fit_contrast)
-
-volcanoplot(fit)
-# Generate a list of top 100 differentially expressed genes
-# top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
-top_genes <- topTable(fit, number = 100, adjust = "fdr", coef = "Monocytes_A")
+# # Fit the expression matrix to a linear model
+# fit <- lmFit(exp_matrix, design)
+# # Compute contrast
+# # fit_contrast <- contrasts.fit(fit, cont_matrix)
+# # Bayes statistics of differential expression
+# # *There are several options to tweak!*
+# # fit_contrast <- eBayes(fit_contrast)
+# 
+# fit <- eBayes(fit)
+# # Generate a vocalno plot to visualize differential expression
+# #volcanoplot(fit_contrast)
+# 
+# volcanoplot(fit)
+# 
+# 
+# # Generate a list of top 100 differentially expressed genes
+# # top_genes <- topTable(fit_contrast, number = 100, adjust = "BH")
+# top_genes <- topTable(fit, number = 100, adjust = "fdr")
 
 
 
 # Summary of results (number of differentially expressed genes)
 # result <- decideTests(fit_contrast)
 
-result <- decideTests(fit)
-
-summary(result)
+# result <- decideTests(fit)
+# 
+# summary(result)
 
 
 # QQ-plots for differential expression
 
-ordinary.t <- fit$coef / fit$stdev.unscaled / fit$sigma
-
-par(mfrow=c(1,2))
-qqt(ordinary.t, df=fit$df.residual, main="Ordinary t")
-abline(0,1)
-qqt(fit$t, df=fit$df.total,main="Moderated t")
-abline(0,1)
-par(mfrow=c(1,1))
-
-
-# similar to eBayes but with fold change threshold
-treat(fit, lfc=0, trend=FALSE, robust=FALSE, winsor.tail.p=c(0.05,0.1))
+# ordinary.t <- fit$coef / fit$stdev.unscaled / fit$sigma
+# 
+# par(mfrow=c(1,2))
+# qqt(ordinary.t, df=fit$df.residual, main="Ordinary t")
+# abline(0,1)
+# qqt(fit$t, df=fit$df.total,main="Moderated t")
+# abline(0,1)
+# par(mfrow=c(1,1))
+# 
+# 
+# # similar to eBayes but with fold change threshold
+# treat(fit, lfc=0, trend=FALSE, robust=FALSE, winsor.tail.p=c(0.05,0.1))
 
 
 
@@ -639,11 +643,20 @@ scp_0 <- scp_0[, scp_0$SampleType %in%  selectedComp_stat]
 exp_matrix_0 <- assay(scp_0[["proteins_final"]])
 
 # fetch multiple factors for analysis
-user_choice <- c("Pair", "Technician")
+user_choice <- c("Pair")#, "Technician")
+#user_choice <- c("Technician")
 
 # fetch the metadata to factorize
 fetched_factor <- colData(scp_0)[user_choice]
 design_frame <- cbind(fetched_factor, scp_0$SampleType)
-design <- model.matrix(~ . , data=design_frame)
+design <- model.matrix(~0 + . , data=design_frame)
 
 fit <- lmFit(exp_matrix_0, design)
+fit <- eBayes(fit)
+
+results <- decideTests(fit)
+topTable(fit, coef = "`scp_0$SampleType`Monocytes_B")
+
+volcanoplot(fit)
+
+

@@ -116,8 +116,11 @@ server <- function(input, output, session) {
       incProgress(2/17, detail = paste("replacing zeros with NA"))
       scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
       
+      # filter PSM
+      # filter out potential contaminants
+      # filter out matches to decoy database
+      # keep PSMs with high PIF (parental ion fraction)
       req(input$PIF_cutoff)
-      # apply first filter
       incProgress(3/17, detail = paste("filter contaminants and PIF"))
       scp_0 <- filterFeatures(scp_0,
                               ~ Reverse != "+" &
@@ -159,7 +162,6 @@ server <- function(input, output, session) {
       scp_0$MedianRI <- medians
       
       # Filter based on the median CV -> remove covariant peptides over multiple proteins
-      
       req(input$nObs_pep_razrpr)
       incProgress(9/17, detail=paste("calculate covariance per cell"))
       scp_0 <- medianCVperCell(scp_0,
@@ -177,13 +179,13 @@ server <- function(input, output, session) {
       incProgress(12/17, detail=paste("remove peptides with high missing rate"))
       req(input$pNA)
       scp_0 <- filterNA(scp_0,
-                        i = peptides, #_norm",
+                        i = peptides,
                         pNA = input$pNA)
       
       
       incProgress(13/17, detail=paste("aggregate peptides to proteins"))
       scp_0 <- aggregateFeatures(scp_0,
-                                 i = peptides, #_log",
+                                 i = peptides,
                                  name = "proteins",
                                  fcol = "Leading.razor.protein",
                                  fun = matrixStats::colMedians, na.rm = TRUE)
@@ -435,6 +437,7 @@ server <- function(input, output, session) {
         req(input$selectedComp_stat)
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
         exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
+
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
         
@@ -451,9 +454,10 @@ server <- function(input, output, session) {
 
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
         exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
+        
         fetched_factor <- colData(scp_0)[input$col_factors]
         design_frame <- cbind(fetched_factor, scp_0$SampleType)
-        design <- model.matrix(~ . , data=design_frame)
+        design <- model.matrix(~0+ . , data=design_frame)
         fit <- lmFit(exp_matrix_0, design)
       }
 
@@ -625,7 +629,6 @@ server <- function(input, output, session) {
   observeEvent(input$model_design, {
     updateSelectInput(session, "col_factors", choices = columns())
   })
-  
   
   
   # reactive element for the comp list --> update if the scp object changes
