@@ -120,12 +120,14 @@ server <- function(input, output, session) {
       # filter out potential contaminants
       # filter out matches to decoy database
       # keep PSMs with high PIF (parental ion fraction)
-      req(input$PIF_cutoff)
+
       incProgress(3/17, detail = paste("filter contaminants and PIF"))
+      req(input$PIF_cutoff)
+      PIF_cutoff <- input$PIF_cutoff
       scp_0 <- filterFeatures(scp_0,
                               ~ Reverse != "+" &
                                 Potential.contaminant != "+" &
-                                !is.na(PIF) & PIF > input$PIF_cutoff)
+                                !is.na(PIF) & PIF > PIF_cutoff)
       
       # compute qvalues_PSMs to filter out by FDR
       incProgress(4/17, detail=paste("calculate q-value for PSMs"))
@@ -141,9 +143,11 @@ server <- function(input, output, session) {
                           groupBy = "Leading.razor.protein",
                           rowDataName = "qvalue_proteins")
       
-      req(input$qvalue_cutoff)
+      
       incProgress(6/17, detail=paste("filter according to q-value"))
-      scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < input$qvalue_cutoff)
+      req(input$qvalue_cutoff)
+      qvalue_cutoff <- input$qvalue_cutoff
+      scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < qvalue_cutoff)
       
       # aggregate PSMS to peptides
       incProgress(7/17, detail=paste("aggregating features"))
@@ -162,8 +166,8 @@ server <- function(input, output, session) {
       scp_0$MedianRI <- medians
       
       # Filter based on the median CV -> remove covariant peptides over multiple proteins
-      req(input$nObs_pep_razrpr)
       incProgress(9/17, detail=paste("calculate covariance per cell"))
+      req(input$nObs_pep_razrpr)
       scp_0 <- medianCVperCell(scp_0,
                                i = length(rowDataNames(scp_0)),
                                groupBy = "Leading.razor.protein",
@@ -412,7 +416,7 @@ server <- function(input, output, session) {
   # expression matrix is used by plot functions
   exp_matrix <- reactive({
     scp_0 <- scp()
-    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+    exp_matrix_0 <- data.frame(assay(scp_0[[length(scp_0)]]))
     colnames(exp_matrix_0) <- scp_0$SampleType  
     return(exp_matrix_0)
   })
@@ -422,12 +426,12 @@ server <- function(input, output, session) {
     withProgress(message= "running statistical analysis", value=0, {
       incProgress(1/3, detail=paste("read data"))
       scp_0 <- scp()
+      exp_matrix_0 <- exp_matrix()
       
       incProgress(2/3, detail=paste("creating linear model"))
       req(input$model_design)
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
-        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
         fit <- lmFit(exp_matrix_0, design)
@@ -436,7 +440,6 @@ server <- function(input, output, session) {
       else if (input$model_design == "Differential Expression with defined Contrasts") {
         req(input$selectedComp_stat)
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
 
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
@@ -453,8 +456,7 @@ server <- function(input, output, session) {
         req(input$selectedComp_stat)
 
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
-        
+
         fetched_factor <- colData(scp_0)[input$col_factors]
         design_frame <- cbind(fetched_factor, scp_0$SampleType)
         design <- model.matrix(~0+ . , data=design_frame)
