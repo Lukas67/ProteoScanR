@@ -296,6 +296,7 @@ server <- function(input, output, session) {
         }
         if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
           protein_matrix <- log10(protein_matrix)
+          transform_base_bc <- "log10"
           print("log10(protein_matrix)")
         }
         if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
@@ -337,7 +338,7 @@ server <- function(input, output, session) {
       
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
-      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10") {
+      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | !is.na(transform_base_bc == "log10")) {
         # center cols with median
         scp_0 <- sweep(scp_0, i = "proteins_transf",
                        MARGIN = 2,
