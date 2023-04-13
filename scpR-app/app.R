@@ -7,7 +7,7 @@ library("reshape2")
 library("scater")
 library("limma")
 library("CONSTANd")
-library("MASS")
+library("stats")
 
 reactlog::reactlog_enable()
 
@@ -80,6 +80,55 @@ ui <- fluidPage(
     )
   )
 )
+
+# box cox transf
+boxcox_1 <- function(object, ...) UseMethod("boxcox_1")
+
+boxcox_1.formula <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- object$model
+    m <- length(lambda)
+    object <- stats::lm(object, y = TRUE, qr = TRUE)
+    result <- NextMethod()
+    result
+  }
+
+boxcox_1.lm <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- object$model
+    m <- length(lambda)
+    if(is.null(object$y) || is.null(object$qr))
+      object <- update(object, y = TRUE, qr = TRUE)
+    result <- NextMethod()
+    result
+  }
+
+boxcox_1.default <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- as.matrix(object$model)
+    if(is.null(y <- object$y) || is.null(xqr <- object$qr))
+      stop(gettextf("%s does not have both 'qr' and 'y' components",
+                    sQuote(deparse(substitute(object)))), domain = NA)
+    if(any(y <= 0))
+      stop("response variable must be positive")
+    n <- length(y)
+    ## scale y[]  {for accuracy in  y^la - 1 }:
+    y <- y / exp(mean(log(y)))
+    logy <- log(y) # now  ydot = exp(mean(log(y))) == 1
+    xl <- loglik <- as.vector(lambda)
+    m <- length(xl)
+    for(i in 1L:m) {
+      if(abs(la <- xl[i]) > eps)
+        yt <- (y^la - 1)/la
+      else yt <- logy * (1 + (la * logy)/2 *
+                           (1 + (la * logy)/3 * (1 + (la * logy)/4)))
+      loglik[i] <- - n/2 * log(sum(qr.resid(xqr, yt)^2))
+    }
+    list(x = xl, y = loglik)
+  }
 
 
 # Define server logic required to draw a histogram
@@ -227,11 +276,10 @@ server <- function(input, output, session) {
       else if (input$transform_base == "BoxCox") {
         
         protein_matrix <- assay(scp_0[["proteins"]])
-        prot_lm <- lm(protein_matrix ~ 1)
-
-        b <- boxcox(prot_lm, plotit=F)
+        b <- boxcox_1(stats::lm(protein_matrix ~ 1))
         # Exact lambda
         lambda <- b$x[which.max(b$y)]
+        print(lambda)
 
         
         if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
