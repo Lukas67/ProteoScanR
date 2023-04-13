@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.8)  12 APR 2023 14:59
+This is pdfTeX, Version 3.141592653-2.6-1.40.24 (TeX Live 2022) (preloaded format=pdflatex 2023.3.8)  13 APR 2023 15:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -434,12 +434,12 @@ Package hyperref Info: Link coloring OFF on input line 78.
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=76, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=92, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 90.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=77, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=93, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 91.
@@ -488,7 +488,7 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 AED: lastpage setting LastPage
 [15] (./Thesis.aux)
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 4DC378F5968B416420A53D7C6413E086;2340.
+(rerunfilecheck)             Checksum: 3D50C38D1EF77D13F8F682427ABECDFC;2853.
  )
 (\end occurred inside a group at level 2)
 
@@ -496,18 +496,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 11814 strings out of 477984
- 183582 string characters out of 5839218
+ 11827 strings out of 477984
+ 183840 string characters out of 5839218
  1858388 words of memory out of 5000000
- 31698 multiletter control sequences out of 15000+600000
+ 31705 multiletter control sequences out of 15000+600000
  547450 words of font info for 57 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,5n,76p,311b,8320s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,76p,311b,8320s stack positions out of 10000i,1000n,20000p,200000b,200000s
 {/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
-Output written on Thesis.pdf (19 pages, 183778 bytes).
+Output written on Thesis.pdf (19 pages, 184902 bytes).
 PDF statistics:
- 339 PDF objects out of 1000 (max. 8388607)
- 300 compressed objects within 3 object streams
- 112 named destinations out of 1000 (max. 500000)
- 155 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 363 PDF objects out of 1000 (max. 8388607)
+ 323 compressed objects within 4 object streams
+ 118 named destinations out of 1000 (max. 500000)
+ 187 words of extra memory for PDF output out of 10000 (max. 10000000)
 

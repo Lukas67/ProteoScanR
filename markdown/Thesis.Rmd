@@ -30,6 +30,12 @@ if (!requireNamespace("tinytex", quietly=TRUE))
   install.packages("tinytex")
 
 library(tinytex)
+
+#install dependencies
+if (!requireNamespace("DiagrammeR", quietly=TRUE))
+  install.packages("DiagrammeR")
+
+library(DiagrammeR)
 ```
 
 

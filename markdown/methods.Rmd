@@ -2,7 +2,6 @@
 title: ''
 output: pdf_document
 ---
-
 # Materials and Methods
 
 ## Materials
@@ -11,40 +10,13 @@ For analysis two types of cells were used. One type is the Jurkat-based cell lin
 
 The other type of cells are macrophages with a sample size of 72 cells. The analysis is done with two groups. A HIV negative (HIV-) control group and a HIV positive (HIV+) group. 
 
+### Cell Isolation
 
-## Data
+### Lysis
 
-### Acquisition
+### Digestion
 
-Acquisition of the data was done with MaxQuant \citep{Cox2008} software package. 
-
-
-### Instrumentation
-
-#### Cell Isolation
-
-#### Lysis
-
-#### Digestion
-
-#### Liquid chromatography
-
-In order to separate proteins according to their chemical properties, size or species a liquid chromatography (LC) is recommended before ionization. 
-
-#### Ionization
-
-In order to analyze a biological sample consisting of proteins in solution the liquid needs to be vaporized into gas phase. Two techniques are capable of this procedure. Electrospray ionization (ESI) pushes the analyte through a capillary and applies an electric current to the liquid, vaporizing the sample to a  charged aerosol. Biomolecules are fragmented according to their chemical properties and can be further handled in the mass spectrometer. The fragmented biomolecules are now in charged droplets separated by their charge on the surface, splitting further into smaller droplets until they become a gas phase ion. Two physical models describe the process from gas phase to ion called “The ion evaporation model” (IEM) and “The charge residue model” (CRM). 
-In the ion evaporation model (by Iribarne and Thomoson) the droplets shrink by evaporation until ions are expelled. The model had its limitation by explaining same evaporation rate constant among ions with different chemical properties. 
-In the charge residue model the assumption of one molecule per droplet leads to an ionization rate constant, which is independent of the ion itself and relies solely on the generation of the droplet and the efficiency of the solvent \citep{Wilm2011}.
- 
-Matrix-assisted laser desorption/ionization (MALDI)
-
-#### Coupled mass-spectrometry (MS/MS)
-
-In order to enhance sequence identification, two MS devices are built in series. In the first run (MS1) the m/z is determined and the molecules are passed to the next device. Upon passing the molecules are fragmented into smaller ions and analyzed by the second MS. The fragmentation highly depends on the chemical bonds found in the molecule. The majority of these breaks occur on the peptide bond of the protein, although this is not guaranteed for all bonds and so it can happen that certain peptide ions have a low abundance \citep{Budnik2018}. These low abundant peptides will not be detected, hence the problem needs to be faced with another approach . A solution for this problem is molecular barcoding with labeling mentioned in the chapter labeling. 
-
-
-#### Labeling techniques
+### Labeling techniques
 
 For differential analysis proteins need to be labeled to compare mass to charge intensities in order to quantify observed peptides. Since mass spectrometry is not a quantitative technique by itself, the peak height or area does not reflect the abundance of a peptide. Physicochemical properties of the proteins can change the ionization efficiency and detectability of the target. However, when comparing the same analyte between multiple runs of labeled proteins, differences in the mass spectrum reflect the abundance of those. Labels should be chosen to change solely the mass of the sample and to not affect folding or other inherent properties of the protein. 
 
@@ -53,13 +25,76 @@ For differential analysis proteins need to be labeled to compare mass to charge 
 Feeding cells with aminoacids containing heavy isotopes, is the method of choice in order to label peptides at the earliest possible level. This atoms can be heavy nitrogen in aminoacids or salts in fertilizer for plants. Mass shifts are proportional to the isotopes incorporated during biomass production and are visible after proteolytic cleavage. Stable isotope labeling in cell culture (SILAC) was presented in the early 2000s. This method used heavy aminoacid enriched media to feed cells, in order to quantitatively analyze expression profiles.    
 
 
-##### Isobaric labeling
+#### Isobaric labeling
 
-###### Tandem mass tag (TMT)
+##### Tandem mass tag (TMT)
 
 Tandem mass tag (TMT) reagents enable to differentiate multiple samples analyzing in one MS run. 
 The samples are labeled individually and pooled afterwards, this procedure is called multiplexing. TMTs have the same charge and differ only by their isotopic masses, the peaks found for each sample are called reporter ions (RI). Each RI and sample is interpreted as one channel in downstream analysis. The identification of these RI leads to an enrichment and identification of low abundance peptide ions which is common especially in single-cell techniques. With this technique it is possible to quantify proteins and differ low abundant proteins from background noise. 
 The disadvantage of isobaric labeling is, that the co-fragmentation signals can be observed in the spectrogram and the data needs to be normalized in order to remove unwanted contribution \citep{Marx2019, Budnik2018}. Furthermore TMTs have an isotopic distribution according to the distribution found in nature. This can be corrected during data-acquisition as a defined spread in other channels.
+
+
+### Instrumentation
+
+#### Liquid chromatography
+
+In order to separate proteins according to their chemical properties, size or species a liquid chromatography (LC) is recommended before ionization. 
+
+#### Mass Spectrometry
+
+##### Ionization
+
+In order to analyze a biological sample consisting of proteins in solution the liquid needs to be vaporized into gas phase. Two techniques are capable of this procedure. Electrospray ionization (ESI) pushes the analyte through a capillary and applies an electric current to the liquid, vaporizing the sample to a  charged aerosol. Biomolecules are fragmented according to their chemical properties and can be further handled in the mass spectrometer. The fragmented biomolecules are now in charged droplets separated by their charge on the surface, splitting further into smaller droplets until they become a gas phase ion. Two physical models describe the process from gas phase to ion called “The ion evaporation model” (IEM) and “The charge residue model” (CRM). 
+In the ion evaporation model (by Iribarne and Thomoson) the droplets shrink by evaporation until ions are expelled. The model had its limitation by explaining same evaporation rate constant among ions with different chemical properties. 
+In the charge residue model the assumption of one molecule per droplet leads to an ionization rate constant, which is independent of the ion itself and relies solely on the generation of the droplet and the efficiency of the solvent \citep{Wilm2011}.
+ 
+Matrix-assisted laser desorption/ionization (MALDI)
+
+##### MS.1
+
+##### Coupled mass-spectrometry (MS/MS) & MS.2
+
+In order to enhance sequence identification, two MS devices are built in series. In the first run (MS1) the m/z is determined and the molecules are passed to the next device. Upon passing the molecules are fragmented into smaller ions and analyzed by the second MS. The fragmentation highly depends on the chemical bonds found in the molecule. The majority of these breaks occur on the peptide bond of the protein, although this is not guaranteed for all bonds and so it can happen that certain peptide ions have a low abundance \citep{Budnik2018}. These low abundant peptides will not be detected, hence the problem needs to be faced with another approach . A solution for this problem is molecular barcoding with labeling mentioned in the chapter labeling. 
+
+
+
+
+## Data
+```{r Dataflow,  echo=FALSE}
+library(DiagrammeR)
+library(webshot)
+
+DiagrammeR::grViz("digraph {
+	graph [layout  =  dot,
+	       rankdir  = TB]
+
+node [shape = rectangle]
+rawData [label = 'msData.raw']
+node [shape = oval]
+MQ [label = 'MaxQuant']
+node [shape = invhouse]
+MQ_fd [label = 'feature detection']
+node [shape = cylinder]
+MQ_ds [label = 'Database search']
+node [shape = invhouse]
+MQ_fdr [label = 'FDR calculation']
+MQ_quant [label = 'Protein Quantification']
+node [shape = rectangle]
+MQoutput [label = 'evidence.txt']
+sampleAnnotate [label = 'sample_annotation.txt']
+node [shape = oval]
+ProteomicsWorkbench [label = 'Proteomics Workbench']
+
+rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
+sampleAnnotate -> ProteomicsWorkbench
+}",
+height = 500)
+```
+
+### Acquisition
+
+Acquisition of the data was done with MaxQuant \citep{Cox2008} software package. 
+
 
 ### MS-Spectrum
 

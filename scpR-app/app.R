@@ -892,7 +892,7 @@ server <- function(input, output, session) {
   output$protein_table <- renderTable({
     req(protein_table())
     protein_table()
-  }, rownames = T)
+  }, rownames = T, striped = T)
   
   # venn diagram for significant proteins
   output$venn_diagram <- renderPlot({
