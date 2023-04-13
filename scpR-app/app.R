@@ -64,7 +64,6 @@ ui <- fluidPage(
                   tabPanel("Statistics",
                            actionButton("run_statistics", "Press to run statistics"),
                            actionButton("qqplot", "check dependencies for linear model"),
-                           textOutput("model_vars"),
                            selectInput("model_design", "Choose your study design",
                                        choices = c("All pairwise comparison",
                                                    "Differential Expression with defined Contrasts",
@@ -72,6 +71,7 @@ ui <- fluidPage(
                            uiOutput("sample_select"),
                            uiOutput("add_factor"),
                            plotOutput("venn_diagram"),
+                           selectInput("chosen_coef", "Select your coefficient of interest", ""),
                            plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
                            verbatimTextOutput("hover_info"),
                            tableOutput("protein_table")
@@ -120,10 +120,9 @@ server <- function(input, output, session) {
       # filter out potential contaminants
       # filter out matches to decoy database
       # keep PSMs with high PIF (parental ion fraction)
-
       incProgress(3/17, detail = paste("filter contaminants and PIF"))
       req(input$PIF_cutoff)
-      PIF_cutoff <- input$PIF_cutoff
+      PIF_cutoff<-input$PIF_cutoff
       scp_0 <- filterFeatures(scp_0,
                               ~ Reverse != "+" &
                                 Potential.contaminant != "+" &
@@ -143,8 +142,7 @@ server <- function(input, output, session) {
                           groupBy = "Leading.razor.protein",
                           rowDataName = "qvalue_proteins")
       
-      
-      incProgress(6/17, detail=paste("filter according to q-value"))
+      incProgress(6/17, detail=paste("filter according to q-value"))      
       req(input$qvalue_cutoff)
       qvalue_cutoff <- input$qvalue_cutoff
       scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < qvalue_cutoff)
@@ -168,23 +166,26 @@ server <- function(input, output, session) {
       # Filter based on the median CV -> remove covariant peptides over multiple proteins
       incProgress(9/17, detail=paste("calculate covariance per cell"))
       req(input$nObs_pep_razrpr)
+      nObs_pep_razrpr<-input$nObs_pep_razrpr
       scp_0 <- medianCVperCell(scp_0,
                                i = length(rowDataNames(scp_0)),
                                groupBy = "Leading.razor.protein",
-                               nobs = input$nObs_pep_razrpr, 
+                               nobs = nObs_pep_razrpr, 
                                norm = "div.median",
                                na.rm = TRUE,
                                colDataName = "MedianCV")
       
       incProgress(10/17, detail=paste("filtering according to covariance"))
       req(input$MedCV_thresh)
-      scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < input$MedCV_thresh, ]
+      MedCV_thresh <- input$MedCV_thresh
+      scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < MedCV_thresh, ]
 
       incProgress(12/17, detail=paste("remove peptides with high missing rate"))
       req(input$pNA)
+      pNA <- input$pNA
       scp_0 <- filterNA(scp_0,
                         i = peptides,
-                        pNA = input$pNA)
+                        pNA = pNA)
       
       
       incProgress(13/17, detail=paste("aggregate peptides to proteins"))
@@ -416,7 +417,7 @@ server <- function(input, output, session) {
   # expression matrix is used by plot functions
   exp_matrix <- reactive({
     scp_0 <- scp()
-    exp_matrix_0 <- data.frame(assay(scp_0[[length(scp_0)]]))
+    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
     colnames(exp_matrix_0) <- scp_0$SampleType  
     return(exp_matrix_0)
   })
@@ -440,7 +441,6 @@ server <- function(input, output, session) {
       else if (input$model_design == "Differential Expression with defined Contrasts") {
         req(input$selectedComp_stat)
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
         
@@ -559,19 +559,6 @@ server <- function(input, output, session) {
     return(list)
   })
   
-  # reactive element for hover function of volcano plot
-  displayed_text <- reactive({
-    req(input$plot_hover)
-    hover <- input$plot_hover
-    dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
-    
-    if(min(dist) < 0.3) {
-      rownames(stat_result())[which.min(dist)]
-    } else {
-      NULL
-    }
-  })
-
   # observer for qqplot interface
   observeEvent(input$qqplot, {
     showModal(qqModal())
@@ -632,6 +619,17 @@ server <- function(input, output, session) {
     updateSelectInput(session, "col_factors", choices = columns())
   })
   
+  #observer for updating the coefficient dropdown menu
+  observeEvent(input$run_statistics, {
+    updateSelectInput(session, "chosen_coef", choices = coefs())
+  })
+  
+  # coefficients for the statistic modules volcanoplot and topTable
+  coefs <- reactive({
+    req(stat_result())
+    fit_0 <- stat_result()
+    list <- colnames(fit_0$coefficients)
+  })
   
   # reactive element for the comp list --> update if the scp object changes
   comp_list <- reactive({
@@ -756,37 +754,9 @@ server <- function(input, output, session) {
             legend.position = "bottom")
   })
   
-  # volcanoplot in statistic tab
-  output$volcano <- renderPlot({
-    volcanoplot(stat_result(), cex = 0.5) 
-  })
+  ### Statistic Module ###
   
-  # hover output below volcano chart
-  output$hover_info <- renderPrint({
-    req(displayed_text())
-    
-    cat("UniProt-ID\n")
-    displayed_text()
-  })
-  
-  # show significant proteins in the table
-  output$protein_table <- renderTable({
-    topTable(stat_result(), number = 10, adjust = "BH")
-  }, rownames = T)
-  
-  # venn diagram for significant proteins
-  output$venn_diagram <- renderPlot({
-    req(stat_result())
-    vennDiagram(decideTests(stat_result()))
-  })
-  
-  output$model_vars <- renderText({
-    req(scp())
-    unique(scp()$SampleType)
-  })
-  
-  model_vals <- reactiveValues(data = NULL)
-
+  ## Dependencies
   # plot the qq_count-th column
   output$qqPlot <- renderPlot({
     exp_matrix_0 <- exp_matrix()
@@ -802,6 +772,71 @@ server <- function(input, output, session) {
     sample_types <- unique(colnames(exp_matrix_0))
     i <- qq_count()
     hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
+  })
+    
+  # create interface for the qqmodal dialog
+  qqModal <- function() {
+    modalDialog(
+      actionButton("previous_plot", "Show previous"),
+      actionButton("next_plot", "Show next"),
+      plotOutput("qqPlot"),
+      plotOutput("hist"),
+      footer = tagList(
+        modalButton("Dismiss")
+      )
+    )
+  }
+  
+  ## Calculation
+  # additional ui for statistic module
+  output$sample_select <- renderUI({
+    req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
+    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
+  })
+
+  # Ui for multifactorial model
+  output$add_factor <- renderUI({
+    req(input$model_design == "Multi factor additivity")
+    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
+  })
+  
+  
+  ## Results 
+  # volcanoplot in statistic tab
+  output$volcano <- renderPlot({
+    volcanoplot(stat_result(), cex = 0.5, coef = input$chosen_coef) 
+  })
+  
+  # reactive element for hover function of volcano plot
+  displayed_text <- reactive({
+    req(input$plot_hover)
+    hover <- input$plot_hover
+    dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
+    
+    if(min(dist) < 0.3) {
+      rownames(stat_result())[which.min(dist)]
+    } else {
+      NULL
+    }
+  })
+  
+  # hover output below volcano chart
+  output$hover_info <- renderPrint({
+    req(displayed_text())
+    
+    cat("UniProt-ID\n")
+    displayed_text()
+  })
+  
+  # show significant proteins in the table
+  output$protein_table <- renderTable({
+    topTable(stat_result(), number = 10, adjust = "BH", coef = input$chosen_coef)
+  }, rownames = T)
+  
+  # venn diagram for significant proteins
+  output$venn_diagram <- renderPlot({
+    req(stat_result())
+    vennDiagram(decideTests(stat_result()))
   })
   
   # plot MA plot for the constand method
@@ -844,32 +879,6 @@ server <- function(input, output, session) {
     MAplot(assay(scp()[["proteins_transf"]][,index_A[[1]]]), assay(scp()[["proteins_transf"]][,index_B[[1]]]))
   })
 
-  # additional ui for statistic module
-  output$sample_select <- renderUI({
-    req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
-    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
-  })
-  
-  
-  
-  output$add_factor <- renderUI({
-    req(input$model_design == "Multi factor additivity")
-    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
-  })
-  
-  # create interface for the qqmodal dialog
-  qqModal <- function() {
-    modalDialog(
-      actionButton("previous_plot", "Show previous"),
-      actionButton("next_plot", "Show next"),
-      plotOutput("qqPlot"),
-      plotOutput("hist"),
-      footer = tagList(
-        modalButton("Dismiss")
-      )
-    )
-  }
-  
   #create interface for the constand normalization method
   CONSTANdModal <- function() {
     modalDialog(
