@@ -804,17 +804,28 @@ server <- function(input, output, session) {
   ## Results 
   # volcanoplot in statistic tab
   output$volcano <- renderPlot({
+    req(input$chosen_coef)
+    req(stat_result())
     volcanoplot(stat_result(), cex = 0.5, coef = input$chosen_coef) 
+  })
+
+  # reactive element for toptable
+  protein_table <- reactive({
+    req(stat_result())
+    req(input$chosen_coef)
+    data.frame(topTable(stat_result(), number = Inf, adjust = "BH", coef = input$chosen_coef))
   })
   
   # reactive element for hover function of volcano plot
   displayed_text <- reactive({
     req(input$plot_hover)
     hover <- input$plot_hover
-    dist <- sqrt((hover$x - stat_result()$coef)^2 + (hover$y - -log10(stat_result()$p.value))^2)
+    req(protein_table())
+    
+    dist <- sqrt((hover$x - protein_table()$logFC)^2 + (hover$y - -log10(protein_table()$P.Value))^2)
     
     if(min(dist) < 0.3) {
-      rownames(stat_result())[which.min(dist)]
+      rownames(protein_table())[which.min(dist)]
     } else {
       NULL
     }
@@ -830,7 +841,8 @@ server <- function(input, output, session) {
   
   # show significant proteins in the table
   output$protein_table <- renderTable({
-    topTable(stat_result(), number = 10, adjust = "BH", coef = input$chosen_coef)
+    req(protein_table())
+    protein_table()
   }, rownames = T)
   
   # venn diagram for significant proteins
