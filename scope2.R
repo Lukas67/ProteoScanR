@@ -19,7 +19,7 @@ library("MASS")
 
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/evidence.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
 
 # create annotation file
 # this varies upon experimental design
@@ -40,14 +40,14 @@ mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combine
 # 
 # sampleAnnotation$SampleType <- samples
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/mq-run_150223/combined/txt/sampleAnnotation_two_groups.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
 
 # create QFeature object
 scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
                channelCol = "Channel",
                batchCol = "Raw.file",
-               suffix = paste0("_TMT", 1:12),
+               suffix = paste0("_TMT", 1:length(unique(sampleAnnotation$Channel))),
                removeEmptyCols = TRUE)
 
 
@@ -117,12 +117,12 @@ scp <- scp[, , keepAssay]
 # compute qvalues_PSMs to filter out by FDR
 
 scp <- pep2qvalue(scp,
-                  i = 1:length(rowDataNames(scp)),
+                  i = names(scp),
                   PEP = "PEP", # by reference the dart_PEP value is used
                   rowDataName = "qvalue_PSMs")
 
 scp <- pep2qvalue(scp,
-                  i = 1:length(rowDataNames(scp)),
+                  i = names(scp),
                   PEP = "PEP",
                   groupBy = "Leading.razor.protein",
                   rowDataName = "qvalue_proteins")
@@ -143,25 +143,41 @@ scp <- filterFeatures(scp, ~ qvalue_proteins < 0.01)
 
 # aggregate PSMs to peptides
 
+# can be called in the function argument of aggregateFeaturesOverAssays
+remove.duplicates <- function(x)
+  apply(x, 2, function(xx) xx[which(!is.na(xx))[1]] )
+
+# matrixStats::colMedians, na.rm = TRUE aggregate over median 
 scp <- aggregateFeaturesOverAssays(scp,
-                                  i = 1:length(rowDataNames(scp)),
+                                  i = names(scp),
                                   fcol = "Modified.sequence",
                                   name = paste0("peptides_", names(scp)),
                                   fun = matrixStats::colMedians, na.rm = TRUE)
-# filter per sample type
-# scp <- scp[, scp$SampleType %in% c("Blank", "Macrophage", "Monocyte"), ]
 
-#scp <- joinAssays(scp,
-#                  i = 1:length(rowDataNames(scp)),
-#                  name = "Peptides")
+
+# join assays to one
+if (length(names(scp)) > 1) {
+  scp <- joinAssays(scp,
+                    i = ((length(names(scp))/2)+1):length(names(scp)),
+                    name = "Peptides")
+}
+  
 
 # filter by median intensity
-file_name <- sampleAnnotation$Raw.file[1]
-peptides <- paste("peptides_", as.character(file_name), sep = "")
+file_name <- unique(sampleAnnotation$Raw.file)
+peptide_file <- paste("peptides_", as.character(file_name), sep = "")
 
-medians <- colMedians(assay(scp[[peptides]]), na.rm = TRUE)
+if (length(peptide_file) > 1) {
+  medians <- c()
+  for (assay_name in peptide_file) {
+    print(assay_name)
+    new_medians <- colMedians(assay(scp[[assay_name]]), na.rm = TRUE)
+    medians <- c(medians, new_medians)
+  }
+} else {
+  medians <- colMedians(assay(scp[[peptide_file]]), na.rm = TRUE)
+}
 scp$MedianRI <- medians
-
 
 colData(scp) %>%
   data.frame %>%

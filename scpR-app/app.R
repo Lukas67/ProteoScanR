@@ -133,7 +133,7 @@ boxcox_1.default <-
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  options(shiny.maxRequestSize=10*1024^2)
+  options(shiny.maxRequestSize=30*1024^2)
   
   ## Data structures and objects
   # sample_annotation needs to be accessible for plots
@@ -158,7 +158,7 @@ server <- function(input, output, session) {
                        colData = meta_data_0,
                        channelCol = "Channel",
                        batchCol = "Raw.file",
-                       suffix = paste0(input$label_suffix, 1:nrow(meta_data_0)),
+                       suffix = paste0(input$label_suffix, 1:length(unique(meta_data_0$Channel))),
                        removeEmptyCols = TRUE)
       
       # # change zeros to NA, apply first filter
@@ -180,13 +180,13 @@ server <- function(input, output, session) {
       # compute qvalues_PSMs to filter out by FDR
       incProgress(4/17, detail=paste("calculate q-value for PSMs"))
       scp_0 <- pep2qvalue(scp_0,
-                          i = 1:length(rowDataNames(scp_0)),
+                          i = names(scp_0),
                           PEP = "PEP", # by reference the dart_PEP value is used
                           rowDataName = "qvalue_PSMs")
       
       incProgress(5/17, detail=paste("calculate q value for proteins"))
       scp_0 <- pep2qvalue(scp_0,
-                          i = 1:length(rowDataNames(scp_0)),
+                          i = names(scp_0),
                           PEP = "PEP",
                           groupBy = "Leading.razor.protein",
                           rowDataName = "qvalue_proteins")
@@ -199,18 +199,35 @@ server <- function(input, output, session) {
       # aggregate PSMS to peptides
       incProgress(7/17, detail=paste("aggregating features"))
       scp_0 <- aggregateFeaturesOverAssays(scp_0,
-                                           i = 1:length(rowDataNames(scp_0)),
+                                           i = names(scp_0),
                                            fcol = "Modified.sequence",
                                            name = paste0("peptides_", names(scp_0)),
                                            fun = matrixStats::colMedians, na.rm = TRUE)
       
-      file_name <- meta_data_0$Raw.file[1]
-      peptides <- paste("peptides_", as.character(file_name), sep = "")
+      # join assays to one
+      if (length(unique(meta_data_0$Raw.file)) > 1) {
+        scp_0 <- joinAssays(scp_0,
+                          i = ((length(names(scp_0))/2)+1):length(names(scp_0)),
+                          name = "Peptides")
+      }
+      
       
       # calculate median reporter IO intensity
       incProgress(8/17, detail=paste("calculate reporter ion intensity"))
-      medians <- colMedians(assay(scp_0[[peptides]]), na.rm = TRUE)
+      file_name <- unique(meta_data_0$Raw.file)
+      peptide_file <- paste("peptides_", as.character(file_name), sep = "")
+      
+      if (length(peptide_file) > 1) {
+        medians <- c()
+        for (assay_name in peptide_file) {
+          new_medians <- colMedians(assay(scp_0[[assay_name]]), na.rm = TRUE)
+          medians <- c(medians, new_medians)
+        }
+      } else {
+        medians <- colMedians(assay(scp_0[[peptide_file]]), na.rm = TRUE)
+      }
       scp_0$MedianRI <- medians
+      
       
       # Filter based on the median CV -> remove covariant peptides over multiple proteins
       incProgress(9/17, detail=paste("calculate covariance per cell"))
@@ -338,7 +355,7 @@ server <- function(input, output, session) {
       
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
-      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | !is.na(transform_base_bc == "log10")) {
+      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" ) {
         # center cols with median
         scp_0 <- sweep(scp_0, i = "proteins_transf",
                        MARGIN = 2,
