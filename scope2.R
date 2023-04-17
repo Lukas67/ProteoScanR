@@ -497,13 +497,47 @@ longFormat(scp[, , "proteins_norm"]) %>%
 
 # use knn to impute missing values
 library(impute)
+library(sva)
 
-scp <- impute(scp,
-              i = "proteins_norm",
-              name = "proteins_imptd",
-              method = "knn",
-              k = 3, rowmax = 1, colmax= 1,
-              maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+if (length(peptide_file) > 1) {
+  scp <- impute(scp,
+                  i = "proteins_norm",
+                  name = "proteins_imptd",
+                  method = "knn",
+                  k = 3, rowmax = 1, colmax= 1,
+                  maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+  
+  sce <- getWithColData(scp, "proteins_imptd")
+  
+  batch <- colData(sce)$Raw.file
+  model <- model.matrix(~0 + SampleType, data = colData(sce))
+  
+  assay(sce) <- ComBat(dat = assay(sce),
+                       batch = batch)#,
+                       #mod = model)
+  
+  
+  scp <- addAssay(scp,
+                    y = sce,
+                    name = "proteins_dim_red")
+  
+  scp <- addAssayLinkOneToOne(scp,
+                                from = "proteins_imptd",
+                                to = "proteins_dim_red")
+  
+  
+} else {
+  sce <- getWithColData(scp, "proteins_norm")
+  
+  scp <- addAssay(scp,
+                    y = sce,
+                    name = "proteins_dim_red")
+  
+  scp <- addAssayLinkOneToOne(scp,
+                                from = "proteins_norm",
+                                to = "proteins_dim_red")  
+}
+
 
 
 # show missing values again
@@ -514,26 +548,6 @@ scp[["proteins_imptd"]] %>%
 
 # batch correction
 # upon multiple runs
-
-sce <- getWithColData(scp, "proteins_imptd")
-
-batch <- colData(sce)$Raw.file
-model <- model.matrix(~0 + SampleType, data = colData(sce))
-
-library(sva)
-assay(sce) <- ComBat(dat = assay(sce),
-                     batch = batch)#,
-                     #mod = model)
-
-
- scp <- addAssay(scp,
-                 y = sce,
-                 name = "proteins_final")
-
- scp <- addAssayLinkOneToOne(scp,
-                             from = "proteins_transf",
-                             to = "proteins_final")
-
 
 
 # dimensionality reduction
