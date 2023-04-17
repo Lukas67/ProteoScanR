@@ -1,4 +1,7 @@
 library("shiny")
+library("shinyWidgets")
+library("shinydashboard")
+
 library("scp")
 library("ggplot2")
 library("magrittr")
@@ -8,6 +11,9 @@ library("scater")
 library("limma")
 library("CONSTANd")
 library("stats")
+library("impute")
+library("sva")
+
 
 reactlog::reactlog_enable()
 
@@ -44,7 +50,12 @@ ui <- fluidPage(
       # choose log transform base
       selectInput("transform_base", "Choose method for protein data transformation", choices = c("log2", "log10", "sqrt", "quadratic", "BoxCox", "None")),
       # normalization method 
-      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd"))
+      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
+      switchInput(inputId = "multiple_batches", onLabel = "Multiple batches", offLabel = "Single batch", value = F),
+      conditionalPanel(condition = "input.multiple_batches"#, 
+                       #switchInput(inputId = "missing_v_impt", onLabel = "Missing value imputation", offLabel = "Missing = NaN", value = F),
+                       #switchInput(inputId = "batch_correction", onLabel = "Batch correction", offLabel = "No batch correction")
+                       )
       
     ),
     
@@ -208,7 +219,7 @@ server <- function(input, output, session) {
       if (length(unique(meta_data_0$Raw.file)) > 1) {
         scp_0 <- joinAssays(scp_0,
                           i = ((length(names(scp_0))/2)+1):length(names(scp_0)),
-                          name = "Peptides")
+                          name = "peptides")
       }
       
       
@@ -233,14 +244,25 @@ server <- function(input, output, session) {
       incProgress(9/17, detail=paste("calculate covariance per cell"))
       req(input$nObs_pep_razrpr)
       nObs_pep_razrpr<-input$nObs_pep_razrpr
-      scp_0 <- medianCVperCell(scp_0,
-                               i = length(rowDataNames(scp_0)),
+      
+      if (length(peptide_file) > 1) {
+        scp_0 <- medianCVperCell(scp_0,
+                               i = "peptides",
                                groupBy = "Leading.razor.protein",
                                nobs = nObs_pep_razrpr, 
                                norm = "div.median",
                                na.rm = TRUE,
                                colDataName = "MedianCV")
-      
+      } else {
+        scp_0 <- medianCVperCell(scp_0,
+                               i = peptide_file,
+                               groupBy = "Leading.razor.protein",
+                               nobs = nObs_pep_razrpr, 
+                               norm = "div.median",
+                               na.rm = TRUE,
+                               colDataName = "MedianCV")
+      }
+            
       incProgress(10/17, detail=paste("filtering according to covariance"))
       req(input$MedCV_thresh)
       MedCV_thresh <- input$MedCV_thresh
@@ -249,18 +271,35 @@ server <- function(input, output, session) {
       incProgress(12/17, detail=paste("remove peptides with high missing rate"))
       req(input$pNA)
       pNA <- input$pNA
-      scp_0 <- filterNA(scp_0,
-                        i = peptides,
-                        pNA = pNA)
       
+      if (length(peptide_file) > 1) {
+        scp_0 <- filterNA(scp_0,
+                        i = "peptides",
+                        pNA = pNA)
+      } else {
+        scp_0 <- filterNA(scp_0,
+                        i = peptide_file,
+                        pNA = pNA)
+      }
       
       incProgress(13/17, detail=paste("aggregate peptides to proteins"))
-      scp_0 <- aggregateFeatures(scp_0,
-                                 i = peptides,
+      
+      # aggregate peptide to protein
+      if (length(peptide_file) > 1) {
+        scp_0 <- aggregateFeatures(scp_0,
+                                 i = "peptides",
                                  name = "proteins",
                                  fcol = "Leading.razor.protein",
                                  fun = matrixStats::colMedians, na.rm = TRUE)
-
+        
+      } else {
+        scp_0 <- aggregateFeatures(scp_0,
+                                 i = peptide_file,
+                                 name = "proteins",
+                                 fcol = "Leading.razor.protein",
+                                 fun = matrixStats::colMedians, na.rm = TRUE)
+      }
+      
       incProgress(14/17, detail=paste("transforming protein data"))
       req(input$transform_base)
       if (input$transform_base == "log2") {
@@ -372,17 +411,6 @@ server <- function(input, output, session) {
                                         na.rm = TRUE),
                        name = "proteins_norm")
         
-        sce <- getWithColData(scp_0, "proteins_norm")
-        
-        scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_dim_red")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_dim_red")
-        
-        
       }
       else if (input$norm_method == "SCoPE2" && input$transform_base != "log2" | input$transform_base != "log10") {
         # center cols with median
@@ -401,32 +429,7 @@ server <- function(input, output, session) {
                                         na.rm = TRUE),
                        name = "proteins_norm")
         
-        sce <- getWithColData(scp_0, "proteins_norm")
-        
-        scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_dim_red")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_dim_red")
-        
-        
-      }
-      else if (input$norm_method == "None") {
-        # apply nothing and return the original data as new object
-        sce <- getWithColData(scp_0, "proteins_transf")
-        
-        scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_dim_red")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_transf",
-                                      to = "proteins_dim_red")
-        
-      }
-      else if (input$norm_method == "CONSTANd") {
+      } else if (input$norm_method == "CONSTANd") {
         # apply matrix raking --> row means and col means equal Nrows and Ncols  
         protein_matrix <- assay(scp_0[["proteins_transf"]])
         protein_matrix <- CONSTANd(protein_matrix)
@@ -443,6 +446,40 @@ server <- function(input, output, session) {
         
         assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
         
+      }
+      
+      
+      if (length(peptide_file) > 1 && input$multiple_batches) {
+        incProgress(16/17, detail=paste("running missing value imputation"))
+        scp_0 <- impute(scp_0,
+                      i = "proteins_norm",
+                      name = "proteins_imptd",
+                      method = "knn",
+                      k = 3, rowmax = 1, colmax= 1,
+                      maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+        
+        incProgress(16/17, detail=paste("running batch correction"))
+        
+        sce <- getWithColData(scp_0, "proteins_imptd")
+        
+        batch <- colData(sce)$Raw.file
+        model <- model.matrix(~0 + SampleType, data = colData(sce))
+        
+        assay(sce) <- ComBat(dat = assay(sce),
+                             batch = batch)#,
+                             #mod = model)
+        
+        
+        scp_0 <- addAssay(scp_0,
+                        y = sce,
+                        name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                    from = "proteins_imptd",
+                                    to = "proteins_dim_red")
+        
+        
+      } else {
         sce <- getWithColData(scp_0, "proteins_norm")
         
         scp_0 <- addAssay(scp_0,
@@ -451,9 +488,11 @@ server <- function(input, output, session) {
         
         scp_0 <- addAssayLinkOneToOne(scp_0,
                                       from = "proteins_norm",
-                                      to = "proteins_dim_red")
-        
+                                      to = "proteins_dim_red")  
       }
+
+      
+      
       
       incProgress(16/17, detail=paste("running dimensionality reduction"))
       
@@ -763,15 +802,25 @@ server <- function(input, output, session) {
     scp_0 <- scp()
     meta_data_0 <- meta_data()
     
-    file_name <- meta_data_0$Raw.file[1]
-    peptides <- paste("peptides_", as.character(file_name), sep = "")
+    file_name <- unique(meta_data_0$Raw.file)
+    peptide_file <- paste("peptides_", as.character(file_name), sep = "")
     
-    getWithColData(scp_0, peptides) %>%
-      colData %>%
-      data.frame %>%
-      ggplot(aes(x = MedianCV,
-                 fill = SampleType)) +
-      geom_boxplot()
+    if (length(peptide_file) > 1) {
+      getWithColData(scp_0, "peptides") %>%
+        colData %>%
+        data.frame %>%
+        ggplot(aes(x = MedianCV,
+                   fill = SampleType)) +
+        geom_boxplot() +
+        geom_vline(xintercept = 0.65)  
+    } else {
+      getWithColData(scp_0, peptide_file) %>%
+        colData %>%
+        data.frame %>%
+        ggplot(aes(x = MedianCV,
+                   fill = SampleType)) +
+        geom_boxplot()
+    }
   })
   
   # principle component analysis in fifth tab

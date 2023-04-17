@@ -69,8 +69,6 @@ scp <- filterFeatures(scp,
 
 
 nPSMs <- dims(scp)[1, ]
-#nPSMs <- dims(scp)[1, 1]
-#nPeps <- dims(scp)[1, 2]
 
 ggplot(data.frame(nPSMs)) +
   aes(x = nPSMs) +
@@ -159,7 +157,7 @@ scp <- aggregateFeaturesOverAssays(scp,
 if (length(names(scp)) > 1) {
   scp <- joinAssays(scp,
                     i = ((length(names(scp))/2)+1):length(names(scp)),
-                    name = "Peptides")
+                    name = "peptides")
 }
   
 
@@ -170,7 +168,6 @@ peptide_file <- paste("peptides_", as.character(file_name), sep = "")
 if (length(peptide_file) > 1) {
   medians <- c()
   for (assay_name in peptide_file) {
-    print(assay_name)
     new_medians <- colMedians(assay(scp[[assay_name]]), na.rm = TRUE)
     medians <- c(medians, new_medians)
   }
@@ -189,22 +186,41 @@ colData(scp) %>%
   scale_x_log10()
 
 # calculate median CV (coefficient of variation)
+if (length(peptide_file) > 1) {
+  scp <- medianCVperCell(scp,
+                         i = "peptides",
+                         groupBy = "Leading.razor.protein",
+                         nobs = 5, 
+                         norm = "div.median",
+                         na.rm = TRUE,
+                         colDataName = "MedianCV")
+} else {
+  scp <- medianCVperCell(scp,
+                         i = peptide_file,
+                         groupBy = "Leading.razor.protein",
+                         nobs = 5, 
+                         norm = "div.median",
+                         na.rm = TRUE,
+                         colDataName = "MedianCV")
+}
 
-scp <- medianCVperCell(scp,
-                       i = length(rowDataNames(scp)),
-                       groupBy = "Leading.razor.protein",
-                       nobs = 5, 
-                       norm = "div.median",
-                       na.rm = TRUE,
-                       colDataName = "MedianCV")
+if (length(peptide_file) > 1) {
+  getWithColData(scp, "peptides") %>%
+    colData %>%
+    data.frame %>%
+    ggplot(aes(x = MedianCV,
+               fill = SampleType)) +
+    geom_boxplot() +
+    geom_vline(xintercept = 0.65)  
+} else {
+  getWithColData(scp, peptide_file) %>%
+    colData %>%
+    data.frame %>%
+    ggplot(aes(x = MedianCV,
+               fill = SampleType)) +
+    geom_boxplot()
+}
 
-getWithColData(scp, peptides) %>%
-  colData %>%
-  data.frame %>%
-  ggplot(aes(x = MedianCV,
-             fill = SampleType)) +
-  geom_boxplot() +
-  geom_vline(xintercept = 0.65)
 
 # filter out all samples with coefficient of variation larger than 
 # variable can be adjusted!
@@ -222,9 +238,18 @@ scp <- scp[, !is.na(scp$MedianCV) & scp$MedianCV < 0.65, ]
 
 # remove peptides with high missing rate
 
-scp <- filterNA(scp,
-                i = peptides, #_norm",
-                pNA = 0.99)
+
+
+if (length(peptide_file) > 1) {
+  scp <- filterNA(scp,
+                  i = "peptides",
+                  pNA = 0.99)
+} else {
+  scp <- filterNA(scp,
+                  i = peptide_file,
+                  pNA = 0.99)
+}
+
 
 # # sqrt transformation
 # scp <- sweep(scp, i="peptides_norm",
@@ -241,11 +266,21 @@ scp <- filterNA(scp,
 # 
 
 # aggregate peptide to protein
-scp <- aggregateFeatures(scp,
-                         i = peptides,
-                         name = "proteins",
-                         fcol = "Leading.razor.protein",
-                         fun = matrixStats::colMedians, na.rm = TRUE)
+if (length(peptide_file) > 1) {
+  scp <- aggregateFeatures(scp,
+                           i = "peptides",
+                           name = "proteins",
+                           fcol = "Leading.razor.protein",
+                           fun = matrixStats::colMedians, na.rm = TRUE)
+  
+} else {
+  scp <- aggregateFeatures(scp,
+                           i = peptide_file,
+                           name = "proteins",
+                           fcol = "Leading.razor.protein",
+                           fun = matrixStats::colMedians, na.rm = TRUE)
+}
+
 
 #log-transform
 # scp <- logTransform(scp,
@@ -386,6 +421,9 @@ assay(scp[["proteins_transf"]]) <- protein_matrix
 # make MA plot first
 MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
   # make an MA plot of y vs. x that shows the rolling average,
+  x[is.na(x)] <- 0
+  y[is.na(y)] <- 0
+  
   M <- log2(y/x)
   xlab = 'A'
   if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
@@ -423,7 +461,7 @@ choice_B <- user_choice_vector[[1]][2]
 index_A <- st_indeces[choice_A]
 index_B <- st_indeces[choice_B]
 
-MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
+#MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
 
 protein_matrix <- assay(scp[["proteins_transf"]])
 #protein_matrix <- CONSTANd(protein_matrix)
@@ -435,55 +473,58 @@ scp <- addAssay(scp,
                 name = "proteins_norm")
 
 scp <- addAssayLinkOneToOne(scp,
-                            from = "proteins",
+                            from = "proteins_transf",
                             to = "proteins_norm")
 
 assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
 #assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 
-# missing value imputation
 
+# missing value imputation
 # show missing values
-scp[["proteins_transf"]] %>%
+scp[["proteins_norm"]] %>%
   assay %>%
   is.na %>%
   mean
 
-# longFormat(scp[, , "proteins_norm"]) %>%
-#   data.frame %>%
-#   group_by(colname) %>%
-#   summarize(missingness = mean(is.na(value))) %>%
-#   ggplot(aes(x = missingness)) +
-#   geom_histogram()
-# 
+longFormat(scp[, , "proteins_norm"]) %>%
+  data.frame %>%
+  group_by(colname) %>%
+  summarize(missingness = mean(is.na(value))) %>%
+  ggplot(aes(x = missingness)) +
+  geom_histogram()
+
 
 # use knn to impute missing values
+library(impute)
 
-# scp <- impute(scp,
-#               i = "proteins_norm",
-#               name = "proteins_imptd",
-#               method = "knn",
-#               k = 3, rowmax = 1, colmax= 1,
-#               maxp = Inf, rng.seed = 1234)
+scp <- impute(scp,
+              i = "proteins_norm",
+              name = "proteins_imptd",
+              method = "knn",
+              k = 3, rowmax = 1, colmax= 1,
+              maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+
 
 # show missing values again
-# scp[["proteins_imptd"]] %>%
-#   assay %>%
-#   is.na %>%
-#   mean
+scp[["proteins_imptd"]] %>%
+  assay %>%
+  is.na %>%
+  mean
 
 # batch correction
 # upon multiple runs
 
-sce <- getWithColData(scp, "proteins_transf")
-# 
-#  batch <- colData(sce)$Raw.file
-#  model <- model.matrix(~ SampleType, data = colData(sce))
- # library(sva)
- # assay(sce) <- ComBat(dat = assay(sce),
- #                      batch = batch,
- #                      mod = model)
- # 
+sce <- getWithColData(scp, "proteins_imptd")
+
+batch <- colData(sce)$Raw.file
+model <- model.matrix(~0 + SampleType, data = colData(sce))
+
+library(sva)
+assay(sce) <- ComBat(dat = assay(sce),
+                     batch = batch)#,
+                     #mod = model)
+
 
  scp <- addAssay(scp,
                  y = sce,
