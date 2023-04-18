@@ -51,9 +51,9 @@ ui <- fluidPage(
       selectInput("transform_base", "Choose method for protein data transformation", choices = c("log2", "log10", "sqrt", "quadratic", "BoxCox", "None")),
       # normalization method 
       selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
-      switchInput(inputId = "multiple_batches", onLabel = "Multiple batches", offLabel = "Single batch", value = F),
-      conditionalPanel(condition = "input.multiple_batches"#, 
-                       #switchInput(inputId = "missing_v_impt", onLabel = "Missing value imputation", offLabel = "Missing = NaN", value = F),
+      switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
+      conditionalPanel(condition = "input.opts_multiple_batches", 
+                       selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with 0", "replace with mean", "replace with median"))
                        #switchInput(inputId = "batch_correction", onLabel = "Batch correction", offLabel = "No batch correction")
                        )
       
@@ -449,14 +449,65 @@ server <- function(input, output, session) {
       }
       
       
-      if (length(peptide_file) > 1 && input$multiple_batches) {
+      if (length(peptide_file) > 1) {
         incProgress(16/17, detail=paste("running missing value imputation"))
-        scp_0 <- impute(scp_0,
-                      i = "proteins_norm",
-                      name = "proteins_imptd",
-                      method = "knn",
-                      k = 3, rowmax = 1, colmax= 1,
-                      maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+        if (input$missing_v == "KNN") {
+          scp_0 <- impute(scp_0,
+                          i = "proteins_norm",
+                          name = "proteins_imptd",
+                          method = "knn",
+                          k = 3, rowmax = 1, colmax= 1,
+                          maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+        } else if (input$missing_v == "drop rows") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_norm",
+                                        to = "proteins_imptd")
+          
+          scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
+        } else if (input$missing_v == "replace with 0") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_imptd")
+          
+          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), 0)
+          
+        } else if (input$missing_v == "replace with mean") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_imptd")
+          
+          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), mean(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
+        } else if (input$missing_v == "replace with median") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_imptd")
+          
+          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), median(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))        
+        }
         
         incProgress(16/17, detail=paste("running batch correction"))
         
@@ -767,17 +818,19 @@ server <- function(input, output, session) {
   # summary barchart second tab
   output$summary_bar <- renderPlot({
     scp_0 <- scp()
+
+    count_table <- data.frame(dims(scp_0))
     
-    nPSMs <- dims(scp_0)[1, 1]
-    nPeps <- dims(scp_0)[1, 2]
-    nProts <- dims(scp_0)[1, 3]
+    nPSMs <- log10(sum(count_table[1:length(unique(scp_0$Raw.file))]))
+    nPeps <- log10(sum(count_table$peptides))
+    nProts <- log10(sum(count_table$proteins))
     summary_count <- data.frame(nPSMs, nPeps, nProts)
     summary_count <- reshape2::melt(summary_count)
     
     ggplot(summary_count, aes(x = variable, y = value, fill = variable)) +
       geom_bar(stat = "identity") +
-      labs(x = "Number of PSMs, Peptides and Proteins", y = "Counts") +
-      scale_fill_manual(values = c("darkblue", "darkgreen", "darkred"))
+      labs(x = "log10 of number of PSMs, Peptides and Proteins", y = "Counts") +
+      scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
   })
   
   # Boxplot of reporter ion intensity third tab
@@ -811,8 +864,7 @@ server <- function(input, output, session) {
         data.frame %>%
         ggplot(aes(x = MedianCV,
                    fill = SampleType)) +
-        geom_boxplot() +
-        geom_vline(xintercept = 0.65)  
+        geom_boxplot()  
     } else {
       getWithColData(scp_0, peptide_file) %>%
         colData %>%
@@ -969,6 +1021,11 @@ server <- function(input, output, session) {
   # plot MA plot for the constand method
   output$MAplot <- renderPlot({
     req(input$selectedComp)
+    req(scp())
+    
+    scp_0 <- scp() 
+    scp_0 <- filterNA(scp_0, pNA = 0, "proteins_transf")
+    
     user_choice <- input$selectedComp
     # split user choice of comp back to sample types
     user_choice_vector <- strsplit(user_choice, split = "-")
@@ -977,11 +1034,21 @@ server <- function(input, output, session) {
     choice_B <- user_choice_vector[[1]][2]
     
     #find the row indeces of corresponding to the individual sample types
-    st_indeces <- split(seq_along(scp()$SampleType), scp()$SampleType)
+    st_indeces <- split(seq_along(scp_0$SampleType), scp_0$SampleType)
     index_A <- st_indeces[choice_A]
     index_B <- st_indeces[choice_B]
     
+    
     MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
+      # catch unequal size of matrices
+      if (dim(x)[2] != dim(y)[2]) {
+        if (dim(x)[2] > dim(y)[2]) {
+          x <- x[, 1:dim(y)[2]]
+        } else if (dim(y)[2] > dim(x)[2]) {
+          y <- y[, 1:dim(x)[2]]
+        }
+      }
+      
       # make an MA plot of y vs. x that shows the rolling average,
       M <- log2(y/x)
       xlab = 'A'
@@ -1003,7 +1070,7 @@ server <- function(input, output, session) {
       # rolling average
       if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
     }
-    MAplot(assay(scp()[["proteins_transf"]][,index_A[[1]]]), assay(scp()[["proteins_transf"]][,index_B[[1]]]))
+    MAplot(assay(scp_0[["proteins_transf"]][,index_A[[1]]]), assay(scp_0[["proteins_transf"]][,index_B[[1]]]))
   })
 
   #create interface for the constand normalization method

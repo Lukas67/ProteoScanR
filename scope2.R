@@ -420,10 +420,16 @@ assay(scp[["proteins_transf"]]) <- protein_matrix
 
 # make MA plot first
 MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
-  # make an MA plot of y vs. x that shows the rolling average,
-  x[is.na(x)] <- 0
-  y[is.na(y)] <- 0
+  # catch unequal size of matrices
+  if (dim(x)[2] != dim(y)[2]) {
+    if (dim(x)[2] > dim(y)[2]) {
+      x <- x[, 1:dim(y)[2]]
+    } else if (dim(y)[2] > dim(x)[2]) {
+      y <- y[, 1:dim(x)[2]]
+    }
+  }
   
+  # make an MA plot of y vs. x that shows the rolling average,
   M <- log2(y/x)
   xlab = 'A'
   if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
@@ -461,7 +467,7 @@ choice_B <- user_choice_vector[[1]][2]
 index_A <- st_indeces[choice_A]
 index_B <- st_indeces[choice_B]
 
-#MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
+MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
 
 protein_matrix <- assay(scp[["proteins_transf"]])
 #protein_matrix <- CONSTANd(protein_matrix)
@@ -501,11 +507,13 @@ library(sva)
 
 if (length(peptide_file) > 1) {
   scp <- impute(scp,
-                  i = "proteins_norm",
-                  name = "proteins_imptd",
-                  method = "knn",
-                  k = 3, rowmax = 1, colmax= 1,
-                  maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+                i = "proteins_norm",
+                name = "proteins_imptd",
+                method = "knn",
+                k = 3, rowmax = 1, colmax= 1,
+                maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+} 
+  
   
   sce <- getWithColData(scp, "proteins_imptd")
   
@@ -782,5 +790,6 @@ results <- decideTests(fit)
 topTable(fit, coef = "`scp_0$SampleType`Monocytes_B")
 
 volcanoplot(fit)
+
 
 
