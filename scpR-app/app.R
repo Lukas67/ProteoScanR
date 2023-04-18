@@ -53,8 +53,8 @@ ui <- fluidPage(
       selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
       switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
       conditionalPanel(condition = "input.opts_multiple_batches", 
-                       selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with 0", "replace with mean", "replace with median"))
-                       #switchInput(inputId = "batch_correction", onLabel = "Batch correction", offLabel = "No batch correction")
+                       selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with 0", "replace with mean", "replace with median")),
+                       selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("ComBat", "none"))
                        )
       
     ),
@@ -510,24 +510,25 @@ server <- function(input, output, session) {
         }
         
         incProgress(16/17, detail=paste("running batch correction"))
-        
         sce <- getWithColData(scp_0, "proteins_imptd")
+        if (input$batch_c == "ComBat") {
+          batch <- colData(sce)$Raw.file
+          model <- model.matrix(~0 + SampleType, data = colData(sce))
+          
+          assay(sce) <- ComBat(dat = assay(sce),
+                               batch = batch)#,
+                               #mod = model)
+        } else if (input$batch_c == "none") {
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_dim_red")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_imptd",
+                                        to = "proteins_dim_red")          
+        }
         
-        batch <- colData(sce)$Raw.file
-        model <- model.matrix(~0 + SampleType, data = colData(sce))
-        
-        assay(sce) <- ComBat(dat = assay(sce),
-                             batch = batch)#,
-                             #mod = model)
-        
-        
-        scp_0 <- addAssay(scp_0,
-                        y = sce,
-                        name = "proteins_dim_red")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                    from = "proteins_imptd",
-                                    to = "proteins_dim_red")
+
         
         
       } else {

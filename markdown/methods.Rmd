@@ -132,7 +132,7 @@ Biomolecules can now be searched in a database in forward and reverse direction.
 
 ##### Protein assembly
 
-After these calculation the identified peptides can be aggregated according to it`s respective protein and  quantified. The mentioned metrics indicating the performance of the peptide search can be used in downstream analysis. A so called razor peptide indicates the group with the highest number of identified peptides. Quantification is enabled by taking only unique peptides into contrast. Posterior error probabilities, which refers to the chance that the found peptide is a random event, are multiplied and only distinct sequences with the highst-scoring are used.
+After these calculation the identified peptides can be aggregated according to it`s respective protein and  quantified. The mentioned metrics indicating the performance of the peptide search can be used in downstream analysis. A so called razor peptide indicates the group with the highest number of identified peptides. Quantification is enabled by taking only unique peptides into contrast. Posterior error probabilities, which refers to the chance that the found peptide is a random event, are multiplied and only distinct sequences with the highest-scoring are used.
 
 #### Data processing
 
@@ -140,7 +140,7 @@ Further analysis can be done with R and respective packages such as bioconductor
 
 ##### Reading the data
 
-After processing MaxQuant creates a directory containing all results as .txt file. The evidence.txt file include all peptide sequence matches (PSM) with their respective proteins and statistical parameters. 
+After processing MaxQuant creates a directory containing all results as .txt file. The evidence.txt file include all peptide to spectrum matches (PSM) with their respective proteins and statistical parameters. 
 
 Example fo basic parameters and derivations include:
 
@@ -156,19 +156,42 @@ Example fo basic parameters and derivations include:
 	+ corrected RI
 * Posterior error probability (PEP)
 
-#### Object oriented programming
+##### Object oriented programming
 
-In order to streamline the analysis of multiple experiments, object oriented programming can be applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis. 
+In order to streamline the analysis of multiple experiments, object oriented programming can be applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis \citep{Vanderaa2021}.
 
-#### Filtering
+##### Zero values
+Peptides with low abundance are often set to zero during analysis. However, assigning a value of zero may incorrectly suggest that the sample does not contain the respective peptide. Given that it is highly unlikely for a biological cell of a comparable type and function to not contain a particular protein, replacing the zero value with "not applicable" (NA) is crucial for understanding and interpreting MS data.
 
-Peptides having a low abundance will be set to zero by the analysis. The value zero would imply that the sample does not contain the respective peptide, therefore replacing 0 with not applicable (NA) is crucial for understanding and interpretation of MS-data.
-
+##### Exclude reverse matches/contaminants
 Peptide sequences matching to the reverse protein sequences (=decoy database) are considered as possible contaminants. These matches can be excluded from further analysis.  
 
-The author of the SCoPE2 \citep{Petelski2021} pipeline recommends calculating the sample to carrier ration (SCR). This can be done by dviding the ion intensity of the sample by the reporter ion intensity of the carrier channel. However in our experiment no carrier and reference channel is used. 
+##### Filter according to precursor ion fraction (PIF)
+During mass spectrometry, the ions detected in MS1 are further fragmented through collision during multiple MS runs. The resulting product ions are derived from precursor ions (also known as mother ions or parental ions). Contaminant peptides can co-migrate in this process and can be distinguished by the lower fraction of their respective precursor ions \citep{Tannous2020}. These peptides need to be filtered out during the analysis pipeline. A cutoff value, referenced in the SCoPE2 pipeline \citep{Specht2021}, is applied in the user interface, but it can be adjusted according to the needs of the biologist.
 
+
+##### Filter by q-value
 The next step for quality control is the exclusion of samples with a high false discovery rate (FDR). When applying multiple statistical testing (e.g. t-Test) the obtained p-values can be considered as biased, because the probability to observe a significant will iteratively increase with each test performed. Corrections in statistics are an approach to compensate for the multiplicity of testing. There are many ways to do this compensation like the Bonferroni method or Benjamini-Hochberg`s FDR. In Mass spectrometry the common “way to go” is calculating a false discovery rate, by dividing false PSMs (=hit of the decoy database) through the total number of PSMs above the peptide-spectrum matching score. The peptides spectrum matching score is defined as -10log10(p). Whereas the p-value is defined that the hit is done by chance. The calculation of the score is highly dependent on the data acquisition method used. MaxQuant uses Andromeda , an integrated search engine. Proteome Discoverer from Thermo Fisher utilizes different engines such as Mascot or Minora. As published by J.Cox in 2011 Mascot and Andromeda showed similar performance when comparing FDR values as a function of coverage. However the observed performance can be lower when dealing with a decreased coverage \citep{Cox2011}.The threshold for accepting an FDR of an individual PSM is described as q-value. 
+
+##### Peptide spectrum match (PSM) aggregation to peptides 
+In data science, aggregation refers to a row-wise operation that merges data based on a particular column using a specific function. In the context of processing from peptides to spectrum matches, the desired column is the peptide sequence. To account for different distributions across multiple assays, the median of the channel is used as the function to aggregate multiple matches into one.
+
+##### Join assays when observing multiple comparable batches at once
+Sample size is often a limiting factor in hypothesis testing. A strict quality control and the fact that TMT reagents are only available up to 18-plex can reduce the number of observed samples below the critical threshold, leading to an early end of analyses. To overcome this limitation, the provided software is capable of processing multiple runs simultaneously, allowing for testing of multiple batches and increasing the number of samples that can be included in the analysis.
+
+##### Calculate reporter ion intensity (RI) and filter according to median RI
+Columns which do not meet the desired intensity can be filtered by a threshold set on the RI. The median RI can also be used to check if an entire channel has a lower detection level. This can be due two reasons. One is the expression level of the given proteins in a cell. Meaning, that the expression of the observed cell type is simply lower than the other type. Another one could be a spillage of TMT detection in other channels due incorrect or missing correction of the TMT isotopes. 
+
+##### Calculate and filter according to median coefficient of variation (CV) per cell/channel
+Depending having a bulk sample or single-cell sample choosing a minimum of observed peptides and a cutoff value for the CV, changes the level of confidence in the peptide data. The coefficient of variation of a peptide is considered as the ratio of the standard deviation to the mean and describes the relationship of the observed peptide signal over multiple proteins (=razor proteins). Peptides having a high coefficient of variation over many razor proteins are considered as noise and need to be filtered out before statistical analysis.
+
+
+##### Remove peptides with high missing rate
+Although missing value imputation can be performed during the analysis of multiple batches, peptides with missing detections across channels can be problematic for quantification. The proteomic composition of a biological sample is similar between replicates and even across groups. However, the threshold of missingness (described as a fraction of the row) can be set in the user interface and adjusted to enable different experimental designs.
+
+##### Aggregation of peptides to proteins 
+Similar to the already explained previous aggregation step the peptides will be further processed into their respective proteins after the quality control on the peptide level is performed.  
+
 
 Further filter steps can include correction between multiple runs. This kind of process need the addition of a reference channel. However when observing a single run, these steps are not crucial for the upcoming analysis. 
 

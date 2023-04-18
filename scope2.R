@@ -533,20 +533,6 @@ if (length(peptide_file) > 1) {
                                 from = "proteins_imptd",
                                 to = "proteins_dim_red")
   
-  
-} else {
-  sce <- getWithColData(scp, "proteins_norm")
-  
-  scp <- addAssay(scp,
-                    y = sce,
-                    name = "proteins_dim_red")
-  
-  scp <- addAssayLinkOneToOne(scp,
-                                from = "proteins_norm",
-                                to = "proteins_dim_red")  
-}
-
-
 
 # show missing values again
 scp[["proteins_imptd"]] %>%
@@ -563,7 +549,7 @@ scp[["proteins_imptd"]] %>%
 
 library(scater)
 
-scp[["proteins_final"]] <- runPCA(scp[["proteins_final"]],
+scp[["proteins_dim_red"]] <- runPCA(scp[["proteins_dim_red"]],
                                    ncomponents = 5,
                                    ntop = Inf,
                                    scale = TRUE,
@@ -571,13 +557,13 @@ scp[["proteins_final"]] <- runPCA(scp[["proteins_final"]],
                                    name = "PCA")
 
 
-plotReducedDim(scp[["proteins_final"]],
+plotReducedDim(scp[["proteins_dim_red"]],
                dimred = "PCA",
                colour_by = "SampleType",
                point_alpha = 1)
 
 # UMAP
-scp[["proteins_final"]] <- runUMAP(scp[["proteins_final"]],
+scp[["proteins_dim_red"]] <- runUMAP(scp[["proteins_dim_red"]],
                                    ncomponents = 2,
                                    ntop = Inf,
                                    scale = TRUE,
@@ -586,7 +572,7 @@ scp[["proteins_final"]] <- runUMAP(scp[["proteins_final"]],
                                    dimred = "PCA",
                                    name = "UMAP")
 
-plotReducedDim(scp[["proteins_final"]],
+plotReducedDim(scp[["proteins_dim_red"]],
                dimred = "UMAP",
                colour_by = "SampleType",
                point_alpha = 1)
