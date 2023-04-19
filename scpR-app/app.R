@@ -892,7 +892,7 @@ server <- function(input, output, session) {
           fill = get(input$color_variable_ri)) +
       geom_boxplot() +
       scale_x_log10() +
-      labs(color=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
+      labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
   })
   
   #observer for color_variable
@@ -919,7 +919,7 @@ server <- function(input, output, session) {
         ggplot(aes(x = MedianCV,
                    fill = get(input$color_variable_cv))) +
         geom_boxplot()+
-        labs(color=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
+        labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
     } else {
       getWithColData(scp_0, peptide_file) %>%
         colData %>%
@@ -927,7 +927,7 @@ server <- function(input, output, session) {
         ggplot(aes(x = MedianCV,
                    fill = get(input$color_variable_cv))) +
         geom_boxplot()+
-        labs(color=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
+        labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
     }
   })
   
