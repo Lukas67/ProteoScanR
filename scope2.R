@@ -11,12 +11,17 @@
 # read in SCP data
 
 library("scp")
+library("SingleCellExperiment")
 library("ggplot2")
 library("magrittr")
 library("dplyr")
+library("reshape2")
+library("scater")
+library("limma")
 library("CONSTANd")
-library("MASS")
-
+library("stats")
+library("impute")
+library("sva")
 
 # read in MS result table
 mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")

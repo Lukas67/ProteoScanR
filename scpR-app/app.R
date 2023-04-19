@@ -3,6 +3,7 @@ library("shinyWidgets")
 library("shinydashboard")
 
 library("scp")
+library("SingleCellExperiment")
 library("ggplot2")
 library("magrittr")
 library("dplyr")
@@ -65,9 +66,18 @@ ui <- fluidPage(
       tabsetPanel(type = "tabs",
                   tabPanel("Overview", plotOutput("overview_plot")),
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
-                  tabPanel("Reporter Ion Intensity", plotOutput("RI_intensity")),
-                  tabPanel("Covariance across razor peptides", plotOutput("CV_median")),
-                  tabPanel("Dimensionality reduction", plotOutput("PCA"), plotOutput("UMAP")),
+                  tabPanel("Reporter Ion Intensity", 
+                           selectInput("color_variable_ri", "select variable to indicate", ""),
+                           plotOutput("RI_intensity")),
+                  tabPanel("Covariance across razor peptides",
+                           selectInput("color_variable_cv", "select variable to indicate", ""),
+                           plotOutput("CV_median")),
+                  tabPanel("Dimensionality reduction",
+                           selectInput("color_variable_dim_red", "select variable to color", ""),
+                           selectInput("shape_variable_dim_red", "select variable to shape", ""),
+                           selectInput("size_variable_dim_red", "select variable to size", ""),                           
+                           plotOutput("PCA"), 
+                           plotOutput("UMAP")),
                   tabPanel("Feature wise output", 
                            selectInput("selectedProtein", "Choose protein for observation", ""),
                            plotOutput("feature_subset")),
@@ -513,12 +523,34 @@ server <- function(input, output, session) {
         sce <- getWithColData(scp_0, "proteins_imptd")
         if (input$batch_c == "ComBat") {
           batch <- colData(sce)$Raw.file
+          # can be used to aim batch correction for desired result
           model <- model.matrix(~0 + SampleType, data = colData(sce))
           
           assay(sce) <- ComBat(dat = assay(sce),
                                batch = batch)#,
                                #mod = model)
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_batchC")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_imptd",
+                                        to = "proteins_batchC")
+          
+          sce <- getWithColData(scp_0, "proteins_batchC")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_dim_red")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_batchC",
+                                        to = "proteins_dim_red") 
+          
         } else if (input$batch_c == "none") {
+          sce <- getWithColData(scp_0, "proteins_imptd")
+          
           scp_0 <- addAssay(scp_0,
                             y = sce,
                             name = "proteins_dim_red")
@@ -548,7 +580,7 @@ server <- function(input, output, session) {
       
       incProgress(16/17, detail=paste("running dimensionality reduction"))
       
-      scp_0[["proteins_dim_red"]] <- runPCA(scp_0[["proteins_dim_red"]],
+      scp_0[["proteins_dim_red"]] <- scater::runPCA(scp_0[["proteins_dim_red"]],
                                             ncomponents = 5,
                                             ntop = Inf,
                                             scale = TRUE,
@@ -834,6 +866,13 @@ server <- function(input, output, session) {
       scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
   })
   
+  #observer for color_variable
+  observe({
+    req(columns())
+    updateSelectInput(session, "color_variable_ri", choices=columns())
+  })  
+  
+  
   # Boxplot of reporter ion intensity third tab
   output$RI_intensity <- renderPlot({
     scp_0 <- scp()
@@ -842,11 +881,17 @@ server <- function(input, output, session) {
       data.frame %>%
       ggplot() +
       aes(x = MedianRI, 
-          y = SampleType,
-          fill = SampleType) +
+          y = get(input$color_variable_ri),
+          fill = get(input$color_variable_ri)) +
       geom_boxplot() +
       scale_x_log10()
   })
+  
+  #observer for color_variable
+  observe({
+    req(columns())
+    updateSelectInput(session, "color_variable_cv", choices=columns())
+  })  
   
   # covariance across razor peptides fourth tab
   output$CV_median <- renderPlot({
@@ -864,24 +909,44 @@ server <- function(input, output, session) {
         colData %>%
         data.frame %>%
         ggplot(aes(x = MedianCV,
-                   fill = SampleType)) +
+                   fill = get(input$color_variable_cv))) +
         geom_boxplot()  
     } else {
       getWithColData(scp_0, peptide_file) %>%
         colData %>%
         data.frame %>%
         ggplot(aes(x = MedianCV,
-                   fill = SampleType)) +
+                   fill = get(input$color_variable_cv))) +
         geom_boxplot()
     }
   })
+  
+  #observer for color_variable
+  observe({
+    req(columns())
+    updateSelectInput(session, "color_variable_dim_red", choices=c("", columns()), selected = NULL)
+  })
+
+  #observer for shape_variable
+  observe({
+    req(columns())
+    updateSelectInput(session, "shape_variable_dim_red", choices=c("", columns()), selected = NULL)
+  })
+  
+  observe({
+    req(columns())
+    updateSelectInput(session, "size_variable_dim_red", choices=c("", columns()), selected = NULL)
+  })
+  
   
   # principle component analysis in fifth tab
   output$PCA <- renderPlot({
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "PCA",
-                   colour_by = "SampleType",
+                   colour_by = input$color_variable_dim_red,
+                   shape_by = input$shape_variable_dim_red,
+                   size_by = input$size_variable_dim_red,
                    point_alpha = 1,
                    point_size=3)
   })
@@ -891,7 +956,9 @@ server <- function(input, output, session) {
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "UMAP",
-                   colour_by = "SampleType",
+                   colour_by = input$color_variable_dim_red,
+                   shape_by = input$shape_variable_dim_red,
+                   size_by = input$size_variable_dim_red,
                    point_alpha = 1,
                    point_size = 3)
   })
@@ -1100,8 +1167,6 @@ server <- function(input, output, session) {
 
   
 }
-
-
 
 
 # Run the application 
