@@ -73,11 +73,18 @@ ui <- fluidPage(
                            selectInput("color_variable_cv", "select variable to indicate", ""),
                            plotOutput("CV_median")),
                   tabPanel("Dimensionality reduction",
-                           selectInput("color_variable_dim_red", "select variable to color", ""),
-                           selectInput("shape_variable_dim_red", "select variable to shape", ""),
-                           selectInput("size_variable_dim_red", "select variable to size", ""),                           
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           selectInput("color_variable_dim_red", "select variable to color", "")),
+                                    column(width = 4,
+                                           selectInput("shape_variable_dim_red", "select variable to shape", "")),
+                                    column(width=4,
+                                           selectInput("size_variable_dim_red", "select variable to size", ""))
+                                    ),
+                           fluidPage(
                            plotOutput("PCA"), 
-                           plotOutput("UMAP")),
+                           plotOutput("UMAP"))
+                           ),
                   tabPanel("Feature wise output", 
                            selectInput("selectedProtein", "Choose protein for observation", ""),
                            plotOutput("feature_subset")),
@@ -884,7 +891,8 @@ server <- function(input, output, session) {
           y = get(input$color_variable_ri),
           fill = get(input$color_variable_ri)) +
       geom_boxplot() +
-      scale_x_log10()
+      scale_x_log10() +
+      labs(color=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
   })
   
   #observer for color_variable
@@ -910,55 +918,79 @@ server <- function(input, output, session) {
         data.frame %>%
         ggplot(aes(x = MedianCV,
                    fill = get(input$color_variable_cv))) +
-        geom_boxplot()  
+        geom_boxplot()+
+        labs(color=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
     } else {
       getWithColData(scp_0, peptide_file) %>%
         colData %>%
         data.frame %>%
         ggplot(aes(x = MedianCV,
                    fill = get(input$color_variable_cv))) +
-        geom_boxplot()
+        geom_boxplot()+
+        labs(color=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
     }
   })
   
   #observer for color_variable
   observe({
     req(columns())
-    updateSelectInput(session, "color_variable_dim_red", choices=c("", columns()), selected = NULL)
+    updateSelectInput(session, "color_variable_dim_red", choices=c("NULL", columns()))
   })
 
   #observer for shape_variable
   observe({
     req(columns())
-    updateSelectInput(session, "shape_variable_dim_red", choices=c("", columns()), selected = NULL)
+    updateSelectInput(session, "shape_variable_dim_red", choices=c("NULL", columns()))
   })
   
   observe({
     req(columns())
-    updateSelectInput(session, "size_variable_dim_red", choices=c("", columns()), selected = NULL)
+    updateSelectInput(session, "size_variable_dim_red", choices=c("NULL", columns()))
   })
   
   
   # principle component analysis in fifth tab
   output$PCA <- renderPlot({
+    extract_null <- function(variable) if (variable == "NULL") {
+      return(NULL)
+    } else {
+      return(variable)
+    }
+    
+    color_variable_dim_red <- extract_null(input$color_variable_dim_red)
+    shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
+    size_variable_dim_red <- extract_null(input$size_variable_dim_red)
+    
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "PCA",
-                   colour_by = input$color_variable_dim_red,
-                   shape_by = input$shape_variable_dim_red,
-                   size_by = input$size_variable_dim_red,
+                   colour_by = color_variable_dim_red,
+                   shape_by = shape_variable_dim_red,
+                   size_by = size_variable_dim_red,
                    point_alpha = 1,
                    point_size=3)
   })
   
   # Umap dimensionality reduction in fith tab
   output$UMAP <- renderPlot({
+    extract_null <- function(variable) if (variable == "NULL") {
+      return(NULL)
+    } else {
+      return(variable)
+    }
+    
+    color_variable_dim_red <- extract_null(input$color_variable_dim_red)
+    shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
+    size_variable_dim_red <- extract_null(input$size_variable_dim_red)
+    
+    
+    
     scp_0 <- scp()
     plotReducedDim(scp_0[["proteins_dim_red"]],
                    dimred = "UMAP",
-                   colour_by = input$color_variable_dim_red,
-                   shape_by = input$shape_variable_dim_red,
-                   size_by = input$size_variable_dim_red,
+                   colour_by = color_variable_dim_red,
+                   shape_by = shape_variable_dim_red,
+                   size_by = size_variable_dim_red,
                    point_alpha = 1,
                    point_size = 3)
   })
