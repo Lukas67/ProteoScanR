@@ -759,26 +759,32 @@ hist(exp_matrix[[sample_types[3]]])
 scp_0 <- scp
 
 # fetch user input for contrasts
-selectedComp_stat <- c("A", "B")
+selectedComp_stat <- c("A", "B", "D")
 # update dataframe according to user selection
 scp_0 <- scp_0[, scp_0$SampleType %in%  selectedComp_stat]
 # update expression matrix according to user selection
 exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
 
-# fetch multiple factors for analysis
-user_choice <- c("Raw.file")#, "Technician")
-#user_choice <- c("Technician")
+# # fetch multiple factors for analysis
+# user_choice <- c("Raw.file")#, "Technician")
+# #user_choice <- c("Technician")
+# 
+# # fetch the metadata to factorize
+# fetched_factor <- colData(scp_0)[user_choice]
+# design_frame <- cbind(fetched_factor, scp_0$SampleType)
+# design <- model.matrix(~0 + . , data=design_frame)
 
-# fetch the metadata to factorize
-fetched_factor <- colData(scp_0)[user_choice]
-design_frame <- cbind(fetched_factor, scp_0$SampleType)
-design <- model.matrix(~0 + . , data=design_frame)
-
+# single factor analysis
+design <- model.matrix(~0 + scp_0$SampleType)
+colnames(design)<-unique(scp_0$SampleType)
 fit <- lmFit(exp_matrix_0, design)
+cont.matrix <- makeContrasts(contrasts = "A-B-D" , levels=design)
+fit <- contrasts.fit(fit, cont.matrix)
+
 fit <- eBayes(fit)
 
 results <- decideTests(fit)
-topTable(fit)#, coef = "`scp_0$SampleType`Monocytes_B")
+topTable(fit)
 
 volcanoplot(fit)
 

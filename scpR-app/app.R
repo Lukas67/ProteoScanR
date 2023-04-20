@@ -647,8 +647,7 @@ server <- function(input, output, session) {
         fit <- lmFit(exp_matrix_0, design)
         
         user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
-        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=design)
-        
+        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
         fit <- contrasts.fit(fit, cont_matrix)
       }
       else if (input$model_design == "Multi factor additivity") {
