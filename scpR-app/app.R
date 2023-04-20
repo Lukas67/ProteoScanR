@@ -635,8 +635,12 @@ server <- function(input, output, session) {
         }
       #Differential Expression with defined Contrasts
       else if (input$model_design == "Differential Expression with defined Contrasts") {
+        # fetch user selection
         req(input$selectedComp_stat)
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+        colnames(exp_matrix_0) <- scp_0$SampleType
+        
         design <- model.matrix(~0+factor(scp_0$SampleType))
         colnames(design) <- unique(scp_0$SampleType)
         
@@ -652,7 +656,9 @@ server <- function(input, output, session) {
         req(input$selectedComp_stat)
 
         scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-
+        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+        colnames(exp_matrix_0) <- scp_0$SampleType
+        
         fetched_factor <- colData(scp_0)[input$col_factors]
         design_frame <- cbind(fetched_factor, scp_0$SampleType)
         design <- model.matrix(~0+ . , data=design_frame)

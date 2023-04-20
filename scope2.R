@@ -617,16 +617,16 @@ library(limma)
 
 
 # create expression matrix
-exp_matrix <- data.frame(assay(scp[["proteins_final"]]))
+exp_matrix <- data.frame(assay(scp[["proteins_dim_red"]]))
 colnames(exp_matrix) <- scp$SampleType
 
 # check if the data is normal distributed
 sample_types <- unique(colnames(exp_matrix))
 
-qqnorm(exp_matrix[[sample_types[1]]], main = paste("QQ-plot of ", sample_types[1]))
-qqline(exp_matrix[[sample_types[1]]])
+qqnorm(exp_matrix[[sample_types[3]]], main = paste("QQ-plot of ", sample_types[3]))
+qqline(exp_matrix[[sample_types[3]]])
 
-hist(exp_matrix[[sample_types[1]]])
+hist(exp_matrix[[sample_types[3]]])
 # create design matrix 
 # return the count of individual colnames (Types of experiment)
 # Sample data
@@ -759,14 +759,14 @@ hist(exp_matrix[[sample_types[1]]])
 scp_0 <- scp
 
 # fetch user input for contrasts
-selectedComp_stat <- c("Monocytes_A", "Monocytes_B")
+selectedComp_stat <- c("A", "B")
 # update dataframe according to user selection
 scp_0 <- scp_0[, scp_0$SampleType %in%  selectedComp_stat]
 # update expression matrix according to user selection
-exp_matrix_0 <- assay(scp_0[["proteins_final"]])
+exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
 
 # fetch multiple factors for analysis
-user_choice <- c("Pair")#, "Technician")
+user_choice <- c("Raw.file")#, "Technician")
 #user_choice <- c("Technician")
 
 # fetch the metadata to factorize
@@ -778,7 +778,7 @@ fit <- lmFit(exp_matrix_0, design)
 fit <- eBayes(fit)
 
 results <- decideTests(fit)
-topTable(fit, coef = "`scp_0$SampleType`Monocytes_B")
+topTable(fit)#, coef = "`scp_0$SampleType`Monocytes_B")
 
 volcanoplot(fit)
 
