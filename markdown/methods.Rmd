@@ -192,6 +192,12 @@ Although missing value imputation can be performed during the analysis of multip
 ##### Aggregation of peptides to proteins 
 Similar to the already explained previous aggregation step the peptides will be further processed into their respective proteins after the quality control on the peptide level is performed.  
 
+##### Transformation of protein expression data
+Data transformation applies a function to each value of a matrix or array, so that: 
+$$
+y_i = f(x_i)
+$$
+Depending on the distribution of the values in the observed expression set, different transformations can be applied to fulfill dependencies for statistical testing. In the shiny application various procedures are implemented and can be further expanded upon request from the user. The macrophage analysis done by Specht et. Al mentioned in their SCoPE2 publication citep\{Specht2021} uses the logarithm to the base 2 to spread a compacted distribution and the remove skewness in the dataset. This transformation was used as a reference when comparing methods. However using the logarithm to the base 10 can be easy interpretable way of defining expression data and will also be facilitated by other transformation methods such as the boxcox method which is also implemented in the application. The boxcox transformation developed 1964 by Box and Cox citep\{Sakia1992} applies a recursion on the data by determining the parameter lambda. Depending on the size of lambda a certain function will be applied on each value of the expression set in order to introduce normality. As already mentioned transformations applied by the BoxCox method range from log10 to taking the square root of each value
 
 Further filter steps can include correction between multiple runs. This kind of process need the addition of a reference channel. However when observing a single run, these steps are not crucial for the upcoming analysis. 
 

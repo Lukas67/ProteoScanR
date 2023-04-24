@@ -192,9 +192,7 @@ server <- function(input, output, session) {
       # skip pool sample
       if ("Pool" %in% meta_data_0$SampleType) {
         scp_0 <- scp_0[, scp_0$SampleType !=  "Pool"]
-        print("Pool")
       }
-      print(scp_0$SampleType)
       
       # # change zeros to NA, apply first filter
       incProgress(2/17, detail = paste("replacing zeros with NA"))
