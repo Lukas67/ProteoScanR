@@ -324,6 +324,8 @@ server <- function(input, output, session) {
       
       incProgress(14/17, detail=paste("transforming protein data"))
       req(input$transform_base)
+      transform_base_bc <- "NULL"
+      
       if (input$transform_base == "log2") {
         scp_0 <- logTransform(scp_0,
                               base = 2,
@@ -369,8 +371,8 @@ server <- function(input, output, session) {
           print("1/protein_matrix")
         }
         if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
-          protein_matrix <- 1/protein_matrix**2
-          print("1/protein_matrix**2")
+          protein_matrix <- 1/(protein_matrix**1/2)
+          print("1/(protein_matrix**1/2)")
         }
         if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
           protein_matrix <- log10(protein_matrix)
@@ -416,7 +418,7 @@ server <- function(input, output, session) {
       
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
-      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" ) {
+      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10") {
         # center cols with median
         scp_0 <- sweep(scp_0, i = "proteins_transf",
                        MARGIN = 2,

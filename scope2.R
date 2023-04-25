@@ -55,6 +55,12 @@ scp <- readSCP(featureData = mqScpData,
                suffix = paste0("_TMT", 1:length(unique(sampleAnnotation$Channel))),
                removeEmptyCols = TRUE)
 
+# skip pool sample
+if ("Pool" %in% sampleAnnotation$SampleType) {
+  scp <- scp[, scp$SampleType !=  "Pool"]
+}
+
+
 
 # plot runs (not needed - sample unfractionized)
 # only one run
@@ -367,8 +373,8 @@ if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
   print("1/protein_matrix")
 }
 if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
-  protein_matrix <- 1/protein_matrix**2
-  print("1/protein_matrix**2")
+  protein_matrix <- 1/(protein_matrix**1/2)
+  print("1/(protein_matrix**1/2)")
 }
 if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
   protein_matrix <- log10(protein_matrix)
@@ -475,7 +481,7 @@ index_B <- st_indeces[choice_B]
 MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
 
 protein_matrix <- assay(scp[["proteins_transf"]])
-#protein_matrix <- CONSTANd(protein_matrix)
+protein_matrix <- CONSTANd(protein_matrix)
 
 sce <- getWithColData(scp, "proteins")
 
@@ -487,8 +493,8 @@ scp <- addAssayLinkOneToOne(scp,
                             from = "proteins_transf",
                             to = "proteins_norm")
 
-assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
-#assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
+#assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
+assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 
 
 # missing value imputation
@@ -585,27 +591,27 @@ plotReducedDim(scp[["proteins_dim_red"]],
 
 
 
-## Get the features
-subsetByFeature(scp, "Q9ULV4") %>%
-  ## Format the `QFeatures` to a long format table
-  longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
-  data.frame %>%
-  ## This is used to preserve ordering of the samples and assays in ggplot2
-  mutate(assay = factor(assay, levels = names(scp)),
-         Channel = sub("Reporter.intensity.", "Label", Channel),
-         Channel = factor(Channel, levels = unique(Channel))) %>%
-  ## Start plotting
-  ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
-  geom_point() +
-  ## Plot every assay in a separate facet
-  facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
-  ## Annotate plot
-  xlab("Channels") +
-  ylab("Intensity (arbitrary units)") +
-  ## Improve plot aspect
-  theme(axis.text.x = element_text(angle = 90),
-        strip.text = element_text(hjust = 0),
-        legend.position = "bottom")
+# ## Get the features
+# subsetByFeature(scp, "Q9ULV4") %>%
+#   ## Format the `QFeatures` to a long format table
+#   longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+#   data.frame %>%
+#   ## This is used to preserve ordering of the samples and assays in ggplot2
+#   mutate(assay = factor(assay, levels = names(scp)),
+#          Channel = sub("Reporter.intensity.", "Label", Channel),
+#          Channel = factor(Channel, levels = unique(Channel))) %>%
+#   ## Start plotting
+#   ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+#   geom_point() +
+#   ## Plot every assay in a separate facet
+#   facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+#   ## Annotate plot
+#   xlab("Channels") +
+#   ylab("Intensity (arbitrary units)") +
+#   ## Improve plot aspect
+#   theme(axis.text.x = element_text(angle = 90),
+#         strip.text = element_text(hjust = 0),
+#         legend.position = "bottom")
 
 ## limma analysis 
 # differential expression between two groups
