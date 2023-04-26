@@ -143,7 +143,9 @@ library(magrittr)
 
 opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
 opts_txt_setting <- gpar(col="darkblue", cex=1)
+refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
 
+plot_box_setting <- gpar(fill="#DDCC77")
 # input files
 evidence_file <- boxGrob({glue("evidence file",
                            .sep = "\n")})
@@ -167,8 +169,8 @@ aggregate_psms <-  boxGrob({glue("aggregate peptide spectrum matches to peptides
                                  join multiple batches",
                           .sep = "\n")})
 
-quality_control_2 <- boxGrob({glue("quality control 2",
-                          .sep = "\n")})
+quality_control_2 <- boxGrob("quality control 2",
+                             box_gp=plot_box_setting)
 qc2_content <- boxGrob(
                       "filter by reporter ion intensity cutoff\nfilter by pepitde covariance to razor protein\nremove peptides by missing rate",
                        txt_gp = opts_box_setting,
@@ -179,8 +181,8 @@ qc2_content <- boxGrob(
 aggregate_peps <- boxGrob({glue("aggregate peptides to proteins",
                           .sep = "\n")})
 
-transform_data <- boxGrob({glue("transform data",
-                          .sep = "\n")})
+transform_data <- boxGrob("transform data",
+                          box_gp=plot_box_setting)
 transform_opts <- boxGrob(
                       "options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
                        txt_gp = opts_box_setting,
@@ -188,8 +190,8 @@ transform_opts <- boxGrob(
                        just="center"
                        )
 
-normalize_data <- boxGrob({glue("normalize data",
-                          .sep = "\n")})
+normalize_data <- boxGrob("normalize data",
+                          box_gp=plot_box_setting)
 normalize_opts <- boxGrob(
                       "options:\nSCoPE2\nCONSTANd\nNone",
                        txt_gp = opts_box_setting,
@@ -197,8 +199,8 @@ normalize_opts <- boxGrob(
                        just="center"
                        )
 
-missing_value_handling <- boxGrob({glue("missing value handling",
-                          .sep = "\n")})
+missing_value_handling <- boxGrob("missing value handling",
+                                  box_gp=plot_box_setting)
 missing_value_opts <- boxGrob(
                       "options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
                        txt_gp = opts_box_setting,
@@ -206,8 +208,8 @@ missing_value_opts <- boxGrob(
                        just="center"
                        )
 
-batch_correction <- boxGrob({glue("batch correction",
-                          .sep = "\n")})
+batch_correction <- boxGrob("batch correction",
+                            box_gp=plot_box_setting)
 batch_correction_opts <- boxGrob(
                       "options:\nComBat",
                        txt_gp = opts_box_setting,
@@ -216,8 +218,8 @@ batch_correction_opts <- boxGrob(
                        )
 
 
-dim_red <- boxGrob({glue("dimensionality reduction",
-                          .sep = "\n")})
+dim_red <- boxGrob("dimensionality reduction",
+                   box_gp=plot_box_setting)
 dim_red_actions <- boxGrob(
                       "procedures:\nPCA\nUMAP",
                        txt_gp = opts_box_setting,
@@ -290,15 +292,15 @@ connectGrob(input[[2]], vert$read_data, type = "N")
 
 connectGrob(vert$quality_control_1, qc1_content, type = "horizontal", arrow_obj = arrow(angle=0))
 
-connectGrob(vert$quality_control_2, qc2_content, type = "horizontal", arrow_obj = arrow(angle=0))
+connectGrob(vert$quality_control_2, qc2_content, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
-connectGrob(vert$transform_data, transform_opts, type = "horizontal", arrow_obj = arrow(angle=0))
+connectGrob(vert$transform_data, transform_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
-connectGrob(vert$normalize_data, normalize_opts, type = "horizontal", arrow_obj = arrow(angle=0))
+connectGrob(vert$normalize_data, normalize_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
-connectGrob(vert$missing_value_handling, missing_value_opts, type = "horizontal", arrow_obj = arrow(angle=0))
+connectGrob(vert$missing_value_handling, missing_value_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
-connectGrob(vert$batch_correction, batch_correction_opts, type = "horizontal", arrow_obj = arrow(angle=0))
+connectGrob(vert$batch_correction, batch_correction_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
 connectGrob(vert$dim_red, dim_red_actions, type = "horizontal", arrow_obj = arrow(angle=0))
 
