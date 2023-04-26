@@ -255,32 +255,32 @@ vert$files <- NULL
 # right side
 qc1_content <- moveBox(qc1_content,
                     x = .8,
-                    y = coords(vert$quality_control_1)$top)
+                    y = coords(vert$quality_control_1)$y)
 
 transform_opts <- moveBox(transform_opts,
                     x = .9,
-                    y = coords(vert$transform_data)$top)
+                    y = coords(vert$transform_data)$y)
 
 missing_value_opts <- moveBox(missing_value_opts,
                     x = .7,
-                    y = coords(vert$missing_value_handling)$top)
+                    y = coords(vert$missing_value_handling)$y)
 
 dim_red_actions <- moveBox(dim_red_actions,
                     x = .9,
-                    y = coords(vert$dim_red)$top)
+                    y = coords(vert$dim_red)$y)
 
 # left side
 qc2_content <- moveBox(qc2_content,
                     x = .2,
-                    y = coords(vert$quality_control_2)$top)
+                    y = coords(vert$quality_control_2)$y)
 
 normalize_opts <- moveBox(normalize_opts,
                     x = .2,
-                    y = coords(vert$normalize_data)$top)
+                    y = coords(vert$normalize_data)$y)
 
 batch_correction_opts <- moveBox(batch_correction_opts,
                     x = .2,
-                    y = coords(vert$batch_correction)$top)
+                    y = coords(vert$batch_correction)$y)
 
 
 for (i in 1:(length(vert) - 1)) {
