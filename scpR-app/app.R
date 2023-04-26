@@ -290,7 +290,7 @@ server <- function(input, output, session) {
       MedCV_thresh <- input$MedCV_thresh
       scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < MedCV_thresh, ]
 
-      incProgress(12/17, detail=paste("remove peptides with high missing rate"))
+      incProgress(12/17, detail=paste("remove peptides by missing rate"))
       req(input$pNA)
       pNA <- input$pNA
       
@@ -1113,7 +1113,6 @@ server <- function(input, output, session) {
   # hover output below volcano chart
   output$hover_info <- renderPrint({
     req(displayed_text())
-    
     cat("UniProt-ID\n")
     displayed_text()
   })

@@ -370,14 +370,21 @@ Depending having a bulk sample or single-cell sample choosing a minimum of obser
 Although missing value imputation can be performed during the analysis of multiple batches, peptides with missing detections across channels can be problematic for quantification. The proteomic composition of a biological sample is similar between replicates and even across groups. However, the threshold of missingness (described as a fraction of the row) can be set in the user interface and adjusted to enable different experimental designs.
 
 #### Aggregation of peptides to proteins 
-Similar to the already explained previous aggregation step the peptides will be further processed into their respective proteins after the quality control on the peptide level is performed.  
+Similar to the already explained previous aggregation step the peptides will be further processed into their respective proteins after the quality control on the peptide level is performed. Finally an expression matrix for every protein and their respective channel column is returned. Each channel refers to a sample and reflects contains the intensities of each protein found in the biological specimen. 
 
 #### Transformation of protein expression data
 Data transformation applies a function to each value of a matrix or array, so that: 
 $$
 y_i = f(x_i)
 $$
-Depending on the distribution of the values in the observed expression set, different transformations can be applied to fulfill dependencies for statistical testing. In the shiny application various procedures are implemented and can be further expanded upon request from the user. The macrophage analysis done by Specht et. Al mentioned in their SCoPE2 publication citep\{Specht2021} uses the logarithm to the base 2 to spread a compacted distribution and the remove skewness in the dataset. This transformation was used as a reference when comparing methods. However using the logarithm to the base 10 can be easy interpretable way of defining expression data and will also be facilitated by other transformation methods such as the boxcox method which is also implemented in the application. The boxcox transformation developed 1964 by Box and Cox citep\{Sakia1992} applies a recursion on the data by determining the parameter lambda. Depending on the size of lambda a certain function will be applied on each value of the expression set in order to introduce normality. As already mentioned transformations applied by the BoxCox method range from log10 to taking the square root of each value
+Depending on the distribution of the values in the observed expression set, different transformations can be applied to fulfill assumptions for statistical testing. In the shiny application, various procedures are implemented and can be further expanded upon request from the user. The macrophage analysis done by Specht et al. mentioned in their SCoPE2 publication \citep{Specht2021} uses the logarithm to the base 2 to spread a compacted distribution and remove skewness in the dataset. This transformation was used as a reference when comparing methods. However, using the logarithm to the base 10 may be an easily interpretable way of defining expression data and will also be facilitated by other transformation methods such as the boxcox method, which is also implemented in the application.
+When observing a wide distribution of small and large values of the expression set in a histogram, a square root transformation can help increase the variability of smaller values and decrease the variability of larger values.
+Practically impossible, but in data-driven science, occasionally negative expression values may be present, and they can be converted into positive values by taking each one to the power of two.
+Depending on the distribution, the user has to decide which transformation to consider and verify that statistical assumptions are met after application with visualizations such as histograms, qqplots, and MA-plots.
+For statistically inexperienced users, the boxcox transformation can help with this decision. Developed in 1964 by Box and Cox \citep{Sakia1992}, this method applies a recursion on the data to determine the statistical parameter lambda. 
+
+Depending on the size of lambda, a certain function will be automatically applied to each value of the expression set in order to introduce normality. In terms of usability, the boxcox method is the most efficient transformation method, taking the decision of which calculation to apply away from the user.
+
 
 Further filter steps can include correction between multiple runs. This kind of process need the addition of a reference channel. However when observing a single run, these steps are not crucial for the upcoming analysis. 
 
