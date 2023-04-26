@@ -134,7 +134,7 @@ After these calculation the identified peptides can be aggregated according to i
 
 Further analysis is done with R and respective packages such as bioconductor. Since there is no state of the art established, analysis varies upon experimental design. The workflow of the analysis will be processed in a so called pipeline streamlining the data through steps where individual results can be observed in visualizations and indivdual calculations will be adapted according to user demands and experimental properties. 
 
-```{r data_processing_pipeline_flowchart, echo=FALSE, fig.height=10}
+```{r data_processing_pipeline_flowchart, echo=FALSE, fig.height=17, fig.width=13}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -156,28 +156,24 @@ read_data <- boxGrob({glue("read data into q-feature object",
 
 quality_control_1 <- boxGrob({glue("quality control 1",
                           .sep = "\n")})
-qc1_content <- boxGrob("filter out pool samples\n
-                             replace zeros with NA\n
-                             filter out contaminants\n
-                             filter by q-value cutoff\n",
+qc1_content <- boxGrob(
+                      "filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center",
                        )
 
-aggregate_psms <-  boxGrob({glue("aggregate peptide spectrum matches to
-                                 peptides\n
+aggregate_psms <-  boxGrob({glue("aggregate peptide spectrum matches to peptides\n
                                  join multiple batches",
                           .sep = "\n")})
 
 quality_control_2 <- boxGrob({glue("quality control 2",
                           .sep = "\n")})
-qc2_content <- boxGrob("filter by reporter ion intensity cutoff\n
-                             filter by pepitde covariance to razor protein\n
-                             remove peptides by missing rate\n",
+qc2_content <- boxGrob(
+                      "filter by reporter ion intensity cutoff\nfilter by pepitde covariance to razor protein\nremove peptides by missing rate",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 aggregate_peps <- boxGrob({glue("aggregate peptides to proteins",
@@ -185,60 +181,48 @@ aggregate_peps <- boxGrob({glue("aggregate peptides to proteins",
 
 transform_data <- boxGrob({glue("transform data",
                           .sep = "\n")})
-transform_opts <- boxGrob("options:\n
-                                log2\n
-                                log10\n
-                                sqrt\n
-                                quadratic\n
-                                BoxCox\n
-                                None",
+transform_opts <- boxGrob(
+                      "options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 normalize_data <- boxGrob({glue("normalize data",
                           .sep = "\n")})
-normalize_opts <- boxGrob("options:\n
-                                SCoPE2\n
-                                CONSTANd\n
-                                None",
+normalize_opts <- boxGrob(
+                      "options:\nSCoPE2\nCONSTANd\nNone",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 missing_value_handling <- boxGrob({glue("missing value handling",
                           .sep = "\n")})
-missing_value_opts <- boxGrob("options:\n
-                                    KNN\n
-                                    drop rows\n
-                                    replace with mean\n
-                                    replace with median\n
-                                    replace with 0",
+missing_value_opts <- boxGrob(
+                      "options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 batch_correction <- boxGrob({glue("batch correction",
                           .sep = "\n")})
-batch_correction_opts <- boxGrob("options:\n
-                                       ComBat",
+batch_correction_opts <- boxGrob(
+                      "options:\nComBat",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 
 dim_red <- boxGrob({glue("dimensionality reduction",
                           .sep = "\n")})
-dim_red_actions <- boxGrob("procedures:\n
-                                 PCA\n
-                                 UMAP",
+dim_red_actions <- boxGrob(
+                      "procedures:\nPCA\nUMAP",
                        txt_gp = opts_box_setting,
                        box_gp = opts_box_setting,
-                       just="left"
+                       just="center"
                        )
 
 stat_module <- boxGrob({glue("statistics module",
