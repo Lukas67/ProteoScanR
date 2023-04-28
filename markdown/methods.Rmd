@@ -60,35 +60,35 @@ In order to enhance sequence identification, two MS devices are built in series.
 
 
 ## Data
-```{r Dataflow, eval=FALSE, include=FALSE}
-# library(DiagrammeR)
-# library(webshot)
-# 
-# DiagrammeR::grViz("digraph {
-# 	graph [layout  =  dot,
-# 	       rankdir  = TB]
-# 
-# node [shape = rectangle]
-# rawData [label = 'msData.raw']
-# node [shape = oval]
-# MQ [label = 'MaxQuant']
-# node [shape = invhouse]
-# MQ_fd [label = 'feature detection']
-# node [shape = cylinder]
-# MQ_ds [label = 'Database search']
-# node [shape = invhouse]
-# MQ_fdr [label = 'FDR calculation']
-# MQ_quant [label = 'Protein Quantification']
-# node [shape = rectangle]
-# MQoutput [label = 'evidence.txt']
-# sampleAnnotate [label = 'sample_annotation.txt']
-# node [shape = oval]
-# ProteomicsWorkbench [label = 'Proteomics Workbench']
-# 
-# rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
-# sampleAnnotate -> ProteomicsWorkbench
-# }",
-# height = 500)
+```{r Dataflow, echo=FALSE}
+library(DiagrammeR)
+library(webshot)
+
+DiagrammeR::grViz("digraph {
+	graph [layout  =  dot,
+	       rankdir  = TB]
+
+node [shape = rectangle]
+rawData [label = 'msData.raw']
+node [shape = oval]
+MQ [label = 'MaxQuant']
+node [shape = invhouse]
+MQ_fd [label = 'feature detection']
+node [shape = cylinder]
+MQ_ds [label = 'Database search']
+node [shape = invhouse]
+MQ_fdr [label = 'FDR calculation']
+MQ_quant [label = 'Protein Quantification']
+node [shape = rectangle]
+MQoutput [label = 'evidence.txt']
+sampleAnnotate [label = 'sample_annotation.txt']
+node [shape = oval]
+ProteomicsWorkbench [label = 'Proteomics Workbench']
+
+rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
+sampleAnnotate -> ProteomicsWorkbench
+}",
+height = 500)
 ```
 
 ### Acquisition
@@ -141,96 +141,104 @@ library(htmlTable)
 library(grid)
 library(magrittr)
 
+default_txt_setting <- gpar(cex=1.9)
+default_box_setting <- gpar(fill="white")
+
 data_box_setting <- gpar(fill="#56B4E9")
 
 opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
-opts_txt_setting <- gpar(col="darkblue", cex=1)
+opts_txt_setting <- gpar(col="darkblue", cex=1.5)
 refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
 
 plot_box_setting <- gpar(fill="#DDCC77")
 # input files
 evidence_file <- boxGrob("evidence file",
-                         box_gp = data_box_setting)
+                         box_gp = data_box_setting,
+                         txt_gp = default_txt_setting)
 sample_annotation_file <- boxGrob("sample annotation",
-                                  box_gp=data_box_setting)
+                                  box_gp = data_box_setting,
+                                  txt_gp = default_txt_setting)
 
-read_data <- boxGrob({glue("read data into q-feature object",
-                          .sep = "\n")})
+read_data <- boxGrob(glue("read data into q-feature object",.sep = "\n"),
+                     box_gp = default_box_setting,
+                     txt_gp = default_txt_setting)
 
+quality_control_1 <- boxGrob(glue("quality control 1",.sep = "\n"),
+                             box_gp = default_box_setting,
+                             txt_gp = default_txt_setting)
 
-quality_control_1 <- boxGrob({glue("quality control 1",
-                          .sep = "\n")})
-qc1_content <- boxGrob(
-                      "filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center",
-                       )
+qc1_content <- boxGrob("filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
+                      box_gp = opts_box_setting,
+                      txt_gp = opts_txt_setting,
+                      just="center")
 
-aggregate_psms <-  boxGrob({glue("aggregate peptide spectrum matches to peptides\n
-                                 join multiple batches",
-                          .sep = "\n")})
+aggregate_psms <-  boxGrob(glue("aggregate peptide spectrum matches to peptides\n
+                                 join multiple batches", .sep = "\n"),
+                           box_gp = default_box_setting,
+                           txt_gp = default_txt_setting)
 
 quality_control_2 <- boxGrob("quality control 2",
-                             box_gp=plot_box_setting)
-qc2_content <- boxGrob(
-                      "filter by reporter ion intensity cutoff\nfilter by pepitde covariance to razor protein\nremove peptides by missing rate",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center"
-                       )
+                             box_gp = plot_box_setting,
+                             txt_gp = default_txt_setting)
 
-aggregate_peps <- boxGrob({glue("aggregate peptides to proteins",
-                          .sep = "\n")})
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+                       box_gp = opts_box_setting,
+                       txt_gp = opts_txt_setting,
+                       just="center")
+
+aggregate_peps <- boxGrob(glue("aggregate peptides to proteins", .sep = "\n"),
+                          box_gp = default_box_setting,
+                          txt_gp = default_txt_setting)
 
 transform_data <- boxGrob("transform data",
-                          box_gp=plot_box_setting)
-transform_opts <- boxGrob(
-                      "options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center"
-                       )
+                          box_gp = plot_box_setting,
+                          txt_gp = default_txt_setting)
+
+transform_opts <- boxGrob("options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
+                          box_gp = opts_box_setting,
+                          txt_gp = opts_txt_setting,
+                          just="center")
 
 normalize_data <- boxGrob("normalize data",
-                          box_gp=plot_box_setting)
-normalize_opts <- boxGrob(
-                      "options:\nSCoPE2\nCONSTANd\nNone",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center"
-                       )
+                          box_gp = plot_box_setting,
+                          txt_gp = default_txt_setting)
+
+normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
+                          box_gp = opts_box_setting,
+                          txt_gp = opts_txt_setting,
+                          just="center")
 
 missing_value_handling <- boxGrob("missing value handling",
-                                  box_gp=plot_box_setting)
-missing_value_opts <- boxGrob(
-                      "options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center"
-                       )
+                                  box_gp = plot_box_setting,
+                                  txt_gp = default_txt_setting)
+
+missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
+                              box_gp = opts_box_setting,
+                              txt_gp = opts_txt_setting,
+                              just="center")
 
 batch_correction <- boxGrob("batch correction",
-                            box_gp=plot_box_setting)
-batch_correction_opts <- boxGrob(
-                      "options:\nComBat",
-                       txt_gp = opts_box_setting,
-                       box_gp = opts_box_setting,
-                       just="center"
-                       )
+                            box_gp=plot_box_setting,
+                            txt_gp = default_txt_setting)
 
+batch_correction_opts <- boxGrob("options:\nComBat",
+                                 box_gp = opts_box_setting,
+                                 txt_gp = opts_txt_setting,
+                                 just="center")
 
 dim_red <- boxGrob("dimensionality reduction",
-                   box_gp=plot_box_setting)
-dim_red_actions <- boxGrob(
-                      "procedures:\nPCA\nUMAP",
-                       txt_gp = opts_box_setting,
+                   box_gp = plot_box_setting,
+                   txt_gp = default_txt_setting)
+
+dim_red_actions <- boxGrob("procedures:\nPCA\nUMAP",
                        box_gp = opts_box_setting,
+                       txt_gp = opts_txt_setting,
                        just="center"
                        )
 
-stat_module <- boxGrob({glue("statistics module",
-                          .sep = "\n")})
+stat_module <- boxGrob(glue("statistics module",.sep = "\n"),
+                       box_gp = default_box_setting,
+                       txt_gp = default_txt_setting)
 
 grid.newpage()
 vert <- {spreadVertical(files = evidence_file,
@@ -262,7 +270,7 @@ transform_opts <- moveBox(transform_opts,
                     y = coords(vert$transform_data)$y)
 
 missing_value_opts <- moveBox(missing_value_opts,
-                    x = .7,
+                    x = .85,
                     y = coords(vert$missing_value_handling)$y)
 
 dim_red_actions <- moveBox(dim_red_actions,
@@ -271,7 +279,7 @@ dim_red_actions <- moveBox(dim_red_actions,
 
 # left side
 qc2_content <- moveBox(qc2_content,
-                    x = .2,
+                    x = .17,
                     y = coords(vert$quality_control_2)$y)
 
 normalize_opts <- moveBox(normalize_opts,
@@ -305,6 +313,202 @@ connectGrob(vert$missing_value_handling, missing_value_opts, type = "horizontal"
 connectGrob(vert$batch_correction, batch_correction_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
 
 connectGrob(vert$dim_red, dim_red_actions, type = "horizontal", arrow_obj = arrow(angle=0))
+
+# Print boxes
+input
+vert
+qc1_content
+qc2_content
+transform_opts
+normalize_opts
+missing_value_opts
+batch_correction_opts
+dim_red_actions
+```
+
+```{r data_processing_pipeline_flowchart2, echo=FALSE, fig.height=9, fig.width=32}
+library(Gmisc, quietly = TRUE)
+library(glue)
+library(htmlTable)
+library(grid)
+library(magrittr)
+
+default_txt_setting <- gpar(cex=1.5)
+default_box_setting <- gpar(fill="white")
+
+data_box_setting <- gpar(fill="#56B4E9")
+
+opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
+opts_txt_setting <- gpar(col="darkblue", cex=1)
+refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
+
+plot_box_setting <- gpar(fill="#DDCC77")
+# input files
+evidence_file <- boxGrob("evidence file",
+                         box_gp = data_box_setting,
+                         txt_gp = default_txt_setting)
+sample_annotation_file <- boxGrob("sample annotation",
+                                  box_gp = data_box_setting,
+                                  txt_gp = default_txt_setting)
+
+read_data <- boxGrob(glue("read data into q-feature object",.sep = "\n"),
+                     box_gp = default_box_setting,
+                     txt_gp = default_txt_setting)
+
+quality_control_1 <- boxGrob(glue("quality control 1",.sep = "\n"),
+                             box_gp = default_box_setting,
+                             txt_gp = default_txt_setting)
+
+qc1_content <- boxGrob("filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
+                      box_gp = opts_box_setting,
+                      txt_gp = opts_txt_setting,
+                      just="center")
+
+aggregate_psms <-  boxGrob(glue("aggregate peptide spectrum matches to peptides\n
+                                 join multiple batches", .sep = "\n"),
+                           box_gp = default_box_setting,
+                           txt_gp = default_txt_setting)
+
+quality_control_2 <- boxGrob("quality control 2",
+                             box_gp = plot_box_setting,
+                             txt_gp = default_txt_setting)
+
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+                       box_gp = opts_box_setting,
+                       txt_gp = opts_txt_setting,
+                       just="center")
+
+aggregate_peps <- boxGrob(glue("aggregate peptides to proteins", .sep = "\n"),
+                          box_gp = default_box_setting,
+                          txt_gp = default_txt_setting)
+
+transform_data <- boxGrob("transform data",
+                          box_gp = plot_box_setting,
+                          txt_gp = default_txt_setting)
+
+transform_opts <- boxGrob("options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
+                          box_gp = opts_box_setting,
+                          txt_gp = opts_txt_setting,
+                          just="center")
+
+normalize_data <- boxGrob("normalize data",
+                          box_gp = plot_box_setting,
+                          txt_gp = default_txt_setting)
+
+normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
+                          box_gp = opts_box_setting,
+                          txt_gp = opts_txt_setting,
+                          just="center")
+
+missing_value_handling <- boxGrob("missing value handling",
+                                  box_gp = plot_box_setting,
+                                  txt_gp = default_txt_setting)
+
+missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
+                              box_gp = opts_box_setting,
+                              txt_gp = opts_txt_setting,
+                              just="center")
+
+batch_correction <- boxGrob("batch correction",
+                            box_gp=plot_box_setting,
+                            txt_gp = default_txt_setting)
+
+batch_correction_opts <- boxGrob("options:\nComBat",
+                                 box_gp = opts_box_setting,
+                                 txt_gp = opts_txt_setting,
+                                 just="center")
+
+dim_red <- boxGrob("dimensionality reduction",
+                   box_gp = plot_box_setting,
+                   txt_gp = default_txt_setting)
+
+dim_red_actions <- boxGrob("procedures:\nPCA\nUMAP",
+                       box_gp = opts_box_setting,
+                       txt_gp = opts_txt_setting,
+                       just="center"
+                       )
+
+stat_module <- boxGrob(glue("statistics module",.sep = "\n"),
+                       box_gp = default_box_setting,
+                       txt_gp = default_txt_setting)
+
+grid.newpage()
+
+vert <- {spreadHorizontal(files = evidence_file,
+                       read_data = read_data,
+                       quality_control_1 = quality_control_1,
+                       aggregate_psms,
+                       quality_control_2 = quality_control_2,
+                       aggregate_peps,
+                       transform_data = transform_data,
+                       normalize_data = normalize_data,
+                       missing_value_handling = missing_value_handling,
+                       batch_correction = batch_correction,
+                       dim_red = dim_red,
+                       stat_module
+)}
+
+input <- alignHorizontal(reference = vert$files,
+                      evidence_file, sample_annotation_file) %>%
+  spreadVertical()
+vert$files <- NULL
+
+
+# connect and move the boxes
+for (i in 1:(length(vert) - 1)) {
+    connectGrob(vert[[i]], vert[[i + 1]], type = "horizontal") %>%
+    print}
+
+
+# right side
+qc1_content <- moveBox(qc1_content,
+                    x = coords(vert$quality_control_1)$x,
+                    y = 0.8)
+
+transform_opts <- moveBox(transform_opts,
+                    y = .9,
+                    x = coords(vert$transform_data)$x)
+
+missing_value_opts <- moveBox(missing_value_opts,
+                    y = .7,
+                    x = coords(vert$missing_value_handling)$x)
+
+dim_red_actions <- moveBox(dim_red_actions,
+                    y = .9,
+                    x = coords(vert$dim_red)$x)
+
+# left side
+qc2_content <- moveBox(qc2_content,
+                    y = .2,
+                    x = coords(vert$quality_control_2)$x)
+
+normalize_opts <- moveBox(normalize_opts,
+                    y = .2,
+                    x = coords(vert$normalize_data)$x)
+
+batch_correction_opts <- moveBox(batch_correction_opts,
+                    y = .2,
+                    x = coords(vert$batch_correction)$x)
+
+
+
+# connect boxes
+connectGrob(input[[1]], vert$read_data, type = "vertical")
+connectGrob(input[[2]], vert$read_data, type = "vertical")
+
+connectGrob(vert$quality_control_1, qc1_content, type = "vertical", arrow_obj = arrow(angle=0))
+
+connectGrob(vert$quality_control_2, qc2_content, type = "vertical", arrow_obj = refinement_arrow_setting)
+
+connectGrob(vert$transform_data, transform_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
+
+connectGrob(vert$normalize_data, normalize_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
+
+connectGrob(vert$missing_value_handling, missing_value_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
+
+connectGrob(vert$batch_correction, batch_correction_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
+
+connectGrob(vert$dim_red, dim_red_actions, type = "vertical", arrow_obj = arrow(angle=0))
 
 # Print boxes
 input

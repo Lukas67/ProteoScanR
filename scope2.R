@@ -22,30 +22,29 @@ library("CONSTANd")
 library("stats")
 library("impute")
 library("sva")
+library("tibble")
 
 # read in MS result table
 mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
-
-# create annotation file
-# this varies upon experimental design
-#quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = T)
-
-
-# create sample file
-# this needs to be done by the researcher
-# sampleAnnotation <- as.data.frame(quantCols)
-# colnames(sampleAnnotation) <-c("Channel")
-# sampleAnnotation$Raw.file = unique(mqScpData$Raw.file)
-# 
-# 
-# samplesA <- c(replicate(6, "Monocytes_A"))
-# samplesB <- c(replicate(6, "Monocytes_B"))
-# samples <- c(samplesA, samplesB)
-# 
-# 
-# sampleAnnotation$SampleType <- samples
+mqScpData2 <- read.delim("/home/lukas/Downloads/Raw_data.txt")
 
 sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
+sampleAnnotation2 = read.delim("/home/lukas/Downloads/Design.txt")
+
+
+# define file handling for not mq generated data
+
+#metadata is used as a reference --> change different metadata file accordingly
+if (!"Sequence" %in% colnames(mqScpData2)) {
+  sampleAnnotation2 <- 
+    sampleAnnotation2 %>% rename(
+    SampleType = Group,
+    Raw.File = Batch
+  )
+  sampleAnnotation2 <- sampleAnnotation2[order(sampleAnnotation2$Raw.File),]
+  sampleAnnotation2$Channel <- sampleAnnotation2
+}
+
 
 # create QFeature object
 scp <- readSCP(featureData = mqScpData,
@@ -54,6 +53,30 @@ scp <- readSCP(featureData = mqScpData,
                batchCol = "Raw.file",
                suffix = paste0("_TMT", 1:length(unique(sampleAnnotation$Channel))),
                removeEmptyCols = TRUE)
+
+
+if (!"Sequence" %in% colnames(mqScpData2)) {
+  mqScpData2 <- 
+    mqScpData2 %>% rename(
+    Protein = ID
+  )
+  
+  mqScpData2 %>% 
+    rename_with(~deframe(sampleAnnotation2)[.x], .cols = sampleAnnotation2$Channel) %>% 
+    select(Protein, any_of(sampleAnnotation2$Channel))
+  
+  
+  scp2 <- readSCP(featureData = mqScpData2,
+                  colData = sampleAnnotation2,
+                  channelCol = "Channel",
+                  batchCol = "Raw.file",
+                  removeEmptyCols = TRUE,
+                  verbose = T)
+
+  
+}
+
+
 
 # skip pool sample
 if ("Pool" %in% sampleAnnotation$SampleType) {
