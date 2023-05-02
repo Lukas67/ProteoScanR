@@ -35,6 +35,8 @@ ui <- fluidPage(
       fileInput("sample_annotation_file", "Upload sample annotation file", accept = c("text")),
       textInput("label_suffix", "Input the label suffix (e.g. _TMT)"),
       
+      selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
+      
       # cutoff for PIF
       numericInput("PIF_cutoff", "Input cutoff value for parental ion fraction. PSMs larger than the value remain", 0.1, min = 0, max=1, step = 0.1),
       
@@ -109,7 +111,7 @@ ui <- fluidPage(
   )
 )
 
-# box cox transf
+# box cox transformati0n --> alteration of basic MASS package was needed to run it
 boxcox_1 <- function(object, ...) UseMethod("boxcox_1")
 
 boxcox_1.formula <-
@@ -162,517 +164,7 @@ boxcox_1.default <-
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=30*1024^2)
-  
-  ## Data structures and objects
-  # sample_annotation needs to be accessible for plots
-  meta_data <- reactive({
-    req(input$sample_annotation_file)
-    meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
-    return(meta_data_0)
-  })
-  
-  # result of analysis pipleline
-  scp <- eventReactive(input$update_button, {
-    withProgress(message= "running analysis", value=0, {
-      req(input$evidence_file)
-      req(meta_data)
-      req(input$label_suffix)
-      
-      evidence_data <- read.delim(input$evidence_file$datapath)
-      meta_data_0 <- meta_data()
-      
-      incProgress(1/17, detail = paste("read Data"))
-      scp_0 <- readSCP(featureData = evidence_data,
-                       colData = meta_data_0,
-                       channelCol = "Channel",
-                       batchCol = "Raw.file",
-                       suffix = paste0(input$label_suffix, 1:length(unique(meta_data_0$Channel))),
-                       removeEmptyCols = TRUE)
-      
-      # skip pool sample
-      if ("Pool" %in% meta_data_0$SampleType) {
-        scp_0 <- scp_0[, scp_0$SampleType !=  "Pool"]
-      }
-      
-      # # change zeros to NA, apply first filter
-      incProgress(2/17, detail = paste("replacing zeros with NA"))
-      scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
-      
-      # filter PSM
-      # filter out potential contaminants
-      # filter out matches to decoy database
-      # keep PSMs with high PIF (parental ion fraction)
-      incProgress(3/17, detail = paste("filter contaminants and PIF"))
-      req(input$PIF_cutoff)
-      PIF_cutoff<-input$PIF_cutoff
-      scp_0 <- filterFeatures(scp_0,
-                              ~ Reverse != "+" &
-                                Potential.contaminant != "+" &
-                                !is.na(PIF) & PIF > PIF_cutoff)
-      
-      # compute qvalues_PSMs to filter out by FDR
-      incProgress(4/17, detail=paste("calculate q-value for PSMs"))
-      scp_0 <- pep2qvalue(scp_0,
-                          i = names(scp_0),
-                          PEP = "PEP", # by reference the dart_PEP value is used
-                          rowDataName = "qvalue_PSMs")
-      
-      incProgress(5/17, detail=paste("calculate q value for proteins"))
-      scp_0 <- pep2qvalue(scp_0,
-                          i = names(scp_0),
-                          PEP = "PEP",
-                          groupBy = "Leading.razor.protein",
-                          rowDataName = "qvalue_proteins")
-      
-      incProgress(6/17, detail=paste("filter according to q-value"))      
-      req(input$qvalue_cutoff)
-      qvalue_cutoff <- input$qvalue_cutoff
-      scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < qvalue_cutoff)
-      
-      # aggregate PSMS to peptides
-      incProgress(7/17, detail=paste("aggregating features"))
-      scp_0 <- aggregateFeaturesOverAssays(scp_0,
-                                           i = names(scp_0),
-                                           fcol = "Modified.sequence",
-                                           name = paste0("peptides_", names(scp_0)),
-                                           fun = matrixStats::colMedians, na.rm = TRUE)
-      
-      # join assays to one
-      if (length(unique(meta_data_0$Raw.file)) > 1) {
-        scp_0 <- joinAssays(scp_0,
-                          i = ((length(names(scp_0))/2)+1):length(names(scp_0)),
-                          name = "peptides")
-      }
-      
-      
-      # calculate median reporter IO intensity
-      incProgress(8/17, detail=paste("calculate reporter ion intensity"))
-      file_name <- unique(meta_data_0$Raw.file)
-      peptide_file <- paste("peptides_", as.character(file_name), sep = "")
-      
-      if (length(peptide_file) > 1) {
-        medians <- c()
-        for (assay_name in peptide_file) {
-          new_medians <- colMedians(assay(scp_0[[assay_name]]), na.rm = TRUE)
-          medians <- c(medians, new_medians)
-        }
-      } else {
-        medians <- colMedians(assay(scp_0[[peptide_file]]), na.rm = TRUE)
-      }
-      scp_0$MedianRI <- medians
-      
-      
-      # Filter based on the median CV -> remove covariant peptides over multiple proteins
-      incProgress(9/17, detail=paste("calculate covariance per cell"))
-      req(input$nObs_pep_razrpr)
-      nObs_pep_razrpr<-input$nObs_pep_razrpr
-      
-      if (length(peptide_file) > 1) {
-        scp_0 <- medianCVperCell(scp_0,
-                               i = "peptides",
-                               groupBy = "Leading.razor.protein",
-                               nobs = nObs_pep_razrpr, 
-                               norm = "div.median",
-                               na.rm = TRUE,
-                               colDataName = "MedianCV")
-      } else {
-        scp_0 <- medianCVperCell(scp_0,
-                               i = peptide_file,
-                               groupBy = "Leading.razor.protein",
-                               nobs = nObs_pep_razrpr, 
-                               norm = "div.median",
-                               na.rm = TRUE,
-                               colDataName = "MedianCV")
-      }
-            
-      incProgress(10/17, detail=paste("filtering according to covariance"))
-      req(input$MedCV_thresh)
-      MedCV_thresh <- input$MedCV_thresh
-      scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < MedCV_thresh, ]
 
-      incProgress(12/17, detail=paste("remove peptides by missing rate"))
-      req(input$pNA)
-      pNA <- input$pNA
-      
-      if (length(peptide_file) > 1) {
-        scp_0 <- filterNA(scp_0,
-                        i = "peptides",
-                        pNA = pNA)
-      } else {
-        scp_0 <- filterNA(scp_0,
-                        i = peptide_file,
-                        pNA = pNA)
-      }
-      
-      incProgress(13/17, detail=paste("aggregate peptides to proteins"))
-      
-      # aggregate peptide to protein
-      if (length(peptide_file) > 1) {
-        scp_0 <- aggregateFeatures(scp_0,
-                                 i = "peptides",
-                                 name = "proteins",
-                                 fcol = "Leading.razor.protein",
-                                 fun = matrixStats::colMedians, na.rm = TRUE)
-        
-      } else {
-        scp_0 <- aggregateFeatures(scp_0,
-                                 i = peptide_file,
-                                 name = "proteins",
-                                 fcol = "Leading.razor.protein",
-                                 fun = matrixStats::colMedians, na.rm = TRUE)
-      }
-      
-      incProgress(14/17, detail=paste("transforming protein data"))
-      req(input$transform_base)
-      transform_base_bc <- "NULL"
-      
-      if (input$transform_base == "log2") {
-        scp_0 <- logTransform(scp_0,
-                              base = 2,
-                              i = "proteins",
-                              name = "proteins_transf")
-      }
-      else if (input$transform_base == "log10") {
-        scp_0 <- logTransform(scp_0,
-                              base = 10,
-                              i = "proteins",
-                              name = "proteins_transf")
-      }
-      else if (input$transform_base == "sqrt") {
-        scp_0 <- sweep(scp_0, i="proteins",
-                     MARGIN = 2,
-                     FUN="^",
-                     STATS=1/2,
-                     name="proteins_transf")
-        
-      }
-      else if (input$transform_base == "quadratic") {
-        scp_0 <- sweep(scp_0, i="proteins",
-                       MARGIN = 2,
-                       FUN="^",
-                       STATS=2,
-                       name="proteins_transf")
-      }  
-      else if (input$transform_base == "BoxCox") {
-        
-        protein_matrix <- assay(scp_0[["proteins"]])
-        b <- boxcox_1(stats::lm(protein_matrix ~ 1))
-        # Exact lambda
-        lambda <- b$x[which.max(b$y)]
-        print(lambda)
-
-        
-        if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
-          protein_matrix <- 1/protein_matrix**2
-          print("1/protein_matrix**2")
-        }
-        if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
-          protein_matrix <- 1/protein_matrix
-          print("1/protein_matrix")
-        }
-        if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
-          protein_matrix <- 1/(protein_matrix**1/2)
-          print("1/(protein_matrix**1/2)")
-        }
-        if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
-          protein_matrix <- log10(protein_matrix)
-          transform_base_bc <- "log10"
-          print("log10(protein_matrix)")
-        }
-        if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
-          protein_matrix <- protein_matrix**1/2
-          print("protein_matrix**1/2")
-        }
-        if (round(lambda, digits = 0) == 1 || lambda > 0.75 && lamdba < 1.5) {
-          protein_matrix <- protein_matrix
-          print("protein_matrix")
-        }
-        if (round(lambda, digits = 0) == 2 || lambda > 1.5) {
-          protein_matrix <- protein_matrix**2
-          print("protein_matrix**2")
-        }        
-        
-        sce <- getWithColData(scp_0, "proteins")
-        
-        scp_0 <- addAssay(scp_0,
-                        y = sce,
-                        name = "proteins_transf")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                    from = "proteins",
-                                    to = "proteins_transf")
-        
-        assay(scp_0[["proteins_transf"]]) <- protein_matrix
-      }
-      else if (input$transform_base == "None") {
-        sce <- getWithColData(scp_0, "proteins")
-        
-        scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_transf")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins",
-                                      to = "proteins_transf")        
-      }
-      
-      incProgress(15/17, detail=paste("normalizing proteins"))
-      req(input$norm_method)
-      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10") {
-        # center cols with median
-        scp_0 <- sweep(scp_0, i = "proteins_transf",
-                       MARGIN = 2,
-                       FUN = "-",
-                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
-                                          na.rm = TRUE),
-                       name = "proteins_norm_col")
-  
-        # Center rows with mean
-        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
-                       MARGIN = 1,
-                       FUN = "-",
-                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
-                                        na.rm = TRUE),
-                       name = "proteins_norm")
-        
-      }
-      else if (input$norm_method == "SCoPE2" && input$transform_base != "log2" | input$transform_base != "log10") {
-        # center cols with median
-        scp_0 <- sweep(scp_0, i = "proteins_transf",
-                       MARGIN = 2,
-                       FUN = "/",
-                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
-                                          na.rm = TRUE),
-                       name = "proteins_norm_col")
-        
-        # Center rows with mean
-        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
-                       MARGIN = 1,
-                       FUN = "/",
-                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
-                                        na.rm = TRUE),
-                       name = "proteins_norm")
-        
-      } else if (input$norm_method == "CONSTANd") {
-        # apply matrix raking --> row means and col means equal Nrows and Ncols  
-        protein_matrix <- assay(scp_0[["proteins_transf"]])
-        protein_matrix <- CONSTANd(protein_matrix)
-        
-        sce <- getWithColData(scp_0, "proteins_transf")
-        
-        scp_0 <- addAssay(scp_0,
-                        y = sce,
-                        name = "proteins_norm")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                    from = "proteins_transf",
-                                    to = "proteins_norm")
-        
-        assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
-        
-      }
-      
-      
-      if (length(peptide_file) > 1) {
-        incProgress(16/17, detail=paste("running missing value imputation"))
-        if (input$missing_v == "KNN") {
-          scp_0 <- impute(scp_0,
-                          i = "proteins_norm",
-                          name = "proteins_imptd",
-                          method = "knn",
-                          k = 3, rowmax = 1, colmax= 1,
-                          maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
-        } else if (input$missing_v == "drop rows") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_norm",
-                                        to = "proteins_imptd")
-          
-          scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
-        } else if (input$missing_v == "replace with mean") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_imptd")
-          
-          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), mean(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
-        } else if (input$missing_v == "replace with median") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_imptd")
-          
-          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), median(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))        
-        }
-        
-        incProgress(16/17, detail=paste("running batch correction"))
-        sce <- getWithColData(scp_0, "proteins_imptd")
-        if (input$batch_c == "ComBat") {
-          batch <- colData(sce)$Raw.file
-          # can be used to aim batch correction for desired result
-          model <- model.matrix(~0 + SampleType, data = colData(sce))
-          
-          assay(sce) <- ComBat(dat = assay(sce),
-                               batch = batch)#,
-                               #mod = model)
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_batchC")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_imptd",
-                                        to = "proteins_batchC")
-          
-          sce <- getWithColData(scp_0, "proteins_batchC")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_dim_red")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_batchC",
-                                        to = "proteins_dim_red") 
-          
-        } else if (input$batch_c == "none") {
-          sce <- getWithColData(scp_0, "proteins_imptd")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_dim_red")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_imptd",
-                                        to = "proteins_dim_red")          
-        }
-        
-
-        
-        
-      } else {
-        sce <- getWithColData(scp_0, "proteins_norm")
-        
-        scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_dim_red")
-        
-        scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_dim_red")  
-      }
-
-      
-      
-      
-      incProgress(16/17, detail=paste("running dimensionality reduction"))
-      
-      scp_0[["proteins_dim_red"]] <- scater::runPCA(scp_0[["proteins_dim_red"]],
-                                            ncomponents = 5,
-                                            ntop = Inf,
-                                            scale = TRUE,
-                                            exprs_values = 1,
-                                            name = "PCA")
-      
-      scp_0[["proteins_dim_red"]] <- runUMAP(scp_0[["proteins_dim_red"]],
-                                             ncomponents = 2,
-                                             ntop = Inf,
-                                             scale = TRUE,
-                                             exprs_values = 1,
-                                             n_neighbors = 3,
-                                             dimred = "PCA",
-                                             name = "UMAP")
-      
-      
-      
-      incProgress(17/17, detail=paste("analysis finish"))
-    })
-    return(scp_0)
-  })
-  
-  # expression matrix is used by plot functions
-  exp_matrix <- reactive({
-    scp_0 <- scp()
-    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-    colnames(exp_matrix_0) <- scp_0$SampleType  
-    return(exp_matrix_0)
-  })
-  
-  # statistical pipeline
-  stat_result <- eventReactive(input$run_statistics, {
-    withProgress(message= "running statistical analysis", value=0, {
-      incProgress(1/3, detail=paste("read data"))
-      scp_0 <- scp()
-      exp_matrix_0 <- exp_matrix()
-      
-      incProgress(2/3, detail=paste("creating linear model"))
-      req(input$model_design)
-      # Create a design matrix
-      if (input$model_design == "All pairwise comparison") {
-        design <- model.matrix(~0+factor(scp_0$SampleType))
-        colnames(design) <- unique(scp_0$SampleType)
-        fit <- lmFit(exp_matrix_0, design)
-        }
-      #Differential Expression with defined Contrasts
-      else if (input$model_design == "Differential Expression with defined Contrasts") {
-        # fetch user selection
-        req(input$selectedComp_stat)
-        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-        colnames(exp_matrix_0) <- scp_0$SampleType
-        
-        design <- model.matrix(~0+factor(scp_0$SampleType))
-        colnames(design) <- unique(scp_0$SampleType)
-        
-        fit <- lmFit(exp_matrix_0, design)
-        
-        user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
-        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
-        fit <- contrasts.fit(fit, cont_matrix)
-      }
-      else if (input$model_design == "Multi factor additivity") {
-        req(input$col_factors)
-        req(input$selectedComp_stat)
-
-        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-        colnames(exp_matrix_0) <- scp_0$SampleType
-        
-        fetched_factor <- colData(scp_0)[input$col_factors]
-        design_frame <- cbind(fetched_factor, scp_0$SampleType)
-        design <- model.matrix(~0+ . , data=design_frame)
-        fit <- lmFit(exp_matrix_0, design)
-      }
-
-      incProgress(4/4, detail=paste("Bayes statistics of differential expression"))
-      # *There are several options to tweak!*
-      fit <- eBayes(fit)
-    })
-    return(fit)
-  })
-  
-  # initial qq counter for the first plot 
-  qq_count <- reactiveVal(1)
-  
-  # trigger for the CONSTANd dependency MA plot
-  CONSTANd_trigger <- reactive(list(input$update_button, input$norm_method))
-  ### graphical outputs and user interface
-  
-  ## reactive events and observers
   # Help Button and content of the help menu
   observeEvent(input$help,{
     showModal(modalDialog(easyClose = T, 
@@ -739,6 +231,463 @@ server <- function(input, output, session) {
     ))
   })
   
+  ## Analysis Pipeline ##
+  # here is the basic processing from PSM to Protein done  
+  
+  # Data structures and objects
+  # sample_annotation needs to be accessible for plots
+  meta_data <- reactive({
+    req(input$sample_annotation_file)
+    meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
+    return(meta_data_0)
+  })
+  
+  # result of analysis pipleline
+  scp <- eventReactive(input$update_button, {
+    withProgress(message= "running analysis", value=0, {
+      req(input$evidence_file)
+      req(meta_data)
+      req(input$label_suffix)
+      
+      evidence_data <- read.delim(input$evidence_file$datapath)
+      meta_data_0 <- meta_data()
+      
+      incProgress(1/17, detail = paste("read Data"))
+      scp_0 <- readSCP(featureData = evidence_data,
+                       colData = meta_data_0,
+                       channelCol = "Channel",
+                       batchCol = "Raw.file",
+                       suffix = paste0(input$label_suffix, 1:length(unique(meta_data_0$Channel))),
+                       removeEmptyCols = TRUE)
+      
+      #manual selection of SampleTypes to exclude from the analysis
+      scp_0 <- scp_0[, !(scp_0$SampleType %in%  input$selectedSampleType_to_exclude)]      
+      
+      
+      
+      # # change zeros to NA, apply first filter
+      incProgress(2/17, detail = paste("replacing zeros with NA"))
+      scp_0 <- zeroIsNA(scp_0, 1:length(rowDataNames(scp_0)))
+      
+      # filter PSM
+      # filter out potential contaminants
+      # filter out matches to decoy database
+      # keep PSMs with high PIF (parental ion fraction)
+      incProgress(3/17, detail = paste("filter contaminants and PIF"))
+      req(input$PIF_cutoff)
+      PIF_cutoff<-input$PIF_cutoff
+      scp_0 <- filterFeatures(scp_0,
+                              ~ Reverse != "+" &
+                                Potential.contaminant != "+" &
+                                !is.na(PIF) & PIF > PIF_cutoff)
+      
+      # compute qvalues_PSMs to filter out by FDR
+      incProgress(4/17, detail=paste("calculate q-value for PSMs"))
+      scp_0 <- pep2qvalue(scp_0,
+                          i = names(scp_0),
+                          PEP = "PEP", # by reference the dart_PEP value is used
+                          rowDataName = "qvalue_PSMs")
+      
+      incProgress(5/17, detail=paste("calculate q value for proteins"))
+      scp_0 <- pep2qvalue(scp_0,
+                          i = names(scp_0),
+                          PEP = "PEP",
+                          groupBy = "Leading.razor.protein",
+                          rowDataName = "qvalue_proteins")
+      
+      incProgress(6/17, detail=paste("filter according to q-value"))      
+      req(input$qvalue_cutoff)
+      qvalue_cutoff <- input$qvalue_cutoff
+      scp_0 <- filterFeatures(scp_0, ~ qvalue_proteins < qvalue_cutoff)
+      
+      # aggregate PSMS to peptides
+      incProgress(7/17, detail=paste("aggregating features"))
+      scp_0 <- aggregateFeaturesOverAssays(scp_0,
+                                           i = names(scp_0),
+                                           fcol = "Modified.sequence",
+                                           name = paste0("peptides_", names(scp_0)),
+                                           fun = matrixStats::colMedians, na.rm = TRUE)
+      
+      # join assays to one
+      if (length(unique(meta_data_0$Raw.file)) > 1) {
+        scp_0 <- joinAssays(scp_0,
+                            i = ((length(names(scp_0))/2)+1):length(names(scp_0)),
+                            name = "peptides")
+      }
+      
+      
+      # calculate median reporter IO intensity
+      incProgress(8/17, detail=paste("calculate reporter ion intensity"))
+      file_name <- unique(meta_data_0$Raw.file)
+      peptide_file <- paste("peptides_", as.character(file_name), sep = "")
+      
+      if (length(peptide_file) > 1) {
+        medians <- c()
+        for (assay_name in peptide_file) {
+          new_medians <- colMedians(assay(scp_0[[assay_name]]), na.rm = TRUE)
+          medians <- c(medians, new_medians)
+        }
+      } else {
+        medians <- colMedians(assay(scp_0[[peptide_file]]), na.rm = TRUE)
+      }
+      scp_0$MedianRI <- medians
+      
+      
+      # Filter based on the median CV -> remove covariant peptides over multiple proteins
+      incProgress(9/17, detail=paste("calculate covariance per cell"))
+      req(input$nObs_pep_razrpr)
+      nObs_pep_razrpr<-input$nObs_pep_razrpr
+      
+      if (length(peptide_file) > 1) {
+        scp_0 <- medianCVperCell(scp_0,
+                                 i = "peptides",
+                                 groupBy = "Leading.razor.protein",
+                                 nobs = nObs_pep_razrpr, 
+                                 norm = "div.median",
+                                 na.rm = TRUE,
+                                 colDataName = "MedianCV")
+      } else {
+        scp_0 <- medianCVperCell(scp_0,
+                                 i = peptide_file,
+                                 groupBy = "Leading.razor.protein",
+                                 nobs = nObs_pep_razrpr, 
+                                 norm = "div.median",
+                                 na.rm = TRUE,
+                                 colDataName = "MedianCV")
+      }
+      
+      incProgress(10/17, detail=paste("filtering according to covariance"))
+      req(input$MedCV_thresh)
+      MedCV_thresh <- input$MedCV_thresh
+      scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < MedCV_thresh, ]
+      
+      incProgress(12/17, detail=paste("remove peptides by missing rate"))
+      req(input$pNA)
+      pNA <- input$pNA
+      
+      if (length(peptide_file) > 1) {
+        scp_0 <- filterNA(scp_0,
+                          i = "peptides",
+                          pNA = pNA)
+      } else {
+        scp_0 <- filterNA(scp_0,
+                          i = peptide_file,
+                          pNA = pNA)
+      }
+      
+      incProgress(13/17, detail=paste("aggregate peptides to proteins"))
+      
+      # aggregate peptide to protein
+      if (length(peptide_file) > 1) {
+        scp_0 <- aggregateFeatures(scp_0,
+                                   i = "peptides",
+                                   name = "proteins",
+                                   fcol = "Leading.razor.protein",
+                                   fun = matrixStats::colMedians, na.rm = TRUE)
+        
+      } else {
+        scp_0 <- aggregateFeatures(scp_0,
+                                   i = peptide_file,
+                                   name = "proteins",
+                                   fcol = "Leading.razor.protein",
+                                   fun = matrixStats::colMedians, na.rm = TRUE)
+      }
+      
+      incProgress(14/17, detail=paste("transforming protein data"))
+      req(input$transform_base)
+      transform_base_bc <- "NULL"
+      
+      if (input$transform_base == "log2") {
+        scp_0 <- logTransform(scp_0,
+                              base = 2,
+                              i = "proteins",
+                              name = "proteins_transf")
+      }
+      else if (input$transform_base == "log10") {
+        scp_0 <- logTransform(scp_0,
+                              base = 10,
+                              i = "proteins",
+                              name = "proteins_transf")
+      }
+      else if (input$transform_base == "sqrt") {
+        scp_0 <- sweep(scp_0, i="proteins",
+                       MARGIN = 2,
+                       FUN="^",
+                       STATS=1/2,
+                       name="proteins_transf")
+        
+      }
+      else if (input$transform_base == "quadratic") {
+        scp_0 <- sweep(scp_0, i="proteins",
+                       MARGIN = 2,
+                       FUN="^",
+                       STATS=2,
+                       name="proteins_transf")
+      }  
+      else if (input$transform_base == "BoxCox") {
+        
+        protein_matrix <- assay(scp_0[["proteins"]])
+        b <- boxcox_1(stats::lm(protein_matrix ~ 1))
+        # Exact lambda
+        lambda <- b$x[which.max(b$y)]
+        print(lambda)
+        
+        
+        if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
+          protein_matrix <- 1/protein_matrix**2
+          print("1/protein_matrix**2")
+        }
+        if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
+          protein_matrix <- 1/protein_matrix
+          print("1/protein_matrix")
+        }
+        if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
+          protein_matrix <- 1/(protein_matrix**1/2)
+          print("1/(protein_matrix**1/2)")
+        }
+        if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
+          protein_matrix <- log10(protein_matrix)
+          transform_base_bc <- "log10"
+          print("log10(protein_matrix)")
+        }
+        if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
+          protein_matrix <- protein_matrix**1/2
+          print("protein_matrix**1/2")
+        }
+        if (round(lambda, digits = 0) == 1 || lambda > 0.75 && lamdba < 1.5) {
+          protein_matrix <- protein_matrix
+          print("protein_matrix")
+        }
+        if (round(lambda, digits = 0) == 2 || lambda > 1.5) {
+          protein_matrix <- protein_matrix**2
+          print("protein_matrix**2")
+        }        
+        
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_transf")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins",
+                                      to = "proteins_transf")
+        
+        assay(scp_0[["proteins_transf"]]) <- protein_matrix
+      }
+      else if (input$transform_base == "None") {
+        sce <- getWithColData(scp_0, "proteins")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_transf")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins",
+                                      to = "proteins_transf")        
+      }
+      
+      incProgress(15/17, detail=paste("normalizing proteins"))
+      req(input$norm_method)
+      if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10") {
+        # center cols with median
+        scp_0 <- sweep(scp_0, i = "proteins_transf",
+                       MARGIN = 2,
+                       FUN = "-",
+                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
+                                          na.rm = TRUE),
+                       name = "proteins_norm_col")
+        
+        # Center rows with mean
+        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
+                       MARGIN = 1,
+                       FUN = "-",
+                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
+                                        na.rm = TRUE),
+                       name = "proteins_norm")
+        
+      }
+      else if (input$norm_method == "SCoPE2" && input$transform_base != "log2" | input$transform_base != "log10") {
+        # center cols with median
+        scp_0 <- sweep(scp_0, i = "proteins_transf",
+                       MARGIN = 2,
+                       FUN = "/",
+                       STATS = colMedians(assay(scp_0[["proteins_transf"]]),
+                                          na.rm = TRUE),
+                       name = "proteins_norm_col")
+        
+        # Center rows with mean
+        scp_0 <- sweep(scp_0, i = "proteins_norm_col",
+                       MARGIN = 1,
+                       FUN = "/",
+                       STATS = rowMeans(assay(scp_0[["proteins_norm_col"]]),
+                                        na.rm = TRUE),
+                       name = "proteins_norm")
+        
+      } else if (input$norm_method == "CONSTANd") {
+        # apply matrix raking --> row means and col means equal Nrows and Ncols  
+        protein_matrix <- assay(scp_0[["proteins_transf"]])
+        protein_matrix <- CONSTANd(protein_matrix)
+        
+        sce <- getWithColData(scp_0, "proteins_transf")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_norm")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_transf",
+                                      to = "proteins_norm")
+        
+        assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
+        
+      }
+      
+      
+      if (length(peptide_file) > 1) {
+        incProgress(16/17, detail=paste("running missing value imputation"))
+        if (input$missing_v == "KNN") {
+          scp_0 <- impute(scp_0,
+                          i = "proteins_norm",
+                          name = "proteins_imptd",
+                          method = "knn",
+                          k = 3, rowmax = 1, colmax= 1,
+                          maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+        } else if (input$missing_v == "drop rows") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_norm",
+                                        to = "proteins_imptd")
+          
+          scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
+        } else if (input$missing_v == "replace with mean") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_norm",
+                                        to = "proteins_imptd")
+          
+          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), mean(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
+        } else if (input$missing_v == "replace with median") {
+          sce <- getWithColData(scp_0, "proteins_norm")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_imptd")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_norm",
+                                        to = "proteins_imptd")
+          
+          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), median(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))        
+        }
+        
+        incProgress(16/17, detail=paste("running batch correction"))
+        sce <- getWithColData(scp_0, "proteins_imptd")
+        if (input$batch_c == "ComBat") {
+          batch <- colData(sce)$Raw.file
+          # can be used to aim batch correction for desired result
+          model <- model.matrix(~0 + SampleType, data = colData(sce))
+          
+          assay(sce) <- ComBat(dat = assay(sce),
+                               batch = batch)#,
+          #mod = model)
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_batchC")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_imptd",
+                                        to = "proteins_batchC")
+          
+          sce <- getWithColData(scp_0, "proteins_batchC")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_dim_red")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_batchC",
+                                        to = "proteins_dim_red") 
+          
+        } else if (input$batch_c == "none") {
+          sce <- getWithColData(scp_0, "proteins_imptd")
+          
+          scp_0 <- addAssay(scp_0,
+                            y = sce,
+                            name = "proteins_dim_red")
+          
+          scp_0 <- addAssayLinkOneToOne(scp_0,
+                                        from = "proteins_imptd",
+                                        to = "proteins_dim_red")          
+        }
+        
+        
+        
+        
+      } else {
+        sce <- getWithColData(scp_0, "proteins_norm")
+        
+        scp_0 <- addAssay(scp_0,
+                          y = sce,
+                          name = "proteins_dim_red")
+        
+        scp_0 <- addAssayLinkOneToOne(scp_0,
+                                      from = "proteins_norm",
+                                      to = "proteins_dim_red")  
+      }
+      
+      
+      
+      
+      incProgress(16/17, detail=paste("running dimensionality reduction"))
+      
+      scp_0[["proteins_dim_red"]] <- scater::runPCA(scp_0[["proteins_dim_red"]],
+                                                    ncomponents = 5,
+                                                    ntop = Inf,
+                                                    scale = TRUE,
+                                                    exprs_values = 1,
+                                                    name = "PCA")
+      
+      scp_0[["proteins_dim_red"]] <- runUMAP(scp_0[["proteins_dim_red"]],
+                                             ncomponents = 2,
+                                             ntop = Inf,
+                                             scale = TRUE,
+                                             exprs_values = 1,
+                                             n_neighbors = 3,
+                                             dimred = "PCA",
+                                             name = "UMAP")
+      
+      
+      
+      incProgress(17/17, detail=paste("analysis finish"))
+    })
+    return(scp_0)
+  })
+  
+  # expression matrix is used by plot functions
+  exp_matrix <- reactive({
+    scp_0 <- scp()
+    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+    colnames(exp_matrix_0) <- scp_0$SampleType  
+    return(exp_matrix_0)
+  })
+  
+  # trigger for the CONSTANd dependency MA plot
+  CONSTANd_trigger <- reactive(list(input$update_button, input$norm_method))
+  ### graphical outputs and user interface
+  
+  
   # observer for protein list
   observe({
     req(protein_list())
@@ -754,44 +703,6 @@ server <- function(input, output, session) {
     return(list)
   })
   
-  # observer for qqplot interface
-  observeEvent(input$qqplot, {
-    showModal(qqModal())
-  })
-  
-  # observer for the next button to increment the counter and show next qq
-  observeEvent(input$next_plot, {
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    
-    i <- qq_count()
-    
-    if(i < length(sample_types)) {
-      j <- i + 1
-    }
-    else {
-      j <- 1
-    }
-    
-    qq_count(j)
-  })  
-  
-  # observer for the previous button to increment the counter and show previous qq
-  observeEvent(input$previous_plot, {
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    
-    i <- qq_count()
-    
-    if(i > 1) {
-      j <- i - 1
-    }
-    else {
-      j <- 1
-    }
-    
-    qq_count(j)
-  })  
 
   # observer for the CONSTANd normalization dependency to check before analysis
   observeEvent(ignoreInit=TRUE, CONSTANd_trigger(), {
@@ -806,25 +717,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selectedComp", choices = comp_list())
   })
   
-  observeEvent(input$model_design, {
-    updateSelectInput(session, "selectedComp_stat", choices = sample_types())
-  })
   
-  observeEvent(input$model_design, {
-    updateSelectInput(session, "col_factors", choices = columns())
-  })
-  
-  #observer for updating the coefficient dropdown menu
-  observeEvent(input$run_statistics, {
-    updateSelectInput(session, "chosen_coef", choices = coefs())
-  })
-  
-  # coefficients for the statistic modules volcanoplot and topTable
-  coefs <- reactive({
-    req(stat_result())
-    fit_0 <- stat_result()
-    list <- colnames(fit_0$coefficients)
-  })
   
   # reactive element for the comp list --> update if the scp object changes
   comp_list <- reactive({
@@ -841,13 +734,21 @@ server <- function(input, output, session) {
     return(list)
   })
   
+  
+  
+  # observer for sample type exclusion
+  observe({
+    req(sample_types())
+    updateSelectInput(session, "selectedSampleType_to_exclude", choices = sample_types())
+  })
   sample_types <- reactive({
     req(scp())
     scp_0 <- scp()
     list <- scp_0$SampleType
     return(list)
   })
-  ## Plots 
+  
+  ## Output of analysis pipeline 
   # pathway of the data first tab
   output$overview_plot <- renderPlot({
     if (!is.null(scp())) {
@@ -872,13 +773,12 @@ server <- function(input, output, session) {
       scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
   })
   
+  # Reporter Ion intensity visualisation
   #observer for color_variable
   observe({
     req(columns())
     updateSelectInput(session, "color_variable_ri", choices=columns())
   })  
-  
-  
   # Boxplot of reporter ion intensity third tab
   output$RI_intensity <- renderPlot({
     scp_0 <- scp()
@@ -894,12 +794,12 @@ server <- function(input, output, session) {
       labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
   })
   
+  # Covariance visualisation
   #observer for color_variable
   observe({
     req(columns())
     updateSelectInput(session, "color_variable_cv", choices=columns())
   })  
-  
   # covariance across razor peptides fourth tab
   output$CV_median <- renderPlot({
     req(scp())
@@ -930,23 +830,22 @@ server <- function(input, output, session) {
     }
   })
   
+  ## Dimensionality reduction plot
   #observer for color_variable
   observe({
     req(columns())
     updateSelectInput(session, "color_variable_dim_red", choices=c("NULL", columns()))
   })
-
   #observer for shape_variable
   observe({
     req(columns())
     updateSelectInput(session, "shape_variable_dim_red", choices=c("NULL", columns()))
   })
-  
+  #observer for size_variable
   observe({
     req(columns())
     updateSelectInput(session, "size_variable_dim_red", choices=c("NULL", columns()))
   })
-  
   
   # principle component analysis in fifth tab
   output$PCA <- renderPlot({
@@ -994,6 +893,7 @@ server <- function(input, output, session) {
                    point_size = 3)
   })
   
+  
   # protein wise visualisation 
   output$feature_subset <- renderPlot({
     scp_0 <- scp()
@@ -1019,103 +919,7 @@ server <- function(input, output, session) {
             strip.text = element_text(hjust = 0),
             legend.position = "bottom")
   })
-  
-  ### Statistic Module ###
-  
-  ## Dependencies
-  # plot the qq_count-th column
-  output$qqPlot <- renderPlot({
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    i <- qq_count()
-    qqnorm(exp_matrix_0[[sample_types[i]]], main=paste("QQ-plot of ", sample_types[i]))
-    qqline(exp_matrix_0[[sample_types[i]]])
-  })
-  
-  # plot hist for linear model
-  output$hist <- renderPlot({
-    exp_matrix_0 <- exp_matrix()
-    sample_types <- unique(colnames(exp_matrix_0))
-    i <- qq_count()
-    hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
-  })
-    
-  # create interface for the qqmodal dialog
-  qqModal <- function() {
-    modalDialog(
-      actionButton("previous_plot", "Show previous"),
-      actionButton("next_plot", "Show next"),
-      plotOutput("qqPlot"),
-      plotOutput("hist"),
-      footer = tagList(
-        modalButton("Dismiss")
-      )
-    )
-  }
-  
-  ## Calculation
-  # additional ui for statistic module
-  output$sample_select <- renderUI({
-    req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
-    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
-  })
 
-  # Ui for multifactorial model
-  output$add_factor <- renderUI({
-    req(input$model_design == "Multi factor additivity")
-    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
-  })
-  
-  
-  ## Results 
-  # volcanoplot in statistic tab
-  output$volcano <- renderPlot({
-    req(input$chosen_coef)
-    req(stat_result())
-    volcanoplot(stat_result(), cex = 0.5, coef = input$chosen_coef) 
-  })
-
-  # reactive element for toptable
-  protein_table <- reactive({
-    req(stat_result())
-    req(input$chosen_coef)
-    data.frame(topTable(stat_result(), number = Inf, adjust = "BH", coef = input$chosen_coef))
-  })
-  
-  # reactive element for hover function of volcano plot
-  displayed_text <- reactive({
-    req(input$plot_hover)
-    hover <- input$plot_hover
-    req(protein_table())
-    
-    dist <- sqrt((hover$x - protein_table()$logFC)^2 + (hover$y - -log10(protein_table()$P.Value))^2)
-    
-    if(min(dist) < 0.3) {
-      rownames(protein_table())[which.min(dist)]
-    } else {
-      NULL
-    }
-  })
-  
-  # hover output below volcano chart
-  output$hover_info <- renderPrint({
-    req(displayed_text())
-    cat("UniProt-ID\n")
-    displayed_text()
-  })
-  
-  # show significant proteins in the table
-  output$protein_table <- renderTable({
-    req(protein_table())
-    protein_table()
-  }, rownames = T, striped = T)
-  
-  # venn diagram for significant proteins
-  output$venn_diagram <- renderPlot({
-    req(stat_result())
-    vennDiagram(decideTests(stat_result()))
-  })
-  
   # plot MA plot for the constand method
   output$MAplot <- renderPlot({
     req(input$selectedComp)
@@ -1170,7 +974,7 @@ server <- function(input, output, session) {
     }
     MAplot(assay(scp_0[["proteins_transf"]][,index_A[[1]]]), assay(scp_0[["proteins_transf"]][,index_B[[1]]]))
   })
-
+  
   #create interface for the constand normalization method
   CONSTANdModal <- function() {
     modalDialog(
@@ -1194,8 +998,212 @@ server <- function(input, output, session) {
     )
   }
   
-
   
+    
+
+  ### Statistic Module ###
+  observeEvent(input$model_design, {
+    updateSelectInput(session, "selectedComp_stat", choices = sample_types())
+  })
+  
+  observeEvent(input$model_design, {
+    updateSelectInput(session, "col_factors", choices = columns())
+  })
+  
+  #observer for updating the coefficient dropdown menu
+  observeEvent(input$run_statistics, {
+    updateSelectInput(session, "chosen_coef", choices = coefs())
+  })
+  
+  
+  # statistical pipeline
+  stat_result <- eventReactive(input$run_statistics, {
+    withProgress(message= "running statistical analysis", value=0, {
+      incProgress(1/3, detail=paste("read data"))
+      scp_0 <- scp()
+      exp_matrix_0 <- exp_matrix()
+      
+      incProgress(2/3, detail=paste("creating linear model"))
+      req(input$model_design)
+      # Create a design matrix
+      if (input$model_design == "All pairwise comparison") {
+        design <- model.matrix(~0+factor(scp_0$SampleType))
+        colnames(design) <- unique(scp_0$SampleType)
+        fit <- lmFit(exp_matrix_0, design)
+      }
+      #Differential Expression with defined Contrasts
+      else if (input$model_design == "Differential Expression with defined Contrasts") {
+        # fetch user selection
+        req(input$selectedComp_stat)
+        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+        colnames(exp_matrix_0) <- scp_0$SampleType
+        
+        design <- model.matrix(~0+factor(scp_0$SampleType))
+        colnames(design) <- unique(scp_0$SampleType)
+        
+        fit <- lmFit(exp_matrix_0, design)
+        
+        user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+        fit <- contrasts.fit(fit, cont_matrix)
+      }
+      else if (input$model_design == "Multi factor additivity") {
+        req(input$col_factors)
+        req(input$selectedComp_stat)
+        
+        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+        colnames(exp_matrix_0) <- scp_0$SampleType
+        
+        fetched_factor <- colData(scp_0)[input$col_factors]
+        design_frame <- cbind(fetched_factor, scp_0$SampleType)
+        design <- model.matrix(~0+ . , data=design_frame)
+        fit <- lmFit(exp_matrix_0, design)
+      }
+      
+      incProgress(4/4, detail=paste("Bayes statistics of differential expression"))
+      # *There are several options to tweak!*
+      fit <- eBayes(fit)
+    })
+    return(fit)
+  })
+
+  ## Dependencies  
+  # initial qq counter for the first plot 
+  qq_count <- reactiveVal(1)
+  # observer for qqplot interface
+  observeEvent(input$qqplot, {
+    showModal(qqModal())
+  })
+  # observer for the next button to increment the counter and show next qq
+  observeEvent(input$next_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    i <- qq_count()
+    
+    if(i < length(sample_types)) {
+      j <- i + 1
+    }
+    else {
+      j <- 1
+    }
+    
+    qq_count(j)
+  })  
+  # observer for the previous button to increment the counter and show previous qq
+  observeEvent(input$previous_plot, {
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    
+    i <- qq_count()
+    
+    if(i > 1) {
+      j <- i - 1
+    }
+    else {
+      j <- 1
+    }
+    
+    qq_count(j)
+  })  
+  # plot the qq_count-th column
+  output$qqPlot <- renderPlot({
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    i <- qq_count()
+    qqnorm(exp_matrix_0[[sample_types[i]]], main=paste("QQ-plot of ", sample_types[i]))
+    qqline(exp_matrix_0[[sample_types[i]]])
+  })
+  # plot hist for linear model
+  output$hist <- renderPlot({
+    exp_matrix_0 <- exp_matrix()
+    sample_types <- unique(colnames(exp_matrix_0))
+    i <- qq_count()
+    hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
+  })
+  # create interface for the qqmodal dialog
+  qqModal <- function() {
+    modalDialog(
+      actionButton("previous_plot", "Show previous"),
+      actionButton("next_plot", "Show next"),
+      plotOutput("qqPlot"),
+      plotOutput("hist"),
+      footer = tagList(
+        modalButton("Dismiss")
+      )
+    )
+  }
+
+  # additional ui for statistic module
+  output$sample_select <- renderUI({
+    req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
+    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
+  })
+
+  # Ui for multifactorial model
+  output$add_factor <- renderUI({
+    req(input$model_design == "Multi factor additivity")
+    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
+  })
+  
+  
+  ## Results 
+  # coefficients for the statistic modules volcanoplot and topTable
+  coefs <- reactive({
+    req(stat_result())
+    fit_0 <- stat_result()
+    list <- colnames(fit_0$coefficients)
+  })
+  
+  # volcanoplot in statistic tab
+  output$volcano <- renderPlot({
+    req(input$chosen_coef)
+    req(stat_result())
+    volcanoplot(stat_result(), cex = 0.5, coef = input$chosen_coef) 
+  })
+
+  # reactive element for toptable
+  protein_table <- reactive({
+    req(stat_result())
+    req(input$chosen_coef)
+    data.frame(topTable(stat_result(), number = Inf, adjust = "BH", coef = input$chosen_coef))
+  })
+  
+  # reactive element for hover function of volcano plot
+  displayed_text <- reactive({
+    req(input$plot_hover)
+    hover <- input$plot_hover
+    req(protein_table())
+    
+    dist <- sqrt((hover$x - protein_table()$logFC)^2 + (hover$y - -log10(protein_table()$P.Value))^2)
+    
+    if(min(dist) < 0.3) {
+      rownames(protein_table())[which.min(dist)]
+    } else {
+      NULL
+    }
+  })
+  
+  # hover output below volcano chart
+  output$hover_info <- renderPrint({
+    req(displayed_text())
+    cat("UniProt-ID\n")
+    displayed_text()
+  })
+  
+  # show significant proteins in the table
+  output$protein_table <- renderTable({
+    req(protein_table())
+    protein_table()
+  }, rownames = T, striped = T)
+  
+  # venn diagram for significant proteins
+  output$venn_diagram <- renderPlot({
+    req(stat_result())
+    vennDiagram(decideTests(stat_result()))
+  })
 }
 
 
