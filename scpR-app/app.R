@@ -734,8 +734,6 @@ server <- function(input, output, session) {
     return(list)
   })
   
-  
-  
   # observer for sample type exclusion
   observe({
     req(sample_types())
