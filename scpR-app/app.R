@@ -54,7 +54,7 @@ ui <- fluidPage(
       selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
       switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
       conditionalPanel(condition = "input.opts_multiple_batches", 
-                       selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with 0", "replace with mean", "replace with median")),
+                       selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with mean", "replace with median")),
                        selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("ComBat", "none"))
                        )
       
@@ -494,19 +494,6 @@ server <- function(input, output, session) {
                                         to = "proteins_imptd")
           
           scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
-        } else if (input$missing_v == "replace with 0") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                          y = sce,
-                          name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                      from = "proteins_norm",
-                                      to = "proteins_imptd")
-          
-          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), 0)
-          
         } else if (input$missing_v == "replace with mean") {
           sce <- getWithColData(scp_0, "proteins_norm")
           

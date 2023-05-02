@@ -26,10 +26,11 @@ library("tibble")
 
 # read in MS result table
 mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
-mqScpData2 <- read.delim("/home/lukas/Downloads/Raw_data.txt")
+mqScpData2 <- read.csv("/home/lukas/Downloads/Raw_data.csv")
+mqScpData3 <- readxl::read_excel("/home/lukas/Downloads/20230207_L1_UN_Monocytes_TMT12_frac.xlsx")
 
 sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
-sampleAnnotation2 = read.delim("/home/lukas/Downloads/Design.txt")
+sampleAnnotation2 = read.csv("/home/lukas/Downloads/Design.csv")
 
 
 # define file handling for not mq generated data
@@ -39,10 +40,8 @@ if (!"Sequence" %in% colnames(mqScpData2)) {
   sampleAnnotation2 <- 
     sampleAnnotation2 %>% rename(
     SampleType = Group,
-    Raw.File = Batch
-  )
-  sampleAnnotation2 <- sampleAnnotation2[order(sampleAnnotation2$Raw.File),]
-  sampleAnnotation2$Channel <- sampleAnnotation2
+    Raw.file = Batch) %>%
+    arrange(Raw.file)
 }
 
 
@@ -60,21 +59,18 @@ if (!"Sequence" %in% colnames(mqScpData2)) {
     mqScpData2 %>% rename(
     Protein = ID
   )
-  
-  mqScpData2 %>% 
-    rename_with(~deframe(sampleAnnotation2)[.x], .cols = sampleAnnotation2$Channel) %>% 
-    select(Protein, any_of(sampleAnnotation2$Channel))
-  
-  
-  scp2 <- readSCP(featureData = mqScpData2,
-                  colData = sampleAnnotation2,
-                  channelCol = "Channel",
-                  batchCol = "Raw.file",
-                  removeEmptyCols = TRUE,
-                  verbose = T)
+}  
 
-  
-}
+
+quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = TRUE)
+
+scp2 <- readSCP(featureData = mqScpData2,
+                 colData = sampleAnnotation2,
+                 channelCol = "Channel",
+                 batchCol = "Raw.file",
+                 suffix=paste0("_TMT", 1:length(unique(sampleAnnotation2$Channel))),
+                 removeEmptyCols = TRUE,
+                 verbose = T)
 
 
 
