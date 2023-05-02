@@ -60,35 +60,35 @@ In order to enhance sequence identification, two MS devices are built in series.
 
 
 ## Data
-```{r Dataflow, echo=FALSE}
-library(DiagrammeR)
-library(webshot)
-
-DiagrammeR::grViz("digraph {
-	graph [layout  =  dot,
-	       rankdir  = TB]
-
-node [shape = rectangle]
-rawData [label = 'msData.raw']
-node [shape = oval]
-MQ [label = 'MaxQuant']
-node [shape = invhouse]
-MQ_fd [label = 'feature detection']
-node [shape = cylinder]
-MQ_ds [label = 'Database search']
-node [shape = invhouse]
-MQ_fdr [label = 'FDR calculation']
-MQ_quant [label = 'Protein Quantification']
-node [shape = rectangle]
-MQoutput [label = 'evidence.txt']
-sampleAnnotate [label = 'sample_annotation.txt']
-node [shape = oval]
-ProteomicsWorkbench [label = 'Proteomics Workbench']
-
-rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
-sampleAnnotate -> ProteomicsWorkbench
-}",
-height = 500)
+```{r Dataflow, eval=FALSE, include=FALSE}
+# library(DiagrammeR)
+# library(webshot)
+# 
+# DiagrammeR::grViz("digraph {
+# 	graph [layout  =  dot,
+# 	       rankdir  = TB]
+# 
+# node [shape = rectangle]
+# rawData [label = 'msData.raw']
+# node [shape = oval]
+# MQ [label = 'MaxQuant']
+# node [shape = invhouse]
+# MQ_fd [label = 'feature detection']
+# node [shape = cylinder]
+# MQ_ds [label = 'Database search']
+# node [shape = invhouse]
+# MQ_fdr [label = 'FDR calculation']
+# MQ_quant [label = 'Protein Quantification']
+# node [shape = rectangle]
+# MQoutput [label = 'evidence.txt']
+# sampleAnnotate [label = 'sample_annotation.txt']
+# node [shape = oval]
+# ProteomicsWorkbench [label = 'Proteomics Workbench']
+# 
+# rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
+# sampleAnnotate -> ProteomicsWorkbench
+# }",
+# height = 500)
 ```
 
 ### Acquisition
@@ -134,7 +134,7 @@ After these calculation the identified peptides can be aggregated according to i
 
 Further analysis is done with R and respective packages such as bioconductor. Since there is no state of the art established, analysis varies upon experimental design. The workflow of the analysis will be processed in a so called pipeline streamlining the data through steps where individual results can be observed in visualizations and indivdual calculations will be adapted according to user demands and experimental properties. 
 
-```{r data_processing_pipeline_flowchart, echo=FALSE, fig.height=17, fig.width=13}
+```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=17, fig.width=13}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -326,7 +326,7 @@ batch_correction_opts
 dim_red_actions
 ```
 
-```{r data_processing_pipeline_flowchart2, echo=FALSE, fig.height=9, fig.width=32}
+```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=9, fig.width=32, include=FALSE}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -585,9 +585,41 @@ Depending on the distribution of the values in the observed expression set, diff
 When observing a wide distribution of small and large values of the expression set in a histogram, a square root transformation can help increase the variability of smaller values and decrease the variability of larger values.
 Practically impossible, but in data-driven science, occasionally negative expression values may be present, and they can be converted into positive values by taking each one to the power of two.
 Depending on the distribution, the user has to decide which transformation to consider and verify that statistical assumptions are met after application with visualizations such as histograms, qqplots, and MA-plots.
-For statistically inexperienced users, the boxcox transformation can help with this decision. Developed in 1964 by Box and Cox \citep{Sakia1992}, this method applies a recursion on the data to determine the statistical parameter lambda. 
+For statistically inexperienced users, the boxcox transformation can help with this decision. Developed in 1964 by Box and Cox \citep{Sakia1992}, this method applies a linear model against 1 on the data to determine the statistical parameter lambda by the maximum likelihood method. The log-likelihood method takes the 95% confidence interval for the parameter lambda and the final lambda is chosen as the value with the highest log-likelihood value. 
+```{r lambda_table, echo=FALSE}
+# 
+# table <- tibble(lambda=c(-2,-1,-0.5,0,0.5,1,2), Transformation=c("$\frac{1}{x^2}$", "$\frac{1}{x}$", "$\frac{1}{\sqrt{x}}$", "$\log{x}$", "$\sqrt{x}$", "$x$", "$x^2$"))
+
+# knitr::kable(cbind(lambda=c(-2,-1,-0.5,0,0.5,1,2), Transformation=c("\$\\frac{1}{x^2}$", "\$\\frac{1}{x}$", "\$\\frac{1}{\\sqrt{x}}$", "\$\\log{x}$", "\$\\sqrt{x}$", "\$x$", "\$x^2$")), escape = F)
+```
+
+\begin{tabular}{l|r}
+\hline
+& lambda & Transformation\$\\
+\hline
+-2 & $\frac{1}{x^2}$
+\hline
+-1 & $\frac{1}{x}$
+\hline
+-0.5 & $\frac{1}{\sqrt{x}}$
+\hline
+0 & $\log{x}$
+\hline
+0.5 & $\sqrt{x}$
+\hline
+1 & $x$
+\hline
+2 & $x^2$
+\end{tabular}
 
 Depending on the size of lambda, a certain function will be automatically applied to each value of the expression set in order to introduce normality. In terms of usability, the boxcox method is the most efficient transformation method, taking the decision of which calculation to apply away from the user.
+
+#### Normalization
+The term normalization is ambiguous in data-science and will be explained briefly in this chapter. Starting with converting the data to the Z-distribution (Gaussian result), where 0 reflects the mean and 1 refers to the standard deviation, until vectorization where every feature (=protein) can be explained as a vector which points in a specific direction in the unit sphere, normalization can have different meanings. Normalization is considered as part of the scaling procedure and ensures that every feature contributes equally to our statistical model and hinders large values from biasing the model in a particular direction. Although this could also be harmful for the modeling procedure, since the impact of important features on the dataset will also be reduced. 
+Depending on the algorithms later used in the data processing, the method of choice for normalization can change the results significantly. The K-means clustering algorithm for instance relies on the distances between distinct data points by minimizing variance of the squared euclidean distances. This method will be applied in the missing value imputation which will be the next step applied to our data. Hence we want to make sure that the get the maximum accuracy for our imputed values. 
+The first option to choose in the user interface is the column-wise median and row-wise mean normalization. This method was chosen by Specht et al in the SCoPE2 publication 2021 /citep{Specht2021} and worked as a reference during the development process to benchmark other methods. When dividing each value of an expression set by the median of the particular column, the procedure is considered as a column-wise median normalization. Hence the mean-normalization works the same way on the column. In the analysis pipeline both procedures were applied on the dataset. However when the logarithm as the transformation method was chosen in advance the pipeline automatically switches from a division to a subtraction, since:
+$\log_a \left(\frac{u}{v}\right)=\log_a u-\log_a v$
+ 
 
 
 Further filter steps can include correction between multiple runs. This kind of process need the addition of a reference channel. However when observing a single run, these steps are not crucial for the upcoming analysis. 

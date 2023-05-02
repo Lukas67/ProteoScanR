@@ -3,6 +3,7 @@
 \PassOptionsToPackage{hyphens}{url}
 %
 \documentclass[
+  11pt,
 ]{article}
 \usepackage{amsmath,amssymb}
 \usepackage{lmodern}
@@ -33,7 +34,8 @@
   \KOMAoptions{parskip=half}}
 \makeatother
 \usepackage{xcolor}
-\usepackage[margin=1in]{geometry}
+\usepackage[left = 2.5cm, right = 2cm, top = 2cm, bottom =
+2cm]{geometry}
 \usepackage{graphicx}
 \makeatletter
 \def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
@@ -50,7 +52,16 @@
 \setlength{\emergencystretch}{3em} % prevent overfull lines
 \providecommand{\tightlist}{%
   \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
-\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\setcounter{secnumdepth}{5}
+\usepackage{float}
+\usepackage{sectsty}
+\usepackage{paralist}
+\usepackage{setspace}\spacing{1.5}
+\usepackage{fancyhdr}
+\usepackage{lastpage}
+\usepackage{dcolumn}
+\usepackage{natbib}\bibliographystyle{agsm}
+\usepackage[nottoc, numbib]{tocbibind}
 \ifLuaTeX
   \usepackage{selnolig}  % disable illegal ligatures
 \fi
@@ -65,6 +76,139 @@
 \date{\vspace{-2.5em}}
 
 \begin{document}
+
+\allsectionsfont{\centering}
+\subsectionfont{\raggedright}
+\subsubsectionfont{\raggedright}
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+\vspace{3cm}
+
+\includegraphics[width=0.2\linewidth]{FHCW_logo} 
+\includegraphics[width=0.2\linewidth]{KI_logo} 
+
+\vspace{1cm}
+
+\Large
+\doublespacing
+{\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
+
+\vspace{1 cm}
+
+\normalsize
+\singlespacing
+By
+
+\vspace{0.5 cm}
+
+\Large
+
+{\bf Lukas Gamp}
+
+\vspace{1.5 cm}
+
+in partial fullfilment of the requirement \\for the degree of MSc \\in Bioinformatics
+
+\vspace{1.5 cm}
+
+\normalsize
+mm yy
+\end{centering}
+
+\newpage
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+{\bf Abstract}
+
+\end{centering}
+
+\spacing{1.5}
+
+(the spacing is set to 1.5)
+
+no more than 250 words for the abstract
+
+\begin{itemize}
+\tightlist
+\item
+  a description of the research question/knowledge gap -- what we know
+  and what we don't know
+\item
+  how your research has attempted to fill this gap
+\item
+  a brief description of the methods
+\item
+  brief results
+\item
+  key conclusions that put the research into a larger context
+\end{itemize}
+
+\pagenumbering{roman}
+
+\newpage
+
+\centering
+\raggedright
+\newpage
+\tableofcontents
+
+\newpage
+
+\section*{Acknowledgements}
+
+Thank you for following this tutorial!
+
+I hope you'll find it useful to write a very professional dissertation.
+
+\newpage
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+\hypertarget{proteomics}{%
+\subsection{Proteomics}\label{proteomics}}
+
+The proteome is referred to the sum of all proteins of a given sample at
+a given time. In the past several quantitative and qualitative assays
+were used to enlighten the protein composition of a sample.
+
+An early approach of qualitative analysis of the cellular proteome
+involved labeling with fluorescent antibodies and imaging. The major
+disadvantage of this technique was the limitation to only stain a few
+proteins per cell. For quantification procedures such as single-cell
+Western blots, immunoassays or CyTOF have been used. Other disadvantages
+are the ability to permeate cells, accessibility and binding of the
+epitope and the creation of specific antibodies for a given protein
+\citep{Budnik2018}.
+
+One of those techniques involved RNA-sequencing. Since RNA involves also
+non-coding RNA, the amount of RNA is often not proportional to the
+content of proteins in a cell. So the proteinaceous content of a cell
+was only predicted and quantitative analysis was not possible.
+
+\hypertarget{mass-spectrometry}{%
+\subsection{Mass Spectrometry}\label{mass-spectrometry}}
+
+Mass spectrometry enables qualitative and quantitative analysis of the
+entire repertoire of a biological sample. The availability of gene
+sequences in databases and the ability to match proteins against those
+sequences with computational methods makes it possible to identify
+alterations of a sample on a protein level. These alterations can rely
+on the sequence level or could be to post-translational modifications
+(PTMs) such as phosphorylation, methylation or else
+\citep{Aebersold2003}.
+
+Mass to charge ratio (m/z)
+
+\pagenumbering{arabic}
+
+\newpage
 
 \hypertarget{materials-and-methods}{%
 \section{Materials and Methods}\label{materials-and-methods}}
@@ -147,8 +291,8 @@ In order to separate proteins according to their chemical properties,
 size or species a liquid chromatography (LC) is recommended before
 ionization.
 
-\hypertarget{mass-spectrometry}{%
-\paragraph{Mass Spectrometry}\label{mass-spectrometry}}
+\hypertarget{mass-spectrometry-1}{%
+\paragraph{Mass Spectrometry}\label{mass-spectrometry-1}}
 
 \hypertarget{ionization}{%
 \subparagraph{Ionization}\label{ionization}}
@@ -299,7 +443,7 @@ where individual results can be observed in visualizations and indivdual
 calculations will be adapted according to user demands and experimental
 properties.
 
-\includegraphics{methods_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf}
+\includegraphics{Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf}
 
 \hypertarget{reading-the-data}{%
 \paragraph{Reading the data}\label{reading-the-data}}
@@ -614,5 +758,97 @@ be obtained at the end of the pipeline. A function call with the
 arguments design and expression matrix calculates the contrast matrix.
 The next step is creating a linear model between groups by log-ratios of
 their expression values.
+
+\newpage
+
+\hypertarget{results}{%
+\section{Results}\label{results}}
+
+Some more guidlines from the School of Geosciences.
+
+This section should summarise the findings of the research referring to
+all figures, tables and statistical results (some of which may be placed
+in appendices). - include the primary results, ordered logically - it is
+often useful to follow the same order as presented in the methods. -
+alternatively, you may find that ordering the results from the most
+important to the least important works better for your project. - data
+should only be presented in the main text once, either in tables or
+figures; if presented in figures, data can be tabulated in appendices
+and referred to at the appropriate point in the main text.
+
+\textbf{Often, it is recommended that you write the results section
+first, so that you can write the methods that are appropriate to
+describe the results presented. Then you can write the discussion next,
+then the introduction which includes the relevant literature for the
+scientific story that you are telling and finally the conclusions and
+abstract -- this approach is called writing backwards.}
+
+\newpage
+
+\hypertarget{discussion}{%
+\section{Discussion}\label{discussion}}
+
+the purpose of the discussion is to summarise your major findings and
+place them in the context of the current state of knowledge in the
+literature. When you discuss your own work and that of others, back up
+your statements with evidence and citations. - The first part of the
+discussion should contain a summary of your major findings (usually 2 --
+4 points) and a brief summary of the implications of your findings.
+Ideally, it should make reference to whether you found support for your
+hypotheses or answered your questions that were placed at the end of the
+introduction. - The following paragraphs will then usually describe each
+of these findings in greater detail, making reference to previous
+studies. - Often the discussion will include one or a few paragraphs
+describing the limitations of your study and the potential for future
+research. - Subheadings within the discussion can be useful for
+orienting the reader to the major themes that are addressed.
+
+\newpage
+
+\hypertarget{conclusion}{%
+\section{Conclusion}\label{conclusion}}
+
+The conclusion section should specify the key findings of your study,
+explain their wider significance in the context of the research field
+and explain how you have filled the knowledge gap that you have
+identified in the introduction. This is your chance to present to your
+reader the major take-home messages of your dissertation research. It
+should be similar in content to the last sentence of your summary
+abstract. It should not be a repetition of the first paragraph of the
+discussion. They can be distinguished in their connection to broader
+issues. The first paragraph of the discussion will tend to focus on the
+direct scientific implications of your work (i.e.~basic science,
+fundamental knowledge) while the conclusion will tend to focus more on
+the implications of the results for society, conservation, etc.
+
+\newpage
+
+\bibliography{bibliography}
+
+\newpage
+
+\hypertarget{appendixces}{%
+\section{Appendix(ces)}\label{appendixces}}
+
+\hypertarget{appendix-a-additional-tables}{%
+\subsection{Appendix A: additional
+tables}\label{appendix-a-additional-tables}}
+
+Insert content for additional tables here.
+
+\newpage
+
+\hypertarget{appendix-b-additional-figures}{%
+\subsection{Appendix B: additional
+figures}\label{appendix-b-additional-figures}}
+
+Insert content for additional figures here.
+
+\newpage
+
+\hypertarget{appendix-c-code}{%
+\subsection{Appendix C: code}\label{appendix-c-code}}
+
+Insert code (if any) used during your dissertation work here.
 
 \end{document}
