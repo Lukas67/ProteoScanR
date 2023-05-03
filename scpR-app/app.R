@@ -1,6 +1,7 @@
 library("shiny")
 library("shinyWidgets")
 library("shinydashboard")
+library("DT")
 
 library("scp")
 library("SingleCellExperiment")
@@ -94,12 +95,18 @@ ui <- fluidPage(
                   tabPanel("Statistics",
                            actionButton("run_statistics", "Press to run statistics"),
                            actionButton("qqplot", "check dependencies for linear model"),
-                           selectInput("model_design", "Choose your study design",
-                                       choices = c("All pairwise comparison",
-                                                   "Differential Expression with defined Contrasts",
-                                                   "Multi factor additivity")),
-                           uiOutput("sample_select"),
-                           uiOutput("add_factor"),
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           selectInput("model_design", "choose your study design",
+                                                       choices = c("All pairwise comparison",
+                                                                   "Differential Expression with defined Contrasts",
+                                                                   "Multi factor additivity"))),
+                                    column(width = 4,
+                                           uiOutput("sample_select")),
+                                    column(width=4,
+                                           uiOutput("add_factor"))
+                           ),
+                           selectInput("p_value_correction", "select method for p-value correction", choices = c("none", "BH", "fdr", "BY", "holm")),
                            plotOutput("venn_diagram"),
                            fluidRow(width=12,
                                     column(width=4,
@@ -109,9 +116,8 @@ ui <- fluidPage(
                                     column(width=4,
                                            numericInput("fold_change_cutoff", "choose fold change cutoff", value = 0.05, min = 0, step = 0.01))
                            ),
-                           
                            plotlyOutput("volcano"),
-                           tableOutput("protein_table")
+                           DT::dataTableOutput("protein_table")
                   )
       )
     )
@@ -1144,13 +1150,13 @@ server <- function(input, output, session) {
   # additional ui for statistic module
   output$sample_select <- renderUI({
     req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
-    selectInput("selectedComp_stat", "choose your samples of interest", "", multiple = T)
+    selectInput("selectedComp_stat", "choose your contrast of interest", "", multiple = T)
   })
 
   # Ui for multifactorial model
   output$add_factor <- renderUI({
     req(input$model_design == "Multi factor additivity")
-    selectInput("col_factors", "choose second factor or multiple for your model", "", multiple = T)
+    selectInput("col_factors", "choose additional factor(s)", "", multiple = T)
   })
   
   
@@ -1194,19 +1200,20 @@ server <- function(input, output, session) {
   protein_table <- reactive({
     req(stat_result())
     req(input$chosen_coef)
-    data.frame(topTable(stat_result(), number = Inf, adjust = "BH", coef = input$chosen_coef))
+    data.frame(topTable(stat_result(), number = Inf, adjust.method = input$p_value_correction, coef = input$chosen_coef))
   })
   
   # show significant proteins in the table
-  output$protein_table <- renderTable({
+  output$protein_table <- DT::renderDataTable({
     req(protein_table())
-    protein_table()
-  }, rownames = T, striped = T)
+    protein_table() %>%
+      mutate_if(is.numeric, round, digits=5)
+  })
   
   # venn diagram for significant proteins
   output$venn_diagram <- renderPlot({
     req(stat_result())
-    vennDiagram(decideTests(stat_result()))
+    vennDiagram(decideTests(stat_result(), p.value=input$p_value_cutoff, adjust.method=input$p_value_correction))
   })
 }
 
