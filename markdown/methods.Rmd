@@ -586,45 +586,49 @@ When observing a wide distribution of small and large values of the expression s
 Practically impossible, but in data-driven science, occasionally negative expression values may be present, and they can be converted into positive values by taking each one to the power of two.
 Depending on the distribution, the user has to decide which transformation to consider and verify that statistical assumptions are met after application with visualizations such as histograms, qqplots, and MA-plots.
 For statistically inexperienced users, the boxcox transformation can help with this decision. Developed in 1964 by Box and Cox \citep{Sakia1992}, this method applies a linear model against 1 on the data to determine the statistical parameter lambda by the maximum likelihood method. The log-likelihood method takes the 95% confidence interval for the parameter lambda and the final lambda is chosen as the value with the highest log-likelihood value. 
-```{r lambda_table, echo=FALSE}
-# 
-# table <- tibble(lambda=c(-2,-1,-0.5,0,0.5,1,2), Transformation=c("$\frac{1}{x^2}$", "$\frac{1}{x}$", "$\frac{1}{\sqrt{x}}$", "$\log{x}$", "$\sqrt{x}$", "$x$", "$x^2$"))
 
-# knitr::kable(cbind(lambda=c(-2,-1,-0.5,0,0.5,1,2), Transformation=c("\$\\frac{1}{x^2}$", "\$\\frac{1}{x}$", "\$\\frac{1}{\\sqrt{x}}$", "\$\\log{x}$", "\$\\sqrt{x}$", "\$x$", "\$x^2$")), escape = F)
-```
-
-\begin{tabular}{l|r}
-\hline
-& lambda & Transformation\$\\
-\hline
--2 & $\frac{1}{x^2}$
-\hline
--1 & $\frac{1}{x}$
-\hline
--0.5 & $\frac{1}{\sqrt{x}}$
-\hline
-0 & $\log{x}$
-\hline
-0.5 & $\sqrt{x}$
-\hline
-1 & $x$
-\hline
+\begin{center}
+\begin{tabular}{l r}
+$\lambda$ & Transformation \\
+-2 & $\frac{1}{x^2}$ \\
+-1 & $\frac{1}{x}$ \\
+-0.5 & $\frac{1}{\sqrt{x}}$ \\
+0 & $\log{x}$ \\
+0.5 & $\sqrt{x}$ \\
+1 & $x$ \\
 2 & $x^2$
 \end{tabular}
+\end{center}
 
 Depending on the size of lambda, a certain function will be automatically applied to each value of the expression set in order to introduce normality. In terms of usability, the boxcox method is the most efficient transformation method, taking the decision of which calculation to apply away from the user.
 
 #### Normalization
-The term normalization is ambiguous in data-science and will be explained briefly in this chapter. Starting with converting the data to the Z-distribution (Gaussian result), where 0 reflects the mean and 1 refers to the standard deviation, until vectorization where every feature (=protein) can be explained as a vector which points in a specific direction in the unit sphere, normalization can have different meanings. Normalization is considered as part of the scaling procedure and ensures that every feature contributes equally to our statistical model and hinders large values from biasing the model in a particular direction. Although this could also be harmful for the modeling procedure, since the impact of important features on the dataset will also be reduced. 
-Depending on the algorithms later used in the data processing, the method of choice for normalization can change the results significantly. The K-means clustering algorithm for instance relies on the distances between distinct data points by minimizing variance of the squared euclidean distances. This method will be applied in the missing value imputation which will be the next step applied to our data. Hence we want to make sure that the get the maximum accuracy for our imputed values. 
-The first option to choose in the user interface is the column-wise median and row-wise mean normalization. This method was chosen by Specht et al in the SCoPE2 publication 2021 /citep{Specht2021} and worked as a reference during the development process to benchmark other methods. When dividing each value of an expression set by the median of the particular column, the procedure is considered as a column-wise median normalization. Hence the mean-normalization works the same way on the column. In the analysis pipeline both procedures were applied on the dataset. However when the logarithm as the transformation method was chosen in advance the pipeline automatically switches from a division to a subtraction, since:
-$\log_a \left(\frac{u}{v}\right)=\log_a u-\log_a v$
- 
+The term normalization is ambiguous in data-science and will be explained briefly in this chapter. Starting with converting the data to the Z-distribution (Gaussian result), where 0 represents the mean and 1 represents the standard deviation, in vectorization every feature (or protein) is represented as a vector that points in a specific direction in the unit sphere, normalization can have different meanings. Normalization is considered as part of the scaling procedure and ensures that every feature contributes equally to our statistical model and hinders large values from biasing the model in a particular direction. However, this could also have negative consequences for the modeling procedure, as it may reduce the impact of important features on the dataset. 
+Depending on the algorithms later used in the data processing, the method of choice for normalization can change the results significantly. The K-means clustering algorithm, for instance relies on the distances between distinct data points by minimizing variance of the squared euclidean distances. This method will be applied in the missing value imputation which will be the next step applied to our data. Therefore, we want to ensure that we obtain the most accurate imputed values possible.
+The first normalization method available in the user interface is column-wise median and row-wise mean normalization. This method was chosen by Specht et al in the SCoPE2 publication 2021 \citep{Specht2021} and worked as a reference during the development process to benchmark other methods. When dividing each value of an expression set by the median of the particular column, the procedure is considered as a column-wise median normalization. Although the mean-normalization works the same way but takes the mean as the second variable. In the analysis pipeline both procedures were applied on the dataset. However when the logarithm as the transformation method was chosen as transformation method, the pipeline automatically switches from a division to a subtraction, since:
+$\log_a \left(\frac{u}{v}\right)=\log_a u-\log_a v$. After applying this normalization method, each value can be interpreted as a distance or fraction of the mean or median of the corresponding column or row, enabling fair comparisons between features and samples.
+The second method for normalization included is the CONSTANd method, which was proven suitable for relative quantification in the field of proteomics \citep{Maes2016, VanHoutven2021}, but can also be applied on RNAseq data. CONSTANd uses a technique called matrix raking, which employs the RAS algorithm. The expression set reflects the nonnegative real $(m, n)$ matrix $A$ were the bi proportional constrained matrix problem will be solved by finding the $(m, n)$ matrix $B$ which equals to $diag(x) * A *diag(y)$ . Whereas $x \in \mathbb{R}^{m}$ and $y \in \mathbb{R}^{n}$. The solution to this problem involves finding the row sum of $B=u_i$ and the column sum of $B=v_j$, where $i$ and $j$ denote the row and column indices of the matrix, respectively \citep{Bacharach1965}. In other words, the matrix will be alternatively manipulated on rows and columns until the mean of both equals 1. In order to apply the method and yield true results, one has to consider 3 major assumptions between sample types. This assumption can be observed in the MA-plot which indicates the differences of two samples. If we have the intensities of two samples, $R$ and $G$, we can plot them on a graph with the x-axis as $M=\log_2(\frac{R}{G})$ and the y-axis as $A=\frac{1}{2}\log_2(RG)$. A comparison between all sample types of identically processed sets is needed before calculation and the assumptions must be fulfilled.
 
+\begin{itemize}
+\item{\textbf{1}} \textbf{The majority of proteins are not differentially expressed}
+\\Density of the dots decreases when looking from the middle of the cloud towards the edges.
 
-Further filter steps can include correction between multiple runs. This kind of process need the addition of a reference channel. However when observing a single run, these steps are not crucial for the upcoming analysis. 
+\item{\textbf{2}} \textbf{Up- and downregulation is balanced around the mean expression}
+\\The scatterplot of the data points is symmetrical around the mean on the horizontal axis. 
 
- 
+\item{\textbf{3}} \textbf{Systematic bias correlates with the magnitude of expression}
+\\The symmetry axis is approximately horizontal.
+
+\end{itemize}
+
+If the MA-plot does not visualize any of these violations the CONSTANd method can be applied on the dataset and the biological meaning of the sample types can be assessed. The method is utilized by the bioconductor package handler. 
+However if the dataset already consists of balanced features and samples or the user wants to benchmark the methods applied, normalization can be skipped also.
+
+#### Missing value handling
+When analyzing multiple batches simultaneously, it is possible to encounter situations where a particular protein is not detected in one of the batches. From a biological perspective, it is highly unlikely that a cell completely lacks a single protein, as it would imply a complete loss of function for that protein. Therefore, an intensity value of 0 is close to impossible for most proteins. In order to handle this dark space in the expression set, several methods can be chosen in the application. 
+A variety of function employs replacing the missing values with the mean or median of the rest of the matrix. This procedure introduces no bias in the data, although differential expression for the sample carrying the missing feature can not be expected as well. Even a more conservative approach is dropping the rows for the feature with the missing value in one of the observed samples. 
+Another common practice is utilizing the K-nearest neighbor algorithm (=KNN), which imputes the missing values by a euclidean metrics of the neighboring values in the columns where the feature is not missing. $K$ denotes for the count of neighboring values of a gene and can be selected upon preference. 
+
 
 
 #### Downstream Analysis
