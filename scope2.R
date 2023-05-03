@@ -813,15 +813,32 @@ genetable <- topTable(fit, number = Inf, adjust = "BH")
 
 volcanoplot(fit)
 
-library(EnhancedVolcano)
-EnhancedVolcano(genetable,
-                lab = rownames(genetable),
-                x = 'logFC',
-                y = 'P.Value',
-                pCutoff = 0.05,
-                FCcutoff = 0.05,
-                ylim = c(-log10(max(genetable$P.Value)), -log10(min(genetable$P.Value))),
-                xlim = c(min(genetable$logFC), max(genetable$logFC))
-                )
+
+library(plotly)
+
+# load data.frame
+toptable <- as.data.frame(genetable)
+toptable <- cbind(rownames(toptable), data.frame(toptable, row.names=NULL))
+colnames(toptable)[1] <- "protein"
+
+# significance cutoffs
+FCcutoff <- 0.05
+pCutoff <- 0.05
+
+# define factor levels for significance
+toptable$Significance <- "not significant"
+toptable$Significance[(abs(toptable$logFC) > FCcutoff)] <- "fold change"
+toptable$Significance[(toptable$P.Value < pCutoff)] <- "p-value"
+toptable$Significance[(toptable$P.Value < pCutoff) & (abs(toptable$logFC) > 
+                                                     FCcutoff)] <- "fold change & p-value"
+toptable$Significance <- factor(toptable$Sig, levels = c("not significant", "fold change", 
+                                                "p-value", "fold change & p-value"))
+
+p <- ggplot(toptable, aes(x = logFC, y = -log10(P.Value), text=protein)) +
+  geom_point(aes(color = Significance), alpha = 1/2, shape = 19, size = 1.5, na.rm = TRUE) +
+  theme(legend.position = "top")
+  
+ggplotly(p, tooltip = "text")
+
 
 

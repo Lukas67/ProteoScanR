@@ -14,7 +14,7 @@ library("CONSTANd")
 library("stats")
 library("impute")
 library("sva")
-
+library("plotly")
 
 reactlog::reactlog_enable()
 
@@ -101,9 +101,16 @@ ui <- fluidPage(
                            uiOutput("sample_select"),
                            uiOutput("add_factor"),
                            plotOutput("venn_diagram"),
-                           selectInput("chosen_coef", "Select your coefficient of interest", ""),
-                           plotOutput("volcano", hover = hoverOpts(id ="plot_hover")),
-                           verbatimTextOutput("hover_info"),
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           selectInput("chosen_coef", "Select your coefficient of interest", "")),
+                                    column(width = 4,
+                                           numericInput("p_value_cutoff", "choose p-value cutoff", value = 0.05, min = 0, step = 0.01)),
+                                    column(width=4,
+                                           numericInput("fold_change_cutoff", "choose fold change cutoff", value = 0.05, min = 0, step = 0.01))
+                           ),
+                           
+                           plotlyOutput("volcano"),
                            tableOutput("protein_table")
                   )
       )
@@ -1156,39 +1163,38 @@ server <- function(input, output, session) {
   })
   
   # volcanoplot in statistic tab
-  output$volcano <- renderPlot({
-    req(input$chosen_coef)
-    req(stat_result())
-    volcanoplot(stat_result(), cex = 0.5, coef = input$chosen_coef) 
-  })
+  output$volcano <- renderPlotly({
+    # load data.frame
+    toptable <- protein_table()
+    toptable <- cbind(rownames(toptable), data.frame(toptable, row.names=NULL))
+    colnames(toptable)[1] <- "protein"
+    
+    # significance cutoffs
+    FCcutoff <- input$fold_change_cutoff
+    pCutoff <- input$p_value_cutoff
+    
+    # define factor levels for significance
+    toptable$Significance <- "not significant"
+    toptable$Significance[(abs(toptable$logFC) > FCcutoff)] <- "fold change"
+    toptable$Significance[(toptable$P.Value < pCutoff)] <- "p-value"
+    toptable$Significance[(toptable$P.Value < pCutoff) & (abs(toptable$logFC) > 
+                                                            FCcutoff)] <- "fold change & p-value"
+    toptable$Significance <- factor(toptable$Sig, levels = c("not significant", "fold change", 
+                                                             "p-value", "fold change & p-value"))
+    
+    p <- ggplot(toptable, aes(x = logFC, y = -log10(P.Value), text=protein)) +
+      geom_point(aes(color = Significance), alpha = 1/2, shape = 19, size = 1.5, na.rm = TRUE) +
+      theme(legend.position = "top")
+    
+    ggplotly(p, tooltip = "text")
 
+  })
+  
   # reactive element for toptable
   protein_table <- reactive({
     req(stat_result())
     req(input$chosen_coef)
     data.frame(topTable(stat_result(), number = Inf, adjust = "BH", coef = input$chosen_coef))
-  })
-  
-  # reactive element for hover function of volcano plot
-  displayed_text <- reactive({
-    req(input$plot_hover)
-    hover <- input$plot_hover
-    req(protein_table())
-    
-    dist <- sqrt((hover$x - protein_table()$logFC)^2 + (hover$y - -log10(protein_table()$P.Value))^2)
-    
-    if(min(dist) < 0.3) {
-      rownames(protein_table())[which.min(dist)]
-    } else {
-      NULL
-    }
-  })
-  
-  # hover output below volcano chart
-  output$hover_info <- renderPrint({
-    req(displayed_text())
-    cat("UniProt-ID\n")
-    displayed_text()
   })
   
   # show significant proteins in the table
