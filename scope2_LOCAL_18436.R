@@ -25,9 +25,24 @@ library("sva")
 library("tibble")
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/20230202_HF2_08_Ujjwal_Monocytes_TMT12_PSMs.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
+# mqScpData2 <- read.csv("/home/lukas/Downloads/Raw_data.csv")
+# mqScpData3 <- readxl::read_excel("/home/lukas/Downloads/20230207_L1_UN_Monocytes_TMT12_frac.xlsx")
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/sampleAnnotate_tabdel.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
+# sampleAnnotation2 = read.csv("/home/lukas/Downloads/Design.csv")
+
+
+# define file handling for not mq generated data
+
+#metadata is used as a reference --> change different metadata file accordingly
+# if (!"Sequence" %in% colnames(mqScpData2)) {
+#   sampleAnnotation2 <- 
+#     sampleAnnotation2 %>% rename(
+#     SampleType = Group,
+#     Raw.file = Batch) %>%
+#     arrange(Raw.file)
+# }
 
 
 # create QFeature object
@@ -36,6 +51,25 @@ scp <- readSCP(featureData = mqScpData,
                channelCol = "Channel",
                batchCol = "Raw.file",
                removeEmptyCols = TRUE)
+
+
+# if (!"Sequence" %in% colnames(mqScpData2)) {
+#   mqScpData2 <- 
+#     mqScpData2 %>% rename(
+#     Protein = ID
+#   )
+# }  
+# 
+# 
+# quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = TRUE)
+# 
+# scp2 <- readSCP(featureData = mqScpData2,
+#                  colData = sampleAnnotation2,
+#                  channelCol = "Channel",
+#                  batchCol = "Raw.file",
+#                  suffix=paste0("_TMT", 1:length(unique(sampleAnnotation2$Channel))),
+#                  removeEmptyCols = TRUE,
+#                  verbose = T)
 
 
 

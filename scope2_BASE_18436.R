@@ -25,9 +25,24 @@ library("sva")
 library("tibble")
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/20230202_HF2_08_Ujjwal_Monocytes_TMT12_PSMs.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
+# mqScpData2 <- read.csv("/home/lukas/Downloads/Raw_data.csv")
+# mqScpData3 <- readxl::read_excel("/home/lukas/Downloads/20230207_L1_UN_Monocytes_TMT12_frac.xlsx")
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/sampleAnnotate_tabdel.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
+# sampleAnnotation2 = read.csv("/home/lukas/Downloads/Design.csv")
+
+
+# define file handling for not mq generated data
+
+#metadata is used as a reference --> change different metadata file accordingly
+# if (!"Sequence" %in% colnames(mqScpData2)) {
+#   sampleAnnotation2 <- 
+#     sampleAnnotation2 %>% rename(
+#     SampleType = Group,
+#     Raw.file = Batch) %>%
+#     arrange(Raw.file)
+# }
 
 
 # create QFeature object
@@ -35,7 +50,27 @@ scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
                channelCol = "Channel",
                batchCol = "Raw.file",
+               suffix = paste0("_TMT", 1:length(unique(sampleAnnotation$Channel))),
                removeEmptyCols = TRUE)
+
+
+# if (!"Sequence" %in% colnames(mqScpData2)) {
+#   mqScpData2 <- 
+#     mqScpData2 %>% rename(
+#     Protein = ID
+#   )
+# }  
+# 
+# 
+# quantCols <- grep("Reporter.intensity.\\d", colnames(mqScpData), value = TRUE)
+# 
+# scp2 <- readSCP(featureData = mqScpData2,
+#                  colData = sampleAnnotation2,
+#                  channelCol = "Channel",
+#                  batchCol = "Raw.file",
+#                  suffix=paste0("_TMT", 1:length(unique(sampleAnnotation2$Channel))),
+#                  removeEmptyCols = TRUE,
+#                  verbose = T)
 
 
 
@@ -575,30 +610,27 @@ plotReducedDim(scp[["proteins_dim_red"]],
 
 
 
-## Get the features
-subsetByFeature(scp, "Q92954") %>%
-  ## Format the `QFeatures` to a long format table
-  longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
-  data.frame %>%
-  ## This is used to preserve ordering of the samples and assays in ggplot2
-  mutate(assay = factor(assay, levels = names(scp)),
-         Channel = sub("Reporter.intensity.", "", Channel),
-  ) %>%
-  mutate(Channel = as.numeric(Channel)) %>%
-  arrange(Channel) %>%
-  mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
-  ## Start plotting
-  ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
-  geom_point() +
-  ## Plot every assay in a separate facet
-  facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
-  ## Annotate plot
-  xlab("Channels") +
-  ylab("Intensity (arbitrary units)") +
-  ## Improve plot aspect
-  theme(axis.text.x = element_text(angle = 90),
-        strip.text = element_text(hjust = 0),
-        legend.position = "bottom")
+# ## Get the features
+# subsetByFeature(scp, "Q9ULV4") %>%
+#   ## Format the `QFeatures` to a long format table
+#   longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+#   data.frame %>%
+#   ## This is used to preserve ordering of the samples and assays in ggplot2
+#   mutate(assay = factor(assay, levels = names(scp)),
+#          Channel = sub("Reporter.intensity.", "Label", Channel),
+#          Channel = factor(Channel, levels = unique(Channel))) %>%
+#   ## Start plotting
+#   ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+#   geom_point() +
+#   ## Plot every assay in a separate facet
+#   facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+#   ## Annotate plot
+#   xlab("Channels") +
+#   ylab("Intensity (arbitrary units)") +
+#   ## Improve plot aspect
+#   theme(axis.text.x = element_text(angle = 90),
+#         strip.text = element_text(hjust = 0),
+#         legend.position = "bottom")
 
 ## limma analysis 
 # differential expression between two groups

@@ -34,7 +34,11 @@ sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerha
 scp <- readSCP(featureData = mqScpData,
                colData = sampleAnnotation,
                channelCol = "Channel",
+<<<<<<< HEAD
                batchCol = "Raw.file",
+=======
+               batchCol = "Spectrum.File",
+>>>>>>> master
                removeEmptyCols = TRUE)
 
 
