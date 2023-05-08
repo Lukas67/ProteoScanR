@@ -415,7 +415,6 @@ server <- function(input, output, session) {
       
       incProgress(14/17, detail=paste("transforming protein data"))
       req(input$transform_base)
-
       if (input$transform_base == "log2") {
         if (input$file_level == FALSE) {
           scp_0 <- logTransform(scp_0,
@@ -651,10 +650,15 @@ server <- function(input, output, session) {
         }
       }
       
-      
       if (length(peptide_file) > 1) {
+        if (input$file_level == FALSE) {
+          
+        }
         incProgress(16/17, detail=paste("running missing value imputation"))
         if (input$missing_v == "KNN") {
+          
+          
+        }
           scp_0 <- impute(scp_0,
                           i = "proteins_norm",
                           name = "proteins_imptd",
