@@ -651,14 +651,8 @@ server <- function(input, output, session) {
       }
       
       if (length(peptide_file) > 1) {
-        if (input$file_level == FALSE) {
-          
-        }
         incProgress(16/17, detail=paste("running missing value imputation"))
         if (input$missing_v == "KNN") {
-          
-          
-        }
           scp_0 <- impute(scp_0,
                           i = "proteins_norm",
                           name = "proteins_imptd",
