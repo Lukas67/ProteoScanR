@@ -8,6 +8,28 @@ meta_data_0 <- read.delim("/home/lukas/Downloads/Design.txt")
 rownames(evidence_data) <- evidence_data$ID
 evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
+selectedSampleType_to_exclude <- c("Pool")
+evidence_data <- evidence_data[, !(meta_data_0$Group %in%  selectedSampleType_to_exclude)]      
+meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
+
+
+barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
+
+evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
+
+evidence_data_medians %>%
+  ggplot() +
+  aes(x = median_intensity, 
+      y = meta_data_0$Group,
+      fill = meta_data_0$Group) +
+  geom_boxplot() +
+  scale_x_log10() +
+  labs(fill=as.character(meta_data_0$Group), y=as.character(meta_data_0$Group))
+
+
+
+
+
 # log transform expression values
 evidence_data <- log10(evidence_data) 
 
@@ -21,11 +43,11 @@ evidence_data <- data.frame(protein_matrix)
 evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
 
 library('corrr')
-library(ggcorrplot)
+library("ggcorrplot")
 library("FactoMineR")
-library(factoextra)
+library("factoextra")
 
-corr_matrix <- cor(evidence_data_norm[,-1])
+corr_matrix <- cor(evidence_data)
 ggcorrplot(corr_matrix)
 
 # in this case a correlation within the batches can be clearly observed 
@@ -51,6 +73,18 @@ fviz_pca_ind(data.pca, col.ind = "cos2",
 
 # batch effects obtained --> use combat to correct
 batch <- meta_data_0$Batch
+
+library("scater")
+dimred_pca <- calculatePCA(evidence_data,                                          ncomponents = 5,
+                           ntop = Inf,
+                           scale = TRUE)
+
+dimred_pca <- data.frame(dimred_pca)
+
+ggplot(dimred_pca, aes(x=PC1, y=PC2)) +
+  geom_jitter()
+
+
 
 library(sva)
 

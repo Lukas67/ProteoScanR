@@ -255,6 +255,7 @@ server <- function(input, output, session) {
   meta_data <- reactive({
     req(input$sample_annotation_file)
     meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
+    meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
     return(meta_data_0)
   })
   
@@ -413,6 +414,7 @@ server <- function(input, output, session) {
       } else {
         rownames(evidence_data) <- evidence_data$ID
         evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
+        evidence_data <- evidence_data[, !(meta_data_0$Group %in%  input$selectedSampleType_to_exclude)]
       } 
       
       incProgress(14/17, detail=paste("transforming protein data"))
@@ -739,54 +741,55 @@ server <- function(input, output, session) {
             evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
           }
         }
-      
-        print("imputed_data")
-        print(evidence_data)
-        
+
         incProgress(16/17, detail=paste("running batch correction"))
         if (input$batch_c == "ComBat") {
-          sce <- getWithColData(scp_0, "proteins_imptd")
-          batch <- colData(sce)$Raw.file
-          # can be used to aim batch correction for desired result
-          model <- model.matrix(~0 + SampleType, data = colData(sce))
-          
-          assay(sce) <- ComBat(dat = assay(sce),
-                               batch = batch)#,
-          #mod = model)
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_batchC")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_imptd",
-                                        to = "proteins_batchC")
-          
-          sce <- getWithColData(scp_0, "proteins_batchC")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_dim_red")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_batchC",
-                                        to = "proteins_dim_red") 
-          
+          if (input$file_level == FALSE) {
+            sce <- getWithColData(scp_0, "proteins_imptd")
+            batch <- colData(sce)$Raw.file
+            # can be used to aim batch correction for desired result
+            model <- model.matrix(~0 + SampleType, data = colData(sce))
+            
+            assay(sce) <- ComBat(dat = assay(sce),
+                                 batch = batch)#,
+            #mod = model)
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_batchC")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_imptd",
+                                          to = "proteins_batchC")
+            
+            sce <- getWithColData(scp_0, "proteins_batchC")
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_dim_red")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_batchC",
+                                          to = "proteins_dim_red") 
+          } else {
+            batch <- meta_data_0$Batch
+            evidence_data <- ComBat(dat=evidence_data, batch=batch)
+          }
         } else if (input$batch_c == "None") {
-          sce <- getWithColData(scp_0, "proteins_imptd")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_dim_red")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_imptd",
-                                        to = "proteins_dim_red")          
+          if (input$file_level == FALSE) {
+            sce <- getWithColData(scp_0, "proteins_imptd")
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_dim_red")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_imptd",
+                                          to = "proteins_dim_red")          
+          } else {
+            evidence_data <- evidence_data
+          }
         }
-        
-        
-        
-        
       } else {
         sce <- getWithColData(scp_0, "proteins_norm")
         
@@ -799,39 +802,43 @@ server <- function(input, output, session) {
                                       to = "proteins_dim_red")  
       }
       
-      
-      
-      
+
       incProgress(16/17, detail=paste("running dimensionality reduction"))
-      
-      scp_0[["proteins_dim_red"]] <- scater::runPCA(scp_0[["proteins_dim_red"]],
-                                                    ncomponents = 5,
-                                                    ntop = Inf,
-                                                    scale = TRUE,
-                                                    exprs_values = 1,
-                                                    name = "PCA")
-      
-      scp_0[["proteins_dim_red"]] <- runUMAP(scp_0[["proteins_dim_red"]],
-                                             ncomponents = 2,
-                                             ntop = Inf,
-                                             scale = TRUE,
-                                             exprs_values = 1,
-                                             n_neighbors = 3,
-                                             dimred = "PCA",
-                                             name = "UMAP")
-      
-      
-      
+      if (input$file_level == FALSE) {
+        scp_0[["proteins_dim_red"]] <- scater::runPCA(scp_0[["proteins_dim_red"]],
+                                                      ncomponents = 5,
+                                                      ntop = Inf,
+                                                      scale = TRUE,
+                                                      exprs_values = 1,
+                                                      name = "PCA")
+        
+        scp_0[["proteins_dim_red"]] <- runUMAP(scp_0[["proteins_dim_red"]],
+                                               ncomponents = 2,
+                                               ntop = Inf,
+                                               scale = TRUE,
+                                               exprs_values = 1,
+                                               n_neighbors = 3,
+                                               dimred = "PCA",
+                                               name = "UMAP")
+      }
       incProgress(17/17, detail=paste("analysis finish"))
     })
-    return(scp_0)
+    if (input$file_level == FALSE) {
+      return(scp_0)
+    } else {
+      return(evidence_data)
+    }
   })
   
   # expression matrix is used by plot functions
   exp_matrix <- reactive({
-    scp_0 <- scp()
-    exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-    colnames(exp_matrix_0) <- scp_0$SampleType  
+    if (input$file_level == FALSE) {
+      scp_0 <- scp()
+      exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+      colnames(exp_matrix_0) <- scp_0$SampleType  
+    } else {
+      exp_matrix_0 <- scp()
+    }
     return(exp_matrix_0)
   })
   
@@ -849,9 +856,14 @@ server <- function(input, output, session) {
   # reactive element for the protein list --> update if the scp object changes
   protein_list <- reactive({
     req(scp())
-    req(scp()[["proteins"]])
-    scp_0 <- scp()
-    list <- rowData(scp_0)[["proteins"]][,1]
+    if (input$file_level == FALSE) {
+      req(scp()[["proteins"]])
+      scp_0 <- scp()
+      list <- rowData(scp_0)[["proteins"]][,1]
+    } else {
+      list <- rownames(scp())
+      print(list)
+    }
     return(list)
   })
   
@@ -873,16 +885,26 @@ server <- function(input, output, session) {
   
   # reactive element for the comp list --> update if the scp object changes
   comp_list <- reactive({
-    req(scp())
-    scp_0 <- scp()
-    list <- apply(combn(unique(scp_0$SampleType),2),2,paste, collapse="-")
+    if (input$file_level == FALSE) {
+      req(scp())
+      scp_0 <- scp()
+      list <- apply(combn(unique(scp_0$SampleType),2),2,paste, collapse="-")
+    } else {
+      req(meta_data())
+      list <- apply(combn(unique(meta_data()$Group),2),2,paste, collapse="-")
+    }
     return(list)
   })
 
   columns <- reactive({
-    req(scp())
-    scp_0 <- scp()
-    list <- colnames(colData(scp_0))
+    if (input$file_level == FALSE) {
+      req(scp())
+      scp_0 <- scp()
+      list <- colnames(colData(scp_0))
+    } else {
+      req(meta_data())
+      list <- colnames(meta_data())
+    }
     return(list)
   })
   
@@ -891,36 +913,46 @@ server <- function(input, output, session) {
     req(sample_types())
     updateSelectInput(session, "selectedSampleType_to_exclude", choices = sample_types())
   })
+  
   sample_types <- reactive({
-    req(scp())
-    scp_0 <- scp()
-    list <- scp_0$SampleType
+    if (input$file_level == FALSE) {
+      req(scp())
+      scp_0 <- scp()
+      list <- scp_0$SampleType
+    } else {
+      req(meta_data())
+      list <- meta_data()$Group
+    }
     return(list)
   })
   
   ## Output of analysis pipeline 
   # pathway of the data first tab
   output$overview_plot <- renderPlot({
-    if (!is.null(scp())) {
+    if (!is.null(scp()) && input$file_level == FALSE) {
       plot(scp()) }
   })
   
   # summary barchart second tab
   output$summary_bar <- renderPlot({
-    scp_0 <- scp()
-
-    count_table <- data.frame(dims(scp_0))
-    
-    nPSMs <- log10(sum(count_table[1:length(unique(scp_0$Raw.file))]))
-    nPeps <- log10(sum(count_table$peptides))
-    nProts <- log10(sum(count_table$proteins))
-    summary_count <- data.frame(nPSMs, nPeps, nProts)
-    summary_count <- reshape2::melt(summary_count)
-    
-    ggplot(summary_count, aes(x = variable, y = value, fill = variable)) +
-      geom_bar(stat = "identity") +
-      labs(x = "log10 of number of PSMs, Peptides and Proteins", y = "Counts") +
-      scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
+    if (input$file_level == FALSE) {
+      scp_0 <- scp()
+      
+      count_table <- data.frame(dims(scp_0))
+      
+      nPSMs <- log10(sum(count_table[1:length(unique(scp_0$Raw.file))]))
+      nPeps <- log10(sum(count_table$peptides))
+      nProts <- log10(sum(count_table$proteins))
+      summary_count <- data.frame(nPSMs, nPeps, nProts)
+      summary_count <- reshape2::melt(summary_count)
+      
+      ggplot(summary_count, aes(x = variable, y = value, fill = variable)) +
+        geom_bar(stat = "identity") +
+        labs(x = "log10 of number of PSMs, Peptides and Proteins", y = "Counts") +
+        scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
+    } else {
+      barplot(log10(dim(scp())[1]), main = "log Count of rows")
+    }
   })
   
   # Reporter Ion intensity visualisation
@@ -932,16 +964,28 @@ server <- function(input, output, session) {
   # Boxplot of reporter ion intensity third tab
   output$RI_intensity <- renderPlot({
     scp_0 <- scp()
-    
-    colData(scp_0) %>%
-      data.frame %>%
-      ggplot() +
-      aes(x = MedianRI, 
-          y = get(input$color_variable_ri),
-          fill = get(input$color_variable_ri)) +
-      geom_boxplot() +
-      scale_x_log10() +
-      labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
+    if (input$file_level == FALSE) {
+      colData(scp_0) %>%
+        data.frame %>%
+        ggplot() +
+        aes(x = MedianRI, 
+            y = get(input$color_variable_ri),
+            fill = get(input$color_variable_ri)) +
+        geom_boxplot() +
+        scale_x_log10() +
+        labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
+    } else{
+      evidence_data <- scp()
+      evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
+      evidence_data_medians %>%
+        ggplot() +
+        aes(x = median_intensity, 
+            y = get(input$color_variable_ri),
+            fill = get(input$color_variable_ri)) +
+        geom_boxplot() +
+        scale_x_log10() +
+        labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri))
+    }
   })
   
   # Covariance visualisation
@@ -955,28 +999,30 @@ server <- function(input, output, session) {
     req(scp())
     req(meta_data())
     
-    scp_0 <- scp()
-    meta_data_0 <- meta_data()
-    
-    file_name <- unique(meta_data_0$Raw.file)
-    peptide_file <- paste("peptides_", as.character(file_name), sep = "")
-    
-    if (length(peptide_file) > 1) {
-      getWithColData(scp_0, "peptides") %>%
-        colData %>%
-        data.frame %>%
-        ggplot(aes(x = MedianCV,
-                   fill = get(input$color_variable_cv))) +
-        geom_boxplot()+
-        labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
-    } else {
-      getWithColData(scp_0, peptide_file) %>%
-        colData %>%
-        data.frame %>%
-        ggplot(aes(x = MedianCV,
-                   fill = get(input$color_variable_cv))) +
-        geom_boxplot()+
-        labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
+    if (input$file_level == FALSE) {
+      scp_0 <- scp()
+      meta_data_0 <- meta_data()
+      
+      file_name <- unique(meta_data_0$Raw.file)
+      peptide_file <- paste("peptides_", as.character(file_name), sep = "")
+      
+      if (length(peptide_file) > 1) {
+        getWithColData(scp_0, "peptides") %>%
+          colData %>%
+          data.frame %>%
+          ggplot(aes(x = MedianCV,
+                     fill = get(input$color_variable_cv))) +
+          geom_boxplot()+
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
+      } else {
+        getWithColData(scp_0, peptide_file) %>%
+          colData %>%
+          data.frame %>%
+          ggplot(aes(x = MedianCV,
+                     fill = get(input$color_variable_cv))) +
+          geom_boxplot()+
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
+      }
     }
   })
   
@@ -1010,13 +1056,18 @@ server <- function(input, output, session) {
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
     
     scp_0 <- scp()
-    plotReducedDim(scp_0[["proteins_dim_red"]],
-                   dimred = "PCA",
-                   colour_by = color_variable_dim_red,
-                   shape_by = shape_variable_dim_red,
-                   size_by = size_variable_dim_red,
-                   point_alpha = 1,
-                   point_size=3)
+    
+    if (input$file_level == FALSE) {
+      plotReducedDim(scp_0[["proteins_dim_red"]],
+                     dimred = "PCA",
+                     colour_by = color_variable_dim_red,
+                     shape_by = shape_variable_dim_red,
+                     size_by = size_variable_dim_red,
+                     point_alpha = 1,
+                     point_size=3)
+    } else {
+      
+    }
   })
   
   # Umap dimensionality reduction in fith tab
