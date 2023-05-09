@@ -1,7 +1,156 @@
 ---
-title: ''
-output: pdf_document
+title: " "
+output: 
+  pdf_document:
+    number_sections: TRUE
+geometry: "left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm"
+fontsize: 11pt
+header-includes:
+  - \usepackage{float}
+  - \usepackage{sectsty}
+  - \usepackage{paralist}
+  - \usepackage{setspace}\spacing{1.5}
+  - \usepackage{fancyhdr}
+  - \usepackage{lastpage}
+  - \usepackage{dcolumn}
+  - \usepackage{natbib}\bibliographystyle{agsm}
+  - \usepackage[nottoc, numbib]{tocbibind}
+bibliography: bibliography.bib
 ---
+
+
+
+
+\allsectionsfont{\centering}
+\subsectionfont{\raggedright}
+\subsubsectionfont{\raggedright}
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+\vspace{3cm}
+
+\includegraphics[width=0.2\linewidth]{FHCW_logo} 
+\includegraphics[width=0.2\linewidth]{KI_logo} 
+
+\vspace{1cm}
+
+\Large
+\doublespacing
+{\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
+
+\vspace{1 cm}
+
+\normalsize
+\singlespacing
+By
+
+\vspace{0.5 cm}
+
+\Large
+
+{\bf Lukas Gamp}
+
+\vspace{1.5 cm}
+
+in partial fullfilment of the requirement \\for the degree of MSc \\in Bioinformatics
+
+\vspace{1.5 cm}
+
+\normalsize
+mm yy
+\end{centering}
+
+\newpage
+
+\pagenumbering{gobble}
+
+\begin{centering}
+
+{\bf Abstract}
+
+\end{centering}
+
+\spacing{1.5}
+
+(the spacing is set to 1.5)
+
+no more than 250 words for the abstract
+
+- a description of the research question/knowledge gap – what we know and what we don’t know
+- how your research has attempted to fill this gap
+- a brief description of the methods
+- brief results
+- key conclusions that put the research into a larger context
+
+\pagenumbering{roman}
+
+\newpage
+
+\centering
+\raggedright
+\newpage
+\tableofcontents
+
+
+\newpage
+
+
+
+
+
+
+
+\section*{Acknowledgements}
+
+Thank you for following this tutorial! 
+
+I hope you'll find it useful to write a very professional dissertation. 
+
+\newpage
+
+
+
+
+
+
+
+
+
+# Introduction
+
+## Proteomics
+
+The proteome is referred to the sum of all proteins of a given sample at a given time. In the past several quantitative and qualitative assays were used to enlighten the protein composition of a sample. 
+
+An early approach of qualitative analysis of the cellular proteome involved labeling with fluorescent antibodies and imaging. The major disadvantage of this technique was the limitation to only stain a few proteins per cell. For quantification procedures such as single-cell Western blots, immunoassays or CyTOF have been used. Other disadvantages are the ability to permeate cells, accessibility and binding of the epitope and the creation of specific antibodies for a given protein \citep{Budnik2018}. 
+
+One of those techniques involved RNA-sequencing. Since RNA involves also non-coding RNA, the amount of RNA is often not proportional to the content of proteins in a cell. So the proteinaceous content of a cell was only predicted and quantitative analysis was not possible. 
+
+
+## Mass Spectrometry
+
+Mass spectrometry enables qualitative and quantitative analysis of the entire repertoire of a biological sample. The availability of gene sequences in databases and the ability to match proteins against those sequences with computational methods makes it possible to identify alterations of a sample on a protein level. These alterations can rely on the sequence level or could be to post-translational modifications (PTMs) such as phosphorylation, methylation or else \citep{Aebersold2003}. 
+
+Mass to charge ratio (m/z)
+
+
+
+
+
+
+
+
+\pagenumbering{arabic}
+
+\newpage
+
+
+
+
+
+
 # Materials and Methods
 
 ## Materials
@@ -60,36 +209,7 @@ In order to enhance sequence identification, two MS devices are built in series.
 
 
 ## Data
-```{r Dataflow, eval=FALSE, include=FALSE}
-# library(DiagrammeR)
-# library(webshot)
-# 
-# DiagrammeR::grViz("digraph {
-# 	graph [layout  =  dot,
-# 	       rankdir  = TB]
-# 
-# node [shape = rectangle]
-# rawData [label = 'msData.raw']
-# node [shape = oval]
-# MQ [label = 'MaxQuant']
-# node [shape = invhouse]
-# MQ_fd [label = 'feature detection']
-# node [shape = cylinder]
-# MQ_ds [label = 'Database search']
-# node [shape = invhouse]
-# MQ_fdr [label = 'FDR calculation']
-# MQ_quant [label = 'Protein Quantification']
-# node [shape = rectangle]
-# MQoutput [label = 'evidence.txt']
-# sampleAnnotate [label = 'sample_annotation.txt']
-# node [shape = oval]
-# ProteomicsWorkbench [label = 'Proteomics Workbench']
-# 
-# rawData -> MQ -> MQ_fd -> MQ_ds -> MQ_fdr -> MQ_quant -> MQoutput -> ProteomicsWorkbench
-# sampleAnnotate -> ProteomicsWorkbench
-# }",
-# height = 500)
-```
+
 
 ### Acquisition
 
@@ -134,393 +254,9 @@ After these calculation the identified peptides can be aggregated according to i
 
 Further analysis is done with R and respective packages such as bioconductor. Since there is no state of the art established, analysis varies upon experimental design. The workflow of the analysis will be processed in a so called pipeline streamlining the data through steps where individual results can be observed in visualizations and indivdual calculations will be adapted according to user demands and experimental properties. 
 
-```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=17, fig.width=13}
-library(Gmisc, quietly = TRUE)
-library(glue)
-library(htmlTable)
-library(grid)
-library(magrittr)
+![](Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf)<!-- --> 
 
-default_txt_setting <- gpar(cex=1.9)
-default_box_setting <- gpar(fill="white")
 
-data_box_setting <- gpar(fill="#56B4E9")
-
-opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
-opts_txt_setting <- gpar(col="darkblue", cex=1.5)
-refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
-
-plot_box_setting <- gpar(fill="#DDCC77")
-# input files
-evidence_file <- boxGrob("evidence file",
-                         box_gp = data_box_setting,
-                         txt_gp = default_txt_setting)
-sample_annotation_file <- boxGrob("sample annotation",
-                                  box_gp = data_box_setting,
-                                  txt_gp = default_txt_setting)
-
-read_data <- boxGrob(glue("read data into q-feature object",.sep = "\n"),
-                     box_gp = default_box_setting,
-                     txt_gp = default_txt_setting)
-
-quality_control_1 <- boxGrob(glue("quality control 1",.sep = "\n"),
-                             box_gp = default_box_setting,
-                             txt_gp = default_txt_setting)
-
-qc1_content <- boxGrob("filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
-                      box_gp = opts_box_setting,
-                      txt_gp = opts_txt_setting,
-                      just="center")
-
-aggregate_psms <-  boxGrob(glue("aggregate peptide spectrum matches to peptides\n
-                                 join multiple batches", .sep = "\n"),
-                           box_gp = default_box_setting,
-                           txt_gp = default_txt_setting)
-
-quality_control_2 <- boxGrob("quality control 2",
-                             box_gp = plot_box_setting,
-                             txt_gp = default_txt_setting)
-
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
-                       box_gp = opts_box_setting,
-                       txt_gp = opts_txt_setting,
-                       just="center")
-
-aggregate_peps <- boxGrob(glue("aggregate peptides to proteins", .sep = "\n"),
-                          box_gp = default_box_setting,
-                          txt_gp = default_txt_setting)
-
-transform_data <- boxGrob("transform data",
-                          box_gp = plot_box_setting,
-                          txt_gp = default_txt_setting)
-
-transform_opts <- boxGrob("options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
-                          box_gp = opts_box_setting,
-                          txt_gp = opts_txt_setting,
-                          just="center")
-
-normalize_data <- boxGrob("normalize data",
-                          box_gp = plot_box_setting,
-                          txt_gp = default_txt_setting)
-
-normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
-                          box_gp = opts_box_setting,
-                          txt_gp = opts_txt_setting,
-                          just="center")
-
-missing_value_handling <- boxGrob("missing value handling",
-                                  box_gp = plot_box_setting,
-                                  txt_gp = default_txt_setting)
-
-missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
-                              box_gp = opts_box_setting,
-                              txt_gp = opts_txt_setting,
-                              just="center")
-
-batch_correction <- boxGrob("batch correction",
-                            box_gp=plot_box_setting,
-                            txt_gp = default_txt_setting)
-
-batch_correction_opts <- boxGrob("options:\nComBat",
-                                 box_gp = opts_box_setting,
-                                 txt_gp = opts_txt_setting,
-                                 just="center")
-
-dim_red <- boxGrob("dimensionality reduction",
-                   box_gp = plot_box_setting,
-                   txt_gp = default_txt_setting)
-
-dim_red_actions <- boxGrob("procedures:\nPCA\nUMAP",
-                       box_gp = opts_box_setting,
-                       txt_gp = opts_txt_setting,
-                       just="center"
-                       )
-
-stat_module <- boxGrob(glue("statistics module",.sep = "\n"),
-                       box_gp = default_box_setting,
-                       txt_gp = default_txt_setting)
-
-grid.newpage()
-vert <- {spreadVertical(files = evidence_file,
-                       read_data = read_data,
-                       quality_control_1 = quality_control_1,
-                       aggregate_psms,
-                       quality_control_2 = quality_control_2,
-                       aggregate_peps,
-                       transform_data = transform_data,
-                       normalize_data = normalize_data,
-                       missing_value_handling = missing_value_handling,
-                       batch_correction = batch_correction,
-                       dim_red = dim_red,
-                       stat_module
-)}
-input <- alignVertical(reference = vert$files,
-                      evidence_file, sample_annotation_file) %>%
-  spreadHorizontal()
-vert$files <- NULL
-
-
-# right side
-qc1_content <- moveBox(qc1_content,
-                    x = .8,
-                    y = coords(vert$quality_control_1)$y)
-
-transform_opts <- moveBox(transform_opts,
-                    x = .9,
-                    y = coords(vert$transform_data)$y)
-
-missing_value_opts <- moveBox(missing_value_opts,
-                    x = .85,
-                    y = coords(vert$missing_value_handling)$y)
-
-dim_red_actions <- moveBox(dim_red_actions,
-                    x = .9,
-                    y = coords(vert$dim_red)$y)
-
-# left side
-qc2_content <- moveBox(qc2_content,
-                    x = .17,
-                    y = coords(vert$quality_control_2)$y)
-
-normalize_opts <- moveBox(normalize_opts,
-                    x = .2,
-                    y = coords(vert$normalize_data)$y)
-
-batch_correction_opts <- moveBox(batch_correction_opts,
-                    x = .2,
-                    y = coords(vert$batch_correction)$y)
-
-
-for (i in 1:(length(vert) - 1)) {
-  connectGrob(vert[[i]], vert[[i + 1]], type = "vert") %>%
-    print
-}
-
-# connect boxes
-connectGrob(input[[1]], vert$read_data, type = "N")
-connectGrob(input[[2]], vert$read_data, type = "N")
-
-connectGrob(vert$quality_control_1, qc1_content, type = "horizontal", arrow_obj = arrow(angle=0))
-
-connectGrob(vert$quality_control_2, qc2_content, type = "horizontal", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$transform_data, transform_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$normalize_data, normalize_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$missing_value_handling, missing_value_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$batch_correction, batch_correction_opts, type = "horizontal", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$dim_red, dim_red_actions, type = "horizontal", arrow_obj = arrow(angle=0))
-
-# Print boxes
-input
-vert
-qc1_content
-qc2_content
-transform_opts
-normalize_opts
-missing_value_opts
-batch_correction_opts
-dim_red_actions
-```
-
-```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=9, fig.width=32, include=FALSE}
-library(Gmisc, quietly = TRUE)
-library(glue)
-library(htmlTable)
-library(grid)
-library(magrittr)
-
-default_txt_setting <- gpar(cex=1.5)
-default_box_setting <- gpar(fill="white")
-
-data_box_setting <- gpar(fill="#56B4E9")
-
-opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
-opts_txt_setting <- gpar(col="darkblue", cex=1)
-refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
-
-plot_box_setting <- gpar(fill="#DDCC77")
-# input files
-evidence_file <- boxGrob("evidence file",
-                         box_gp = data_box_setting,
-                         txt_gp = default_txt_setting)
-sample_annotation_file <- boxGrob("sample annotation",
-                                  box_gp = data_box_setting,
-                                  txt_gp = default_txt_setting)
-
-read_data <- boxGrob(glue("read data into q-feature object",.sep = "\n"),
-                     box_gp = default_box_setting,
-                     txt_gp = default_txt_setting)
-
-quality_control_1 <- boxGrob(glue("quality control 1",.sep = "\n"),
-                             box_gp = default_box_setting,
-                             txt_gp = default_txt_setting)
-
-qc1_content <- boxGrob("filter out pool samples\nreplace zeros with NA\nfilter out contaminants\nfilter by q-value cutoff",
-                      box_gp = opts_box_setting,
-                      txt_gp = opts_txt_setting,
-                      just="center")
-
-aggregate_psms <-  boxGrob(glue("aggregate peptide spectrum matches to peptides\n
-                                 join multiple batches", .sep = "\n"),
-                           box_gp = default_box_setting,
-                           txt_gp = default_txt_setting)
-
-quality_control_2 <- boxGrob("quality control 2",
-                             box_gp = plot_box_setting,
-                             txt_gp = default_txt_setting)
-
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
-                       box_gp = opts_box_setting,
-                       txt_gp = opts_txt_setting,
-                       just="center")
-
-aggregate_peps <- boxGrob(glue("aggregate peptides to proteins", .sep = "\n"),
-                          box_gp = default_box_setting,
-                          txt_gp = default_txt_setting)
-
-transform_data <- boxGrob("transform data",
-                          box_gp = plot_box_setting,
-                          txt_gp = default_txt_setting)
-
-transform_opts <- boxGrob("options:\nlog2\nlog10\nsqrt\nquadratic\nBoxCox\nNone",
-                          box_gp = opts_box_setting,
-                          txt_gp = opts_txt_setting,
-                          just="center")
-
-normalize_data <- boxGrob("normalize data",
-                          box_gp = plot_box_setting,
-                          txt_gp = default_txt_setting)
-
-normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
-                          box_gp = opts_box_setting,
-                          txt_gp = opts_txt_setting,
-                          just="center")
-
-missing_value_handling <- boxGrob("missing value handling",
-                                  box_gp = plot_box_setting,
-                                  txt_gp = default_txt_setting)
-
-missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
-                              box_gp = opts_box_setting,
-                              txt_gp = opts_txt_setting,
-                              just="center")
-
-batch_correction <- boxGrob("batch correction",
-                            box_gp=plot_box_setting,
-                            txt_gp = default_txt_setting)
-
-batch_correction_opts <- boxGrob("options:\nComBat",
-                                 box_gp = opts_box_setting,
-                                 txt_gp = opts_txt_setting,
-                                 just="center")
-
-dim_red <- boxGrob("dimensionality reduction",
-                   box_gp = plot_box_setting,
-                   txt_gp = default_txt_setting)
-
-dim_red_actions <- boxGrob("procedures:\nPCA\nUMAP",
-                       box_gp = opts_box_setting,
-                       txt_gp = opts_txt_setting,
-                       just="center"
-                       )
-
-stat_module <- boxGrob(glue("statistics module",.sep = "\n"),
-                       box_gp = default_box_setting,
-                       txt_gp = default_txt_setting)
-
-grid.newpage()
-
-vert <- {spreadHorizontal(files = evidence_file,
-                       read_data = read_data,
-                       quality_control_1 = quality_control_1,
-                       aggregate_psms,
-                       quality_control_2 = quality_control_2,
-                       aggregate_peps,
-                       transform_data = transform_data,
-                       normalize_data = normalize_data,
-                       missing_value_handling = missing_value_handling,
-                       batch_correction = batch_correction,
-                       dim_red = dim_red,
-                       stat_module
-)}
-
-input <- alignHorizontal(reference = vert$files,
-                      evidence_file, sample_annotation_file) %>%
-  spreadVertical()
-vert$files <- NULL
-
-
-# connect and move the boxes
-for (i in 1:(length(vert) - 1)) {
-    connectGrob(vert[[i]], vert[[i + 1]], type = "horizontal") %>%
-    print}
-
-
-# right side
-qc1_content <- moveBox(qc1_content,
-                    x = coords(vert$quality_control_1)$x,
-                    y = 0.8)
-
-transform_opts <- moveBox(transform_opts,
-                    y = .9,
-                    x = coords(vert$transform_data)$x)
-
-missing_value_opts <- moveBox(missing_value_opts,
-                    y = .7,
-                    x = coords(vert$missing_value_handling)$x)
-
-dim_red_actions <- moveBox(dim_red_actions,
-                    y = .9,
-                    x = coords(vert$dim_red)$x)
-
-# left side
-qc2_content <- moveBox(qc2_content,
-                    y = .2,
-                    x = coords(vert$quality_control_2)$x)
-
-normalize_opts <- moveBox(normalize_opts,
-                    y = .2,
-                    x = coords(vert$normalize_data)$x)
-
-batch_correction_opts <- moveBox(batch_correction_opts,
-                    y = .2,
-                    x = coords(vert$batch_correction)$x)
-
-
-
-# connect boxes
-connectGrob(input[[1]], vert$read_data, type = "vertical")
-connectGrob(input[[2]], vert$read_data, type = "vertical")
-
-connectGrob(vert$quality_control_1, qc1_content, type = "vertical", arrow_obj = arrow(angle=0))
-
-connectGrob(vert$quality_control_2, qc2_content, type = "vertical", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$transform_data, transform_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$normalize_data, normalize_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$missing_value_handling, missing_value_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$batch_correction, batch_correction_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
-
-connectGrob(vert$dim_red, dim_red_actions, type = "vertical", arrow_obj = arrow(angle=0))
-
-# Print boxes
-input
-vert
-qc1_content
-qc2_content
-transform_opts
-normalize_opts
-missing_value_opts
-batch_correction_opts
-dim_red_actions
-```
 
 #### Reading the data
 
@@ -641,3 +377,87 @@ The most common approach in data science for any kind of high dimensional data i
 #### Testing for differential expression 
 
 In order to test for differential expression the package limma from R bioconductor was used. \citep{Phipson2016}.  The package uses a linear model approach to define a fold expression between sample groups. Before starting the analysis two matrices need to be computed. The design matrix identifies samples according to the sample type and defines the experimental design. In order to create the matrix automatically a simple algorithm is used within the programmed backend logic. The expression matrix contains intensities for each identified protein will be obtained at the end of the pipeline. A function call with the arguments design and expression matrix calculates the contrast matrix. The next step is creating a linear model between groups by log-ratios of their expression values. 
+
+\newpage
+
+
+
+
+
+
+
+# Results
+
+Some more guidlines from the School of Geosciences.
+
+This section should summarise the findings of the research referring to all figures, tables and statistical results (some of which may be placed in appendices).
+- include the primary results, ordered logically - it is often useful to follow the same order as presented in the methods.
+- alternatively, you may find that ordering the results from the most important to the least important works better for your project.
+- data should only be presented in the main text once, either in tables or figures; if presented in figures, data can be tabulated in appendices and referred to at the appropriate point in the main text.
+
+**Often, it is recommended that you write the results section first, so that you can write the methods that are appropriate to describe the results presented. Then you can write the discussion next, then the introduction which includes the relevant literature for the scientific story that you are telling and finally the conclusions and abstract – this approach is called writing backwards.**
+
+\newpage
+
+
+
+
+
+
+
+
+# Discussion
+
+the purpose of the discussion is to summarise your major findings and place them in the context of the current state of knowledge in the literature. When you discuss your own work and that of others, back up your statements with evidence and citations.
+- The first part of the discussion should contain a summary of your major findings (usually 2 – 4 points) and a brief summary of the implications of your findings. Ideally, it should make reference to whether you found support for your hypotheses or answered your questions that were placed at the end of the introduction.
+- The following paragraphs will then usually describe each of these findings in greater detail, making reference to previous studies.
+- Often the discussion will include one or a few paragraphs describing the limitations of your study and the potential for future research.
+- Subheadings within the discussion can be useful for orienting the reader to the major themes that are addressed.
+
+\newpage
+
+
+
+
+
+
+
+# Conclusion
+
+The conclusion section should specify the key findings of your study, explain their wider significance in the context of the research field and explain how you have filled the knowledge gap that you have identified in the introduction. This is your chance to present to your reader the major take-home messages of your dissertation research. It should be similar in content to the last sentence of your summary abstract. It should not be a repetition of the first paragraph of the discussion. They can be distinguished in their connection to broader issues. The first paragraph of the discussion will tend to focus on the direct scientific implications of your work (i.e. basic science, fundamental knowledge) while the conclusion will tend to focus more on the implications of the results for society, conservation, etc.
+
+\newpage
+
+
+
+
+
+
+
+\bibliography{bibliography}
+
+\newpage
+
+
+
+
+
+
+# Appendix(ces)
+
+## Appendix A: additional tables 
+
+Insert content for additional tables here.
+
+\newpage
+
+## Appendix B: additional figures
+
+Insert content for additional figures here. 
+
+\newpage
+
+## Appendix C: code
+
+Insert code (if any) used during your dissertation work here. 
+
