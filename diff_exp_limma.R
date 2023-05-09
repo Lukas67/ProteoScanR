@@ -1,24 +1,31 @@
 library(limma)
 library(dplyr)
 
-exp_matrix <- read.delim("/home/lukas/Downloads/Raw_data.txt")
+evidence_data <- read.delim("/home/lukas/Downloads/Raw_data.txt")
 
-design_matrix <- read.delim("/home/lukas/Downloads/Design.txt")
+meta_data_0 <- read.delim("/home/lukas/Downloads/Design.txt")
+
+rownames(evidence_data) <- evidence_data$ID
+evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 # log transform expression values
-exp_matrix[,-1] <- log10(exp_matrix[,-1]) 
+evidence_data <- log10(evidence_data) 
 
-# #normalize colwise
-exp_matrix_norm <- sweep(exp_matrix[,-1], 2, colSums(exp_matrix[,-1]), FUN="-")
+protein_matrix <- as.matrix(evidence_data)
+protein_matrix <- sweep(protein_matrix, 2, colMedians(protein_matrix), FUN="/")
 # #normalize rowwise
-exp_matrix_norm <- sweep(exp_matrix[,-1], 1, rowSums(exp_matrix[,-1]), FUN="-")
- 
+protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="/")
+evidence_data <- data.frame(protein_matrix)
+
+
+evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
+
 library('corrr')
 library(ggcorrplot)
 library("FactoMineR")
 library(factoextra)
 
-corr_matrix <- cor(exp_matrix_norm[,-1])
+corr_matrix <- cor(evidence_data_norm[,-1])
 ggcorrplot(corr_matrix)
 
 # in this case a correlation within the batches can be clearly observed 
@@ -43,34 +50,34 @@ fviz_pca_ind(data.pca, col.ind = "cos2",
 )
 
 # batch effects obtained --> use combat to correct
-batch <- design_matrix$Batch
+batch <- meta_data_0$Batch
 
 library(sva)
 
-combat_edata1 = ComBat(dat=exp_matrix_norm, batch=batch)
+combat_edata1 = ComBat(dat=evidence_data_norm, batch=batch)
 
 # or use limma
-y2 <- removeBatchEffect(exp_matrix_norm, batch)
+y2 <- removeBatchEffect(evidence_data_norm, batch)
 
 # compare corrected batch effects
-boxplot(as.data.frame(exp_matrix_norm),main="Original", ylim=c(0.01,0.05))
+boxplot(as.data.frame(evidence_data_norm),main="Original", ylim=c(0.01,0.05))
 boxplot(as.data.frame(y2),main="Batch corrected with Limma", ylim=c(0.01,0.05))
 boxplot(as.data.frame(combat_edata1),main="Batch corrected with Combat", ylim=c(0.01,0.05))
 
 # Perform differential expression analysis between each of the two groups
 
 # drop pool columns
-exp_matrix_de <- data.frame(combat_edata1) %>% dplyr::select(-starts_with('Control'))
-exp_matrix_de <- as.matrix(exp_matrix_de)
-rownames(exp_matrix_de) <- (exp_matrix$ID)
+evidence_data_de <- data.frame(combat_edata1) %>% dplyr::select(-starts_with('Control'))
+evidence_data_de <- as.matrix(evidence_data_de)
+rownames(evidence_data_de) <- (evidence_data$ID)
 
 # create design matrix consisting of group variables
-design_samples <- subset(design_matrix, Group != "Pool")
+design_samples <- subset(meta_data_0, Group != "Pool")
 design <- model.matrix(~0+factor(design_samples$Group))
 colnames(design) <- c("EC", "HC", "VP")
 
 # Fit the expression matrix to a linear model
-fit <- lmFit(exp_matrix_de, design)
+fit <- lmFit(evidence_data_de, design)
 
 # EC vs HC
 cont_matrix_1 <- makeContrasts(ECvsHC = EC-HC,levels=design)
@@ -117,7 +124,7 @@ summary(result_3)
 
 # perform paired group-wise analysis between EC and VP
 # exclude HC
-exp_matrix_de_paired <- data.frame(exp_matrix_de) %>% dplyr::select(-starts_with('HC'))
+evidence_data_de_paired <- data.frame(evidence_data_de) %>% dplyr::select(-starts_with('HC'))
 design_samples_paired <- design_samples %>%  dplyr::filter(Group!='HC')
 
 # define pairs --> assuming integers indicate pairs
@@ -130,7 +137,7 @@ group <- factor(design_samples_paired$Group)
 paired_design <- model.matrix(~pairs + group)
 
 # apply linear model
-fit_2 <- lmFit(exp_matrix_de_paired, paired_design)
+fit_2 <- lmFit(evidence_data_de_paired, paired_design)
 
 fit_2 <- eBayes(fit_2)
 # shows fold expression and p-values

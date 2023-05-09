@@ -567,9 +567,6 @@ server <- function(input, output, session) {
         }
       }
       
-      print("transformed data")
-      print(evidence_data)
-      
       incProgress(15/17, detail=paste("normalizing proteins"))
       req(input$norm_method)
       if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10") {
@@ -662,8 +659,6 @@ server <- function(input, output, session) {
         }
       }
       
-      print("normalized data")
-      print(evidence_data)
       
       if (input$file_level == TRUE) {
         peptide_file <- unique(meta_data_0$Batch)
@@ -679,11 +674,18 @@ server <- function(input, output, session) {
                             name = "proteins_imptd",
                             method = "knn",
                             k = 3, rowmax = 1, colmax= 1,
-                            maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+                            maxp = Inf,
+                            rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
           } else {
+            evidence_data[evidence_data == 0] <- NA
             protein_matrix <- as.matrix(evidence_data)
-            protein_matrix <- impute.knn(protein_matrix, k=5, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
-            evidence_data <- data.frame(protein_matrix)
+            protein_matrix <- impute.knn(protein_matrix,
+                                         k=5,
+                                         rowmax = 1,
+                                         colmax = 1,
+                                         maxp = Inf,
+                                         rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+            evidence_data <- data.frame(protein_matrix$data)
           }
         } else if (input$missing_v == "drop rows") {
           if (input$file_level == FALSE) {
@@ -699,41 +701,51 @@ server <- function(input, output, session) {
             
             scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
           } else {
-            evidence_data %>% drop_na(evidence_data)
+            evidence_data[evidence_data == 0] <- NA
+            evidence_data <- na.omit(evidence_data)
           }
 
         } else if (input$missing_v == "replace with mean") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_norm",
-                                        to = "proteins_imptd")
-          
-          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), mean(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
-        } else if (input$missing_v == "replace with median") {
-          sce <- getWithColData(scp_0, "proteins_norm")
-          
-          scp_0 <- addAssay(scp_0,
-                            y = sce,
-                            name = "proteins_imptd")
-          
-          scp_0 <- addAssayLinkOneToOne(scp_0,
-                                        from = "proteins_norm",
-                                        to = "proteins_imptd")
-          
-          assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), median(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))        
-        }
+          if (input$file_level == FALSE) {
+            sce <- getWithColData(scp_0, "proteins_norm")
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_imptd")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_norm",
+                                          to = "proteins_imptd")
+            
+            assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), mean(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
+          } else {
+            evidence_data <- replace(evidence_data, is.na(evidence_data), mean(unlist(evidence_data), na.rm = TRUE))
+          }
 
+        } else if (input$missing_v == "replace with median") {
+          if (input$file_level == FALSE) {
+            sce <- getWithColData(scp_0, "proteins_norm")
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_imptd")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_norm",
+                                          to = "proteins_imptd")
+            
+            assay(scp_0[["proteins_imptd"]]) <- replace(assay(scp_0[["proteins_imptd"]]), is.na(assay(scp_0[["proteins_imptd"]])), median(assay(scp_0[["proteins_imptd"]]), na.rm = TRUE))
+          } else {
+            evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
+          }
+        }
+      
         print("imputed_data")
         print(evidence_data)
         
         incProgress(16/17, detail=paste("running batch correction"))
-        sce <- getWithColData(scp_0, "proteins_imptd")
         if (input$batch_c == "ComBat") {
+          sce <- getWithColData(scp_0, "proteins_imptd")
           batch <- colData(sce)$Raw.file
           # can be used to aim batch correction for desired result
           model <- model.matrix(~0 + SampleType, data = colData(sce))
