@@ -36,9 +36,9 @@ ui <- fluidPage(
       materialSwitch(inputId = "file_level", value = F, label="Handle preprocessed expression set", status = "danger"),
       fileInput("evidence_file", "Upload evidence.txt from MaxQuant", accept = c("text")),
       fileInput("sample_annotation_file", "Upload sample annotation file", accept = c("text")),
-      
+      selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
+            
       conditionalPanel(condition = "!input.file_level", 
-                       selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
                        # cutoff for PIF
                        numericInput("PIF_cutoff", "Input cutoff value for parental ion fraction. PSMs larger than the value remain", 0.1, min = 0, max=1, step = 0.1),
                        
@@ -255,7 +255,6 @@ server <- function(input, output, session) {
   meta_data <- reactive({
     req(input$sample_annotation_file)
     meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
-    meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
     return(meta_data_0)
   })
   
@@ -414,7 +413,7 @@ server <- function(input, output, session) {
       } else {
         rownames(evidence_data) <- evidence_data$ID
         evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
-        evidence_data <- evidence_data[, !(meta_data_0$Group %in%  input$selectedSampleType_to_exclude)]
+        evidence_data <- evidence_data[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
       } 
       
       incProgress(14/17, detail=paste("transforming protein data"))
