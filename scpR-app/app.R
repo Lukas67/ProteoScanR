@@ -34,8 +34,8 @@ ui <- fluidPage(
       
       # read in of the data
       materialSwitch(inputId = "file_level", value = F, label="Handle preprocessed expression set", status = "danger"),
-      fileInput("evidence_file", "Upload evidence.txt from MaxQuant", accept = c("text")),
-      fileInput("sample_annotation_file", "Upload sample annotation file", accept = c("text")),
+      fileInput("evidence_file", "Upload tabdel (.txt) PSM file", accept = c("text")),
+      fileInput("sample_annotation_file", "Upload tabdel (.txt) sample annotation file", accept = c("text")),
       selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
             
       conditionalPanel(condition = "!input.file_level", 
@@ -75,9 +75,11 @@ ui <- fluidPage(
                   tabPanel("Reporter Ion Intensity", 
                            selectInput("color_variable_ri", "select variable to indicate", ""),
                            plotOutput("RI_intensity")),
-                  tabPanel("Covariance across razor peptides",
-                           selectInput("color_variable_cv", "select variable to indicate", ""),
-                           plotOutput("CV_median")),
+                  tabPanel("Covariance and correlation",
+                           conditionalPanel(condition = "!input.file_level",
+                                            selectInput("color_variable_cv", "select variable to indicate", ""),
+                                            plotOutput("CV_median")),
+                           plotOutput("corr_matrix"), width="100%"),
                   tabPanel("Dimensionality reduction",
                            fluidRow(width=12,
                                     column(width=4,
@@ -412,8 +414,9 @@ server <- function(input, output, session) {
         
       } else {
         rownames(evidence_data) <- evidence_data$ID
-        evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
-        evidence_data <- evidence_data[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+        evidence_data <- evidence_data[, !(names(evidence_data) %in% c("ID"))]
+        evidence_data <- evidence_data[, !(meta_data_0$Group %in%  input$selectedSampleType_to_exclude)]
+        meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
       } 
       
       incProgress(14/17, detail=paste("transforming protein data"))
@@ -861,7 +864,6 @@ server <- function(input, output, session) {
       list <- rowData(scp_0)[["proteins"]][,1]
     } else {
       list <- rownames(scp())
-      print(list)
     }
     return(list)
   })
@@ -974,13 +976,17 @@ server <- function(input, output, session) {
         scale_x_log10() +
         labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
     } else{
+      
+      meta_data_0 <- meta_data()
+      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+      
       evidence_data <- scp()
       evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
       evidence_data_medians %>%
         ggplot() +
         aes(x = median_intensity, 
-            y = get(input$color_variable_ri),
-            fill = get(input$color_variable_ri)) +
+            y = meta_data_0[[as.character(input$color_variable_ri)]],
+            fill = meta_data_0[[as.character(input$color_variable_ri)]]) +
         geom_boxplot() +
         scale_x_log10() +
         labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri))
@@ -1012,7 +1018,7 @@ server <- function(input, output, session) {
           ggplot(aes(x = MedianCV,
                      fill = get(input$color_variable_cv))) +
           geom_boxplot()+
-          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))  
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "Covariance over razor proteins")  
       } else {
         getWithColData(scp_0, peptide_file) %>%
           colData %>%
@@ -1020,8 +1026,17 @@ server <- function(input, output, session) {
           ggplot(aes(x = MedianCV,
                      fill = get(input$color_variable_cv))) +
           geom_boxplot()+
-          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv))
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "Covariance over razor proteins")
       }
+    }
+  })
+  
+  output$corr_matrix <- renderPlot({
+    scp_0 <- scp()
+    if (input$file_level == FALSE) {
+      heatmap(cor(t(assay(scp_0[["proteins_dim_red"]]))))
+    } else {
+      heatmap(cor(t(scp_0)))
     }
   })
   
@@ -1044,11 +1059,18 @@ server <- function(input, output, session) {
   
   # principle component analysis in fifth tab
   output$PCA <- renderPlot({
+    
     extract_null <- function(variable) if (variable == "NULL") {
       return(NULL)
     } else {
-      return(variable)
+      if (input$file_level == FALSE) {
+        return(variable)
+      } else {
+        return(meta_data_0[[as.character(variable)]])
+      }
     }
+    meta_data_0 <- meta_data()
+    meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
     
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
@@ -1065,60 +1087,97 @@ server <- function(input, output, session) {
                      point_alpha = 1,
                      point_size=3)
     } else {
+      dimred_pca <- calculatePCA(scp_0,                                          ncomponents = 5,
+                                 ntop = Inf,
+                                 scale = TRUE)
       
+      dimred_pca <- data.frame(dimred_pca)
+      
+      ggplot(dimred_pca, aes(x=PC1, 
+                             y=PC2, 
+                             color= color_variable_dim_red,
+                             shape = shape_variable_dim_red,
+                             size = size_variable_dim_red)) +
+        geom_point(alpha=3/4)
     }
   })
   
   # Umap dimensionality reduction in fith tab
   output$UMAP <- renderPlot({
+    
     extract_null <- function(variable) if (variable == "NULL") {
       return(NULL)
     } else {
-      return(variable)
+      if (input$file_level == FALSE) {
+        return(variable)
+      } else {
+        return(meta_data_0[[as.character(variable)]])
+      }
     }
+    meta_data_0 <- meta_data()
+    meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
     
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
     
-    
-    
     scp_0 <- scp()
-    plotReducedDim(scp_0[["proteins_dim_red"]],
-                   dimred = "UMAP",
-                   colour_by = color_variable_dim_red,
-                   shape_by = shape_variable_dim_red,
-                   size_by = size_variable_dim_red,
-                   point_alpha = 1,
-                   point_size = 3)
+    
+    if (input$file_level == FALSE) {
+      plotReducedDim(scp_0[["proteins_dim_red"]],
+                     dimred = "UMAP",
+                     colour_by = color_variable_dim_red,
+                     shape_by = shape_variable_dim_red,
+                     size_by = size_variable_dim_red,
+                     point_alpha = 1,
+                     point_size = 3)      
+    } else {
+      dimred_umap <- calculateUMAP(scp_0,                                          ncomponents = 5,
+                                 ntop = Inf,
+                                 scale = TRUE)
+      
+      dimred_umap <- data.frame(dimred_umap)
+      
+      ggplot(dimred_umap, aes(x=UMAP1, 
+                             y=UMAP2, 
+                             color= color_variable_dim_red,
+                             shape = shape_variable_dim_red,
+                             size = size_variable_dim_red)) +
+        geom_point(alpha=3/4)
+    } 
   })
   
   
   # protein wise visualisation 
   output$feature_subset <- renderPlot({
     scp_0 <- scp()
-    subsetByFeature(scp_0, input$selectedProtein) %>%
-      ## Format the `QFeatures` to a long format table
-      longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
-      data.frame %>%
-      ## This is used to preserve ordering of the samples and assays in ggplot2
-      mutate(assay = factor(assay, levels = names(scp_0)),
-             Channel = sub("Reporter.intensity.", "", Channel)) %>%
-      mutate(Channel = as.numeric(Channel)) %>%
-      arrange(Channel) %>%
-      mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
-      ## Start plotting
-      ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
-      geom_point() +
-      ## Plot every assay in a separate facet
-      facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
-      ## Annotate plot
-      xlab("Channels") +
-      ylab("Intensity (arbitrary units)") +
-      ## Improve plot aspect
-      theme(axis.text.x = element_text(angle = 90),
-            strip.text = element_text(hjust = 0),
-            legend.position = "bottom")
+    
+    if (input$file_level == FALSE) {
+      subsetByFeature(scp_0, input$selectedProtein) %>%
+        ## Format the `QFeatures` to a long format table
+        longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+        data.frame %>%
+        ## This is used to preserve ordering of the samples and assays in ggplot2
+        mutate(assay = factor(assay, levels = names(scp_0)),
+               Channel = sub("Reporter.intensity.", "", Channel)) %>%
+        mutate(Channel = as.numeric(Channel)) %>%
+        arrange(Channel) %>%
+        mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
+        ## Start plotting
+        ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+        geom_point() +
+        ## Plot every assay in a separate facet
+        facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+        ## Annotate plot
+        xlab("Channels") +
+        ylab("Intensity (arbitrary units)") +
+        ## Improve plot aspect
+        theme(axis.text.x = element_text(angle = 90),
+              strip.text = element_text(hjust = 0),
+              legend.position = "bottom")
+    } else {
+      
+    }
   })
 
   # plot MA plot for the constand method

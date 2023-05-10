@@ -25,9 +25,9 @@ library("sva")
 library("tibble")
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/20230202_HF2_08_Ujjwal_Monocytes_TMT12_PSMs.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Monocytes/gerhard_pd/sampleAnnotate_tabdel.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
 
 
 # create QFeature object
@@ -807,6 +807,8 @@ p <- ggplot(toptable, aes(x = logFC, y = -log10(P.Value), text=protein)) +
   theme(legend.position = "top")
   
 ggplotly(p, tooltip = "text")
+
+heatmap(cor(t(assay(scp_0[["proteins_dim_red"]]))))
 
 
 

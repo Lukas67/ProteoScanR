@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.3)  9 MAY 2023 15:33
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.5.9)  9 MAY 2023 15:37
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **Thesis.tex
 (./Thesis.tex
 LaTeX2e <2022-11-01> patch level 1
-L3 programming layer <2023-04-20> (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
+L3 programming layer <2023-05-05> (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/size11.clo
 File: size11.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
@@ -575,12 +575,12 @@ Package natbib Warning: Citation `Johnson2007' on page 14 undefined on input lin
 
 ! Double subscript.
 l.812 \(Y_i_
-            j_g = a_g + X\beta_g + \gamma_i_g + \delta_i_g\epsilon_i_j_g\), 
+            j_g = a_g + X \beta_g + \gamma_i_g + \delta_i_g \epsilon_i_j_g\), 
 Here is how much of TeX's memory you used:
- 12104 strings out of 477961
- 188676 string characters out of 5838317
- 1860074 words of memory out of 5000000
- 32011 multiletter control sequences out of 15000+600000
+ 12102 strings out of 478007
+ 188575 string characters out of 5839447
+ 1860248 words of memory out of 5000000
+ 31965 multiletter control sequences out of 15000+600000
  543187 words of font info for 56 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,9n,76p,339b,8642s stack positions out of 10000i,1000n,20000p,200000b,200000s

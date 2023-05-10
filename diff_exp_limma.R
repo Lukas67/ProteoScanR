@@ -1,20 +1,27 @@
 library(limma)
 library(dplyr)
-
+library(ggplot2)
+library(matrixStats)
+# load files
 evidence_data <- read.delim("/home/lukas/Downloads/Raw_data.txt")
 
 meta_data_0 <- read.delim("/home/lukas/Downloads/Design.txt")
 
+
+# handle id column
 rownames(evidence_data) <- evidence_data$ID
 evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
+# handle exclusion dependencies
 selectedSampleType_to_exclude <- c("Pool")
 evidence_data <- evidence_data[, !(meta_data_0$Group %in%  selectedSampleType_to_exclude)]      
 meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
 
 
+# plot basic counts
 barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
 
+# plot median intensities 
 evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
 
 evidence_data_medians %>%
@@ -26,9 +33,41 @@ evidence_data_medians %>%
   scale_x_log10() +
   labs(fill=as.character(meta_data_0$Group), y=as.character(meta_data_0$Group))
 
+# plot covariance
+heatmap(cor(t(evidence_data)))
+
+# feature wise output across channels
+selectedProtein <- "P26640"
+to_plot <- data.frame(t(evidence_data[selectedProtein, ]))
 
 
+ggplot(to_plot, aes(x = rownames(to_plot), y = get(selectedProtein))) + 
+  geom_col(fill = meta_data_0$Group) +
+  labs(y=as.character(selectedProtein), x="")
 
+# plot featurewise intensities for each channel
+subsetByFeature(scp_0, input$selectedProtein) %>%
+  ## Format the `QFeatures` to a long format table
+  longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
+  data.frame %>%
+  ## This is used to preserve ordering of the samples and assays in ggplot2
+  mutate(assay = factor(assay, levels = names(scp_0)),
+         Channel = sub("Reporter.intensity.", "", Channel)) %>%
+  mutate(Channel = as.numeric(Channel)) %>%
+  arrange(Channel) %>%
+  mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
+  ## Start plotting
+  ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
+  geom_point() +
+  ## Plot every assay in a separate facet
+  facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
+  ## Annotate plot
+  xlab("Channels") +
+  ylab("Intensity (arbitrary units)") +
+  ## Improve plot aspect
+  theme(axis.text.x = element_text(angle = 90),
+        strip.text = element_text(hjust = 0),
+        legend.position = "bottom")
 
 # log transform expression values
 evidence_data <- log10(evidence_data) 
@@ -81,8 +120,31 @@ dimred_pca <- calculatePCA(evidence_data,                                       
 
 dimred_pca <- data.frame(dimred_pca)
 
-ggplot(dimred_pca, aes(x=PC1, y=PC2)) +
-  geom_jitter()
+# sample continuos variable to test 
+
+meta_data_0$body_weight <- rnorm(nrow(meta_data_0), mean=65)
+
+ggplot(dimred_pca, aes(x=PC1, 
+                       y=PC2, 
+                       color=meta_data_0$Batch,
+                       shape = meta_data_0$Gender,
+                       size = meta_data_0$body_weight)) +
+  geom_point(alpha=3/4)
+
+
+dimred_umap <- calculateUMAP(evidence_data,
+                             ncomponents = 5,
+                             ntop = Inf,
+                             scale = TRUE)
+
+dimred_umap <- data.frame(dimred_umap)
+
+ggplot(dimred_umap, aes(x=UMAP1, 
+                        y=UMAP2, 
+                        color=meta_data_0$Batch,
+                        shape = meta_data_0$Gender,
+                        size = meta_data_0$body_weight)) +
+  geom_point(alpha=3/4)
 
 
 
