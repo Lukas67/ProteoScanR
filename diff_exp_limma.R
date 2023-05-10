@@ -146,6 +146,7 @@ ggplot(dimred_umap, aes(x=UMAP1,
                         size = meta_data_0$body_weight)) +
   geom_point(alpha=3/4)
 
+plot_ly(x=dimred_umap$UMAP1, y=dimred_umap$UMAP2, z=dimred_umap$UMAP3, type="scatter3d", mode="markers", color=meta_data_0$Batch)
 
 
 library(sva)
