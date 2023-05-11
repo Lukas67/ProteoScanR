@@ -19,7 +19,7 @@ meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclu
 
 
 # plot basic counts
-barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
+#barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
 
 # plot median intensities 
 evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
@@ -146,7 +146,12 @@ ggplot(dimred_umap, aes(x=UMAP1,
                         size = meta_data_0$body_weight)) +
   geom_point(alpha=3/4)
 
-plot_ly(x=dimred_umap$UMAP1, y=dimred_umap$UMAP2, z=dimred_umap$UMAP3, type="scatter3d", mode="markers", color=meta_data_0$Batch)
+plot_ly(x=dimred_umap$UMAP1,
+        y=dimred_umap$UMAP2, 
+        z=dimred_umap$UMAP3, 
+        type="scatter3d", 
+        mode="markers",
+        color=meta_data_0$Batch) 
 
 
 library(sva)

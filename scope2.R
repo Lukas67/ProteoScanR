@@ -559,7 +559,7 @@ plotReducedDim(scp[["proteins_dim_red"]],
 
 # UMAP
 scp[["proteins_dim_red"]] <- runUMAP(scp[["proteins_dim_red"]],
-                                   ncomponents = 2,
+                                   ncomponents = 3,
                                    ntop = Inf,
                                    scale = TRUE,
                                    exprs_values = 1,
@@ -808,7 +808,19 @@ p <- ggplot(toptable, aes(x = logFC, y = -log10(P.Value), text=protein)) +
   
 ggplotly(p, tooltip = "text")
 
+
+
+
 heatmap(cor(t(assay(scp_0[["proteins_dim_red"]]))))
 
+dimred <- data.frame(reducedDim(scp_0[["proteins_dim_red"]], "PCA"))
+plot_ly(x=dimred$PC1,
+        y=dimred$PC2,
+        z=dimred$PC3,
+        type="scatter3d",
+        mode="markers",
+        color=scp$Raw.file)
 
+selection <- "Channel"
 
+scp_0[["proteins_dim_red"]][[selection]]
