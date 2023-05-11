@@ -109,7 +109,10 @@ ui <- fluidPage(
                                             )
                            ),
                   tabPanel("Feature wise output", 
-                           selectInput("selectedProtein", "Choose protein for observation", ""),
+                           selectizeInput("selectedProtein", "Choose protein for observation", ""),
+                           conditionalPanel(condition = "input.file_level",
+                                            selectInput("color_variable_feature", "select variable to color", "")
+                                            ),
                            plotOutput("feature_subset")),
                   
                   tabPanel("Statistics",
@@ -198,6 +201,10 @@ boxcox_1.default <-
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=30*1024^2)
 
+  session$onSessionEnded(function() {
+    stopApp()
+  })
+  
   #basic error handling
   errMsg <- reactiveVal()
   output$debug <- renderPrint(errMsg())
@@ -878,13 +885,12 @@ server <- function(input, output, session) {
   # observer for protein list
   observe({
     req(protein_list())
-    updateSelectInput(session, "selectedProtein", choices = protein_list())
+    updateSelectizeInput(session, "selectedProtein", choices = protein_list())
   })
   
   # reactive element for the protein list --> update if the scp object changes
   protein_list <- reactive({
     req(scp())
-    tryCatch({
       if (input$file_level == FALSE) {
         req(scp()[["proteins"]])
         scp_0 <- scp()
@@ -892,11 +898,7 @@ server <- function(input, output, session) {
       } else {
         list <- rownames(scp())
       }
-      return(list)}, error = function(err) {
-      print("Error Handler")
-      errMsg("Error")
-    },
-    finally = invalidateLater(1))
+      return(list)
   })
   
 
@@ -1278,6 +1280,12 @@ server <- function(input, output, session) {
       
     } 
   })
+  
+  observe({
+    req(columns())
+    updateSelectInput(session, "color_variable_feature", choices=columns())
+  })  
+  
   # protein wise visualisation 
   output$feature_subset <- renderPlot({
     scp_0 <- scp()
@@ -1306,7 +1314,31 @@ server <- function(input, output, session) {
               strip.text = element_text(hjust = 0),
               legend.position = "bottom")
     } else {
+      extract_null <- function(variable) if (variable == "NULL") {
+        return(NULL)
+      } else {
+        if (input$file_level == FALSE) {
+          return(scp_0[["proteins_dim_red"]][[variable]])
+        } else {
+          return(meta_data_0[[as.character(variable)]])
+        }
+      }
       
+      
+      req(meta_data())
+      meta_data_0 <- meta_data()
+      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+
+      to_plot <- data.frame(t(scp_0[input$selectedProtein, ]))
+      
+      color_variable_feature <- extract_null(input$color_variable_feature)
+      
+      d = data.frame(melt(to_plot))
+
+      ggplot(data = d,
+             mapping = aes(x = variable, y = value, fill=color_variable_feature)) + 
+        geom_col(position = position_dodge()) +
+        labs(y=paste("intensity of", input$selectedProtein))
     }
   })
 

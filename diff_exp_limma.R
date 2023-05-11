@@ -34,40 +34,21 @@ evidence_data_medians %>%
   labs(fill=as.character(meta_data_0$Group), y=as.character(meta_data_0$Group))
 
 # plot covariance
-heatmap(cor(t(evidence_data)))
+#heatmap(cor(t(evidence_data)))
 
 # feature wise output across channels
 selectedProtein <- "P26640"
 to_plot <- data.frame(t(evidence_data[selectedProtein, ]))
+to_plot$names <- rownames(to_plot)
 
+library(reshape2)
 
-ggplot(to_plot, aes(x = rownames(to_plot), y = get(selectedProtein))) + 
-  geom_col(fill = meta_data_0$Group) +
-  labs(y=as.character(selectedProtein), x="")
+d = melt(to_plot, id.vars = "names")
 
-# plot featurewise intensities for each channel
-subsetByFeature(scp_0, input$selectedProtein) %>%
-  ## Format the `QFeatures` to a long format table
-  longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
-  data.frame %>%
-  ## This is used to preserve ordering of the samples and assays in ggplot2
-  mutate(assay = factor(assay, levels = names(scp_0)),
-         Channel = sub("Reporter.intensity.", "", Channel)) %>%
-  mutate(Channel = as.numeric(Channel)) %>%
-  arrange(Channel) %>%
-  mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
-  ## Start plotting
-  ggplot(aes(x = Channel, y = value, group = rowname, col = SampleType)) +
-  geom_point() +
-  ## Plot every assay in a separate facet
-  facet_wrap(facets = vars(assay), scales = "free_y", ncol = 3) +
-  ## Annotate plot
-  xlab("Channels") +
-  ylab("Intensity (arbitrary units)") +
-  ## Improve plot aspect
-  theme(axis.text.x = element_text(angle = 90),
-        strip.text = element_text(hjust = 0),
-        legend.position = "bottom")
+ggplot(data = d,
+       mapping = aes(x = names, y = value, fill=meta_data_0$Batch)) + 
+  geom_col(position = position_dodge()) +
+  labs(y=paste("intensity of", selectedProtein))
 
 # log transform expression values
 evidence_data <- log10(evidence_data) 
