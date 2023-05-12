@@ -14,10 +14,11 @@ evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 # handle exclusion dependencies
 selectedSampleType_to_exclude <- c("Pool")
-evidence_data <- evidence_data[, !(meta_data_0$Group %in%  selectedSampleType_to_exclude)]      
+      
 meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
 
 
+evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
 # plot basic counts
 #barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
 

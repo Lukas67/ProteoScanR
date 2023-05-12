@@ -280,9 +280,14 @@ server <- function(input, output, session) {
   
   # Data structures and objects
   # sample_annotation needs to be accessible for plots
-  meta_data <- reactive({
+  meta_data <- eventReactive(input$update_button, {
     req(input$sample_annotation_file)
     meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
+    if (input$file_level == FALSE) {
+      meta_data_0 <- meta_data_0[!(meta_data_0$SampleType %in%  input$selectedSampleType_to_exclude), ]
+    } else {
+      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+    }
     return(meta_data_0)
   })
   
@@ -442,10 +447,10 @@ server <- function(input, output, session) {
         } else {
           rownames(evidence_data) <- evidence_data$ID
           evidence_data <- evidence_data[, !(names(evidence_data) %in% c("ID"))]
-          evidence_data <- evidence_data[, !(meta_data_0$Group %in%  input$selectedSampleType_to_exclude)]
-          meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+          evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
         } 
         
+
         incProgress(14/17, detail=paste("transforming protein data"))
         req(input$transform_base)
         transform_base_bc <- "None"
@@ -867,12 +872,16 @@ server <- function(input, output, session) {
 
   # expression matrix is used by plot functions
   exp_matrix <- reactive({
+    req(scp())
     if (input$file_level == FALSE) {
       scp_0 <- scp()
       exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
       colnames(exp_matrix_0) <- scp_0$SampleType  
     } else {
+      req(meta_data())
       exp_matrix_0 <- scp()
+      meta_data_0 <- meta_data()
+      colnames(exp_matrix_0) <- meta_data_0$group
     }
     return(exp_matrix_0)
   })
@@ -901,7 +910,6 @@ server <- function(input, output, session) {
       return(list)
   })
   
-
   # observer for the CONSTANd normalization dependency to check before analysis
   observeEvent(ignoreInit=TRUE, CONSTANd_trigger(), {
     if (CONSTANd_trigger()[2] == "CONSTANd" && !is.null(comp_list())){
@@ -955,13 +963,15 @@ server <- function(input, output, session) {
       list <- scp_0$SampleType
     } else {
       req(meta_data())
-      list <- meta_data()$Group
+      meta_data_0 <- meta_data()
+      list <- meta_data_0$Group
     }
     return(list)
     })
   
   ## Output of analysis pipeline 
   # pathway of the data first tab
+  # include pipeline for expression set
   output$overview_plot <- renderPlot({
     if (!is.null(scp()) && input$file_level == FALSE) {
       plot(scp()) }
@@ -997,8 +1007,9 @@ server <- function(input, output, session) {
   })  
   # Boxplot of reporter ion intensity third tab
   output$RI_intensity <- renderPlot({
-    scp_0 <- scp()
+    
     if (input$file_level == FALSE) {
+      scp_0 <- scp()
       colData(scp_0) %>%
         data.frame %>%
         ggplot() +
@@ -1009,11 +1020,9 @@ server <- function(input, output, session) {
         scale_x_log10() +
         labs(fill=as.character(input$color_variable_ri), y=as.character(input$color_variable_ri)) 
     } else{
-      
       meta_data_0 <- meta_data()
-      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
-      
       evidence_data <- scp()
+
       evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
       evidence_data_medians %>%
         ggplot() +
@@ -1090,6 +1099,22 @@ server <- function(input, output, session) {
     updateSelectInput(session, "size_variable_dim_red", choices=c("NULL", columns()))
   })
   
+  
+  dimred_pca_expr_set <- eventReactive(input$update_button, {
+    if (input$file_level == TRUE) {
+      req(scp())
+      scp_0 <- scp()
+      dimred_pca <- calculatePCA(scp_0,                                          
+                                 ncomponents = 5,
+                                 ntop = Inf,
+                                 scale = TRUE)
+      
+      dimred_pca <- data.frame(dimred_pca)
+      return(dimred_pca)
+    }
+  })
+  
+  
   # principle component analysis in fifth tab
   output$PCA <- renderPlot({
     
@@ -1103,12 +1128,11 @@ server <- function(input, output, session) {
       }
     }
     meta_data_0 <- meta_data()
-    
+    scp_0 <- scp()
+        
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
-    
-    scp_0 <- scp()
     
     if (input$file_level == FALSE) {
       plotReducedDim(scp_0[["proteins_dim_red"]],
@@ -1119,14 +1143,8 @@ server <- function(input, output, session) {
                      point_alpha = 1,
                      point_size=3)
     } else {
-      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
-      
-      dimred_pca <- calculatePCA(scp_0,                                          
-                                 ncomponents = 5,
-                                 ntop = Inf,
-                                 scale = TRUE)
-      
-      dimred_pca <- data.frame(dimred_pca)
+
+      dimred_pca <- dimred_pca_expr_set()
       
       ggplot(dimred_pca, aes(x=PC1, 
                              y=PC2, 
@@ -1169,14 +1187,8 @@ server <- function(input, output, session) {
               color=color_variable_dim_red)
       
     } else {
-      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
       
-      dimred_pca <- calculatePCA(scp_0,
-                                 ncomponents = 3,
-                                 ntop = Inf,
-                                 scale = TRUE)
-      
-      dimred_pca <- data.frame(dimred_pca)
+      dimred_pca <- dimred_pca_expr_set()
 
       plot_ly(x=dimred_pca$PC1,
               y=dimred_pca$PC2,
@@ -1187,6 +1199,22 @@ server <- function(input, output, session) {
       
     }
   })
+  
+  dimred_umap_expr_set <- eventReactive(input$update_button, {
+    if (input$file_level == TRUE) {
+      req(scp())
+      scp_0 <- scp()
+      dimred_umap <- calculateUMAP(scp_0,
+                                   ncomponents = 3,
+                                   ntop = Inf,
+                                   scale = TRUE)
+      
+      dimred_umap <- data.frame(dimred_umap)
+      return(dimred_umap)
+    }
+  })
+  
+  
   
   # Umap dimensionality reduction in fith tab
   output$UMAP <- renderPlot({
@@ -1201,13 +1229,11 @@ server <- function(input, output, session) {
       }
     }
     meta_data_0 <- meta_data()
-    meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
+    scp_0 <- scp()
     
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
-    
-    scp_0 <- scp()
     
     if (input$file_level == FALSE) {
       plotReducedDim(scp_0[["proteins_dim_red"]],
@@ -1218,12 +1244,8 @@ server <- function(input, output, session) {
                      point_alpha = 1,
                      point_size = 3)      
     } else {
-      dimred_umap <- calculateUMAP(scp_0,                                          ncomponents = 5,
-                                 ntop = Inf,
-                                 scale = TRUE)
-      
-      dimred_umap <- data.frame(dimred_umap)
-      
+      dimred_umap <- dimred_umap_expr_set()
+
       ggplot(dimred_umap, aes(x=UMAP1, 
                              y=UMAP2, 
                              color= color_variable_dim_red,
@@ -1246,12 +1268,13 @@ server <- function(input, output, session) {
     }
     
     meta_data_0 <- meta_data()
-    scp_0 <- scp()
-    
+    scp_0 <- scp()    
+  
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
     
+
     
     if (input$file_level == FALSE) {
       dimred_umap <- data.frame(reducedDim(scp_0[["proteins_dim_red"]], "UMAP"))
@@ -1262,14 +1285,7 @@ server <- function(input, output, session) {
               mode="markers",
               color=color_variable_dim_red)  
     } else {
-      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
-      
-      dimred_umap <- calculateUMAP(scp_0,
-                                   ncomponents = 3,
-                                   ntop = Inf,
-                                   scale = TRUE)
-      
-      dimred_umap <- data.frame(dimred_umap)
+      dimred_umap<- dimred_umap_expr_set() 
       
       plot_ly(x=dimred_umap$UMAP1,
               y=dimred_umap$UMAP2,
@@ -1327,7 +1343,6 @@ server <- function(input, output, session) {
       
       req(meta_data())
       meta_data_0 <- meta_data()
-      meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  input$selectedSampleType_to_exclude), ]
 
       to_plot <- data.frame(t(scp_0[input$selectedProtein, ]))
       
