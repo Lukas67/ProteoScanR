@@ -879,9 +879,9 @@ server <- function(input, output, session) {
       colnames(exp_matrix_0) <- scp_0$SampleType  
     } else {
       req(meta_data())
-      exp_matrix_0 <- scp()
+      exp_matrix_0 <- data.frame(scp())
       meta_data_0 <- meta_data()
-      colnames(exp_matrix_0) <- meta_data_0$group
+      colnames(exp_matrix_0) <- meta_data_0$Group
     }
     return(exp_matrix_0)
   })
@@ -898,7 +898,7 @@ server <- function(input, output, session) {
   })
   
   # reactive element for the protein list --> update if the scp object changes
-  protein_list <- reactive({
+  protein_list <- eventReactive(input$update_button, {
     req(scp())
       if (input$file_level == FALSE) {
         req(scp()[["proteins"]])
@@ -938,7 +938,7 @@ server <- function(input, output, session) {
     return(list)
   })
 
-  columns <- reactive({
+  columns <- eventReactive(input$update_button, {
     if (input$file_level == FALSE) {
       req(scp())
       scp_0 <- scp()
@@ -956,7 +956,7 @@ server <- function(input, output, session) {
     updateSelectInput(session, "selectedSampleType_to_exclude", choices = sample_types())
   })
   
-  sample_types <- reactive({
+  sample_types <- eventReactive(input$update_button, {
     if (input$file_level == FALSE) {
       req(scp())
       scp_0 <- scp()
@@ -1360,23 +1360,7 @@ server <- function(input, output, session) {
   # plot MA plot for the constand method
   output$MAplot <- renderPlot({
     req(input$selectedComp)
-    req(scp())
-    
-    scp_0 <- scp() 
-    scp_0 <- filterNA(scp_0, pNA = 0, "proteins_transf")
-    
     user_choice <- input$selectedComp
-    # split user choice of comp back to sample types
-    user_choice_vector <- strsplit(user_choice, split = "-")
-    # and assign them to a variable
-    choice_A <- user_choice_vector[[1]][1]
-    choice_B <- user_choice_vector[[1]][2]
-    
-    #find the row indeces of corresponding to the individual sample types
-    st_indeces <- split(seq_along(scp_0$SampleType), scp_0$SampleType)
-    index_A <- st_indeces[choice_A]
-    index_B <- st_indeces[choice_B]
-    
     
     MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
       # catch unequal size of matrices
@@ -1403,13 +1387,57 @@ server <- function(input, output, session) {
       use <- is.finite(M)
       A <- A[use]
       M <- M[use]
+      
+      use <- is.finite(A)
+      A <- A[use]
+      M <- M[use]
+      
       # plot
       print(var(M))
       plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
       # rolling average
       if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
     }
-    MAplot(assay(scp_0[["proteins_transf"]][,index_A[[1]]]), assay(scp_0[["proteins_transf"]][,index_B[[1]]]))
+    
+    if (input$file_level == FALSE) {
+      req(scp())
+      scp_0 <- scp() 
+      
+      scp_0 <- filterNA(scp_0, pNA = 0, "proteins_transf")
+      
+      
+      # split user choice of comp back to sample types
+      user_choice_vector <- strsplit(user_choice, split = "-")
+      # and assign them to a variable
+      choice_A <- user_choice_vector[[1]][1]
+      choice_B <- user_choice_vector[[1]][2]
+      
+      #find the row indeces of corresponding to the individual sample types
+      st_indeces <- split(seq_along(scp_0$SampleType), scp_0$SampleType)
+      index_A <- st_indeces[choice_A]
+      index_B <- st_indeces[choice_B]
+      
+      MAplot(assay(scp_0[["proteins_transf"]][,index_A[[1]]]), assay(scp_0[["proteins_transf"]][,index_B[[1]]]))
+    } else {
+      req(exp_matrix())
+      req(meta_data())
+      exp_matrix_0 <- as.matrix(exp_matrix())
+      meta_data_0 <- meta_data()
+      
+      # split user choice of comp back to sample types
+      user_choice_vector <- strsplit(user_choice, split = "-")
+      # and assign them to a variable
+      choice_A <- user_choice_vector[[1]][1]
+      choice_B <- user_choice_vector[[1]][2]
+      
+      #find the row indeces of corresponding to the individual sample types
+      st_indeces <- split(seq_along(meta_data_0$Group), meta_data_0$Group)
+      index_A <- st_indeces[choice_A]
+      index_B <- st_indeces[choice_B]
+      
+      MAplot(exp_matrix_0[,index_A[[1]]], exp_matrix_0[,index_B[[1]]])
+    }
+
   })
   
   #create interface for the constand normalization method
@@ -1459,44 +1487,91 @@ server <- function(input, output, session) {
       incProgress(1/3, detail=paste("read data"))
       scp_0 <- scp()
       exp_matrix_0 <- exp_matrix()
+      meta_data_0 <- meta_data()
+      
       
       incProgress(2/3, detail=paste("creating linear model"))
       req(input$model_design)
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
-        design <- model.matrix(~0+factor(scp_0$SampleType))
-        colnames(design) <- unique(scp_0$SampleType)
-        fit <- lmFit(exp_matrix_0, design)
+        if (input$file_level == FALSE) {
+          design <- model.matrix(~0+factor(scp_0$SampleType))
+          colnames(design) <- unique(scp_0$SampleType)
+          fit <- lmFit(exp_matrix_0, design)
+        } else {
+          design <- model.matrix(~0+factor(meta_data_0$Group))
+          colnames(design) <- unique(meta_data_0$Group)
+          fit <- lmFit(exp_matrix_0, design)
+        }
+
       }
       #Differential Expression with defined Contrasts
       else if (input$model_design == "Differential Expression with defined Contrasts") {
-        # fetch user selection
-        req(input$selectedComp_stat)
-        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-        colnames(exp_matrix_0) <- scp_0$SampleType
-        
-        design <- model.matrix(~0+factor(scp_0$SampleType))
-        colnames(design) <- unique(scp_0$SampleType)
-        
-        fit <- lmFit(exp_matrix_0, design)
-        
-        user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
-        cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
-        fit <- contrasts.fit(fit, cont_matrix)
+        if (input$file_level == FALSE) {
+          # fetch user selection
+          req(input$selectedComp_stat)
+          scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+          exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+          colnames(exp_matrix_0) <- scp_0$SampleType
+          
+          design <- model.matrix(~0+factor(scp_0$SampleType))
+          colnames(design) <- unique(scp_0$SampleType)
+          
+          fit <- lmFit(exp_matrix_0, design)
+          
+          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          fit <- contrasts.fit(fit, cont_matrix)
+        } else {
+          # fetch user selection
+          req(input$selectedComp_stat)
+          meta_data_0 <- meta_data_0[meta_data_0$Group %in% input$selectedComp_stat, ]
+          
+          exp_matrix_0 <- exp_matrix_0[, as.numeric(rownames(meta_data_0))]
+          colnames(exp_matrix_0) <- meta_data_0$Group
+          
+          design <- model.matrix(~0+factor(meta_data_0$Group))
+          colnames(design) <- unique(meta_data_0$Group)
+
+          
+          fit <- lmFit(exp_matrix_0, design)
+          
+          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          fit <- contrasts.fit(fit, cont_matrix)
+        }
       }
       else if (input$model_design == "Multi factor additivity") {
-        req(input$col_factors)
-        req(input$selectedComp_stat)
-        
-        scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-        exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-        colnames(exp_matrix_0) <- scp_0$SampleType
-        
-        fetched_factor <- colData(scp_0)[input$col_factors]
-        design_frame <- cbind(fetched_factor, scp_0$SampleType)
-        design <- model.matrix(~0+ . , data=design_frame)
-        fit <- lmFit(exp_matrix_0, design)
+        if (input$file_level == FALSE) {
+          req(input$col_factors)
+          req(input$selectedComp_stat)
+          
+          scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
+          exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
+          colnames(exp_matrix_0) <- scp_0$SampleType
+          
+          fetched_factor <- colData(scp_0)[input$col_factors]
+          design_frame <- cbind(fetched_factor, scp_0$SampleType)
+          colnames(design_frame)[-1] <- "SampleType"
+          
+          design <- model.matrix(~0+ . , data=design_frame)
+          fit <- lmFit(exp_matrix_0, design)
+        } else {
+          req(input$col_factors)
+          req(input$selectedComp_stat)
+          
+          # create data 
+          meta_data_0 <- meta_data_0[meta_data_0$Group %in% input$selectedComp_stat, ]
+          exp_matrix_0 <- exp_matrix_0[, as.numeric(rownames(meta_data_0))]
+          colnames(exp_matrix_0) <- meta_data_0$Group
+          
+          fetched_factor <- meta_data_0[input$col_factors]
+          design_frame <- cbind(fetched_factor, meta_data_0$Group)
+          colnames(design_frame)[-1] <- "Group"
+          
+          design <- model.matrix(~0+ . , data=design_frame)
+          fit <- lmFit(exp_matrix_0, design)
+        }
       }
       
       incProgress(4/4, detail=paste("Bayes statistics of differential expression"))
@@ -1549,7 +1624,9 @@ server <- function(input, output, session) {
   output$qqPlot <- renderPlot({
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
+
     i <- qq_count()
+
     qqnorm(exp_matrix_0[[sample_types[i]]], main=paste("QQ-plot of ", sample_types[i]))
     qqline(exp_matrix_0[[sample_types[i]]])
   })
@@ -1558,6 +1635,7 @@ server <- function(input, output, session) {
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
     i <- qq_count()
+    
     hist(exp_matrix_0[[sample_types[i]]], main=paste("Histogram of ", sample_types[i]), xlab= "")
   })
   # create interface for the qqmodal dialog

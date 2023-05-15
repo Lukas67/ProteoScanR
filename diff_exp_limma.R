@@ -12,6 +12,9 @@ meta_data_0 <- read.delim("/home/lukas/Downloads/Design.txt")
 rownames(evidence_data) <- evidence_data$ID
 evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
+
+
+
 # handle exclusion dependencies
 selectedSampleType_to_exclude <- c("Pool")
       
@@ -62,6 +65,65 @@ evidence_data <- data.frame(protein_matrix)
 
 
 evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
+
+
+# test MA plot and constand
+
+MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
+  # catch unequal size of matrices
+  if (dim(x)[2] != dim(y)[2]) {
+    if (dim(x)[2] > dim(y)[2]) {
+      x <- x[, 1:dim(y)[2]]
+    } else if (dim(y)[2] > dim(x)[2]) {
+      y <- y[, 1:dim(x)[2]]
+    }
+  }
+  
+  # make an MA plot of y vs. x that shows the rolling average,
+  M <- log2(y/x)
+  xlab = 'A'
+  if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
+  A <- (log2(y/r)+log2(x/r))/2
+  if (use.order) {
+    orig.order <- order(A)
+    A <- orig.order
+    M <- M[orig.order]
+    xlab = "original rank of feature magnitude within IPS"
+  }
+  # select only finite values
+  use <- is.finite(M)
+  A <- A[use]
+  M <- M[use]
+  # plot
+  print(var(M))
+  plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
+  # rolling average
+  if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
+}
+
+exp_matrix_0 <- as.matrix(evidence_data)
+colnames(exp_matrix_0) <- meta_data_0$Group
+
+user_choice <- "EC-HC"
+# split user choice of comp back to sample types
+user_choice_vector <- strsplit(user_choice, split = "-")
+# and assign them to a variable
+choice_A <- user_choice_vector[[1]][1]
+choice_B <- user_choice_vector[[1]][2]
+
+#find the row indeces of corresponding to the individual sample types
+st_indeces <- split(seq_along(meta_data_0$Group), meta_data_0$Group)
+index_A <- st_indeces[choice_A]
+index_B <- st_indeces[choice_B]
+
+MAplot(exp_matrix_0[,index_A[[1]]], exp_matrix_0[,index_B[[1]]])
+
+
+
+
+
+
+
 
 library('corrr')
 library("ggcorrplot")
