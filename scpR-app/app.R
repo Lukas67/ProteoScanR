@@ -141,6 +141,16 @@ ui <- fluidPage(
                            ),
                            plotlyOutput("volcano"),
                            DT::dataTableOutput("protein_table")
+                  ),
+                  tabPanel("Gene set enrichment",
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           selectInput("p_value_correction_gsea", "select method for p-value correction", choices = c("none", "BH", "fdr", "BY", "holm"))),
+                                    column(width = 4,
+                                           numericInput("p_value_cutoff_gsea", "choose p-value cutoff", value = 0.05, min = 0, step = 0.01)),
+                                    column(width=4,
+                                           numericInput("fold_change_cutoff_gsea", "choose fold change cutoff", value = 0.05, min = 0, step = 0.01)),
+                           plotOutput("gsea"))
                   )
       )
     )
@@ -1719,6 +1729,48 @@ server <- function(input, output, session) {
     req(stat_result())
     vennDiagram(decideTests(stat_result(), p.value=input$p_value_cutoff, adjust.method=input$p_value_correction))
   })
+  
+  
+  # gene set enrichment analysis 
+  
+  result_kegg <- reactive({
+    req(protein_table())
+    tt <- protein_table()
+    
+    # filter the data according to user selection
+    req(input$p_value_cutoff_gsea)
+    req(input$fold_change_cutoff_gsea)
+    p_cut <- input$p_value_cutoff_gsea
+    fc_cut <- input$fold_change_cutoff_gsea
+    
+    mask <- tt$adj.P.Val < p_cut & 
+      abs(tt$logFC) > fc_cut
+    
+    deGenes <- rownames(tt)[mask]
+
+    req(input$p_value_correction_gsea)
+    p_correct <- input$p_value_correction_gsea
+    
+    ans.kegg <- enrichKEGG(
+      deGenes,
+      organism = "hsa",
+      keyType = "uniprot",
+      pvalueCutoff = p_cut,
+      pAdjustMethod = p_correct,
+      minGSSize = 10,
+      maxGSSize = 500,
+      qvalueCutoff = 0.2,
+      use_internal_data = FALSE
+    )
+  })
+  
+  output$gsea<- renderPlot({
+    req(result_kegg())
+    ans.kegg <- result_kegg()
+    
+    dotplot(ans.kegg, showCategory=20) + ggtitle("KEGG")
+  })
+  
 }
 
 

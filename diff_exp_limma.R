@@ -3,9 +3,9 @@ library(dplyr)
 library(ggplot2)
 library(matrixStats)
 # load files
-evidence_data <- read.delim("/home/lukas/Downloads/Raw_data.txt")
+evidence_data <- read.delim("/home/lukas/Desktop/MS-Data/example/expression_matrix/Raw_data.txt")
 
-meta_data_0 <- read.delim("/home/lukas/Downloads/Design.txt")
+meta_data_0 <- read.delim("/home/lukas/Desktop/MS-Data/example/expression_matrix/Design.txt")
 
 
 # handle id column
@@ -58,9 +58,9 @@ evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data
 evidence_data <- log10(evidence_data) 
 
 protein_matrix <- as.matrix(evidence_data)
-protein_matrix <- sweep(protein_matrix, 2, colMedians(protein_matrix), FUN="/")
+protein_matrix <- sweep(protein_matrix, 2, colMedians(protein_matrix), FUN="-")
 # #normalize rowwise
-protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="/")
+protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="-")
 evidence_data <- data.frame(protein_matrix)
 
 
@@ -213,15 +213,11 @@ boxplot(as.data.frame(y2),main="Batch corrected with Limma")
 boxplot(as.data.frame(combat_edata1),main="Batch corrected with Combat")
 
 # Perform differential expression analysis between each of the two groups
+evidence_data_de <- combat_edata1
 
-# drop pool columns
-evidence_data_de <- data.frame(combat_edata1) %>% dplyr::select(-starts_with('Control'))
-evidence_data_de <- as.matrix(evidence_data_de)
-rownames(evidence_data_de) <- (evidence_data$ID)
 
 # create design matrix consisting of group variables
-design_samples <- subset(meta_data_0, Group != "Pool")
-design <- model.matrix(~0+factor(design_samples$Group))
+design <- model.matrix(~0+factor(meta_data_0$Group))
 colnames(design) <- c("EC", "HC", "VP")
 
 # Fit the expression matrix to a linear model
@@ -293,15 +289,50 @@ topTable(fit_2, coef="groupVP")
 volcanoplot(fit_2, main="EC versus VP")
 
 
+## Gene set enrichment analysis (GSEA)
+# # install packages
+# BiocManager::install("fgsea")
+# BiocManager::install("clusterProfiler")
 
-fetched_factor <- design_samples_paired[c("Batch", "Gender")]
-
-factors <- lapply(fetched_factor, factor)
-
-factor_character <- paste0("factors['", names(fetched_factor), "']", collapse = "+")
-
-paired_design <- model.matrix(~factors$Gender + group)
-
-
+library("fgsea")
+library("clusterProfiler")
+library("edgeR")
 
 
+# top table of significant genes is the starting point of the analysis
+tt <- top_genes_2
+
+mask <- tt$adj.P.Val < 0.05 &
+  abs(tt$logFC) > 0.0005
+deGenes <- rownames(tt)[mask]
+head(deGenes)
+
+geneUniverse <- rownames(tt)
+length(geneUniverse)
+
+library(clusterProfiler)
+
+ans.kegg <- enrichKEGG(
+  deGenes,
+  organism = "hsa",
+  keyType = "uniprot",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  minGSSize = 10,
+  maxGSSize = 500,
+  qvalueCutoff = 0.2,
+  use_internal_data = FALSE
+)
+
+tab.kegg <- as.data.frame(ans.kegg)
+tab.kegg<- subset(tab.kegg, Count>5)
+tab.kegg[1:5, 1:6]
+
+library(enrichplot)
+p1 <- graphics::barplot(ans.kegg, showCategory=10)
+p1
+
+p2 <- dotplot(ans.kegg, showCategory=20) + ggtitle("KEGG")
+p2
+
+cowplot::plot_grid(p1, p3, p5, ncol=2, labels=LETTERS[1:3])
