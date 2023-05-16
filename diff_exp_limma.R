@@ -302,13 +302,10 @@ library("edgeR")
 # top table of significant genes is the starting point of the analysis
 tt <- top_genes_2
 
-mask <- tt$adj.P.Val < 0.05 &
+mask <- tt$adj.P.Val < 1 &
   abs(tt$logFC) > 0.0005
 deGenes <- rownames(tt)[mask]
 head(deGenes)
-
-geneUniverse <- rownames(tt)
-length(geneUniverse)
 
 library(clusterProfiler)
 
@@ -335,4 +332,16 @@ p1
 p2 <- dotplot(ans.kegg, showCategory=20) + ggtitle("KEGG")
 p2
 
-cowplot::plot_grid(p1, p3, p5, ncol=2, labels=LETTERS[1:3])
+cowplot::plot_grid(p1, p2, ncol=2, labels=LETTERS[1:2])
+
+plot_ly(x=tab.kegg$Description, y=tab.kegg$Count, type = "bar")
+
+
+# plot_ly(x=dimred_umap$UMAP1,
+#         y=dimred_umap$UMAP2, 
+#         z=dimred_umap$UMAP3, 
+#         type="scatter3d", 
+#         mode="markers",
+#         color=meta_data_0$Batch) 
+
+

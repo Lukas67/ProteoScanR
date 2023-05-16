@@ -658,9 +658,37 @@ $\rightarrow$ This means that the homeomorphic structure (the property of being 
 The UMAP algorithm begins by constructing a graph with a defined neighborhood parameter, typically denoted as $k$, which can be selected computationally. UMAP employs the k-nearest neighbor descent algorithm (NN-descent). Similar to the k-nearest neighbor algorithm (KNN), used in the missing value imputation part of this project, NN-descent recursively iterates to find the smallest distance to the respective neighbors within the defined neighborhood size $k$. Increasing the value of $k$ gradually strengthens the clustering of the data, but at a certain point, fine structure may be lost, and only rough estimates of the underlying principle can be observed.
 The mathematical graph in UMAP is defined by nodes connected by edges, with each node internally connected to at least one other node. Edges are distinguished from each other not only by their connection but also by their importance, which is often referred to as weight. Whereas the weight function is calculated as $w((x_i, x_{i_{j}})) = \exp(\frac{-max(0,d(x_{i},x_{i_{j}}-\rho_{i})}{\sigma_{i}}$ and determine the parameter $\rho$ for the weight function that: $\rho_i=\min \left\{ d(x_i,x_{i_{j}}) \,|\, 1 \leq j \leq k, d(x_i, x_{i_{j}}) > 0 \right\}$. Furthermore $\sigma$ will be set to meet the following conditions: $\sum_{j=1}^{k} \exp ( \frac{ -\max(0, d(x_{i}, x_{i_{j}}) - \rho_i)} { \sigma_i } ) = \log_2(k)$ and acts as a normalisation factor. The obtained graph $\overline{G}$ is called the fuzzy simplicial set which is obtained by approximating the geodesic distance (= locally length-minimizing curve) of the data points, leading to a topological approximation. 
 The second phase of the algorithm adjusts the layout of the weighted graph to a representative view, but preserves the characteristics and shows the underlying topological principle of the data. In order to obtain a visual representation of the graph, the algorithm applies repulsive forces $\frac{2b}{(\epsilon + ||y_i-y_j||_{2}^{2})(1+a||y_i-y_j||_{2}^{2b})}(1-w((x_i,x_j)))(y_i-y_j)$ among vertices and attractive forces 
-$\frac{ -2ab || y_i -y_j||_{2}^{2(b-1)} }{1+||y_i-y_j||_{2}^{2}} w((x_i,x_j))(y_i-y_j)$ along edges. Where $a$ and $b$ are denoted as hyperparameters. By iterating through possible conformations until converging towards a local minimum with decreasing repulsive and attractive forces, the UMAP reaches it`s aim to reveal the underlying properties of the data. 
-The application utilizes the bioconductor package scater for performing UMAP \citep{McCarthy2017}.
+$\frac{ -2ab || y_i -y_j||_{2}^{2(b-1)} }{1+||y_i-y_j||_{2}^{2}} w((x_i,x_j))(y_i-y_j)$ along edges. Where $a$ and $b$ are denoted as hyperparameters. By iterating through possible conformations until converging towards a local minimum with decreasing repulsive and attractive forces, the UMAP reaches it`s aim to reveal the underlying properties of the data. The application utilizes the bioconductor package scater for performing UMAP \citep{McCarthy2017}.
 
-#### Testing for differential expression 
+#### Statistics
+After visualizing the biological tendency in the dataset, the next step is hypothesis testing. Several experimental designs can be tested against the null hypothesis $h_0$, which states that there is no significant difference between the sample types. Before proceeding with any statistical testing, it is important to observe the data using either a quantile-quantile norm plot (qq-norm plot) or a histogram. The quantile-quantile plot (qq-plot) serves a vital role in exploratory statistics by visualizing whether two datasets follow the same underlying distributions. In the case of statistical preparation for parametric tests, the first distribution is the dataset of interest, while the second dataset is the normal distribution. If the dataset follows an exact normal distribution, the values will align with the red line in the chart. However, values at the ends of the distribution may deviate from the normality line, indicating differentially expressed genes. These genes can be observed both in the histogram and the qq-norm plot. 
 
-In order to test for differential expression the package limma from R bioconductor was used. \citep{Phipson2016}.  The package uses a linear model approach to define a fold expression between sample groups. Before starting the analysis two matrices need to be computed. The design matrix identifies samples according to the sample type and defines the experimental design. In order to create the matrix automatically a simple algorithm is used within the programmed backend logic. The expression matrix contains intensities for each identified protein will be obtained at the end of the pipeline. A function call with the arguments design and expression matrix calculates the contrast matrix. The next step is creating a linear model between groups by log-ratios of their expression values. The general aim of UMAP is transforming the data to a toplogical representation of the initial dataset.  
+Parametric statistical tests rely on the assumption of normality in the data, which needs to be achieved before building a model. To achieve normality, it is recommended to try various combinations of transformation and normalization methods. By observing the results in the plots, one can determine which combination of data processing methods satisfies the conditions required for the tests.
+
+##### Differential expression 
+
+To test for differential expression, the analysis utilizes the "limma" package from R Bioconductor \citep{Phipson2016}. This package employs a linear model approach to determine the fold expression between sample groups. Before initiating the analysis, two matrices need to be computed. The design matrix identifies samples based on their sample type and defines the experimental design. An algorithm within the program's backend logic is utilized to automatically generate this matrix according to the user's selection in the interface. The expression matrix contains intensities for each identified protein and is obtained at the end of the pipeline. By calling a function with the design and expression matrices as arguments, the contrast matrix is calculated, enabling the user to decide which comparisons to consider and also perform tests on multiple factors.
+
+The subsequent step involves creating a linear model between groups using log-ratios of their expression values. In a two-way design, the expression of the gene $y$ can be explained as $Exp_{Y} = \beta_{0} + \beta_{1}X_{1} + \epsilon$, where $\beta_0$ represents the intercept, which can be interpreted as the mean expression of the gene. $\beta_1$ represents difference in mean of the treatment (or condition) on the discrete or continuos variable $X_{1}$, and $\epsilon$ acts as an error term. The interface allows for additive models with multiple factors, allowing the user to add factors according to various scenarios. For example, in a two-factor model, it would look like: $Exp_{Y} = \beta_{0} + \beta_{1}X_{1} + \beta_{2}X_{2} + \epsilon$. The principle remains the same for models with multiple factors. When visualizing the linear model, the x-axis would represent the gene for the sample types or other factors, whereas the y-axis would account for the expression value. By drawing a line through the cloud of data points the model is constructed by minimizing the quadratic distance to every data-point, called the least-square method or also ordinary least-square method. With the regression line the above mentioned equation can be constructed. 
+
+Next the statistical module of the program performs an empirical Bayes model utilizing the eBayes \citep{Smyth2004} function of the Limma package. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
