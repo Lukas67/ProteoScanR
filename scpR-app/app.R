@@ -143,14 +143,19 @@ ui <- fluidPage(
                            DT::dataTableOutput("protein_table")
                   ),
                   tabPanel("Gene set enrichment",
+                           br(),
                            fluidRow(width=12,
                                     column(width=4,
-                                           selectInput("p_value_correction_gsea", "select method for p-value correction", choices = c("none", "BH", "fdr", "BY", "holm"))),
+                                           textOutput("p_correct")),
                                     column(width = 4,
-                                           numericInput("p_value_cutoff_gsea", "choose p-value cutoff", value = 0.05, min = 0, step = 0.01)),
+                                           textOutput("p_cutoff")),
                                     column(width=4,
-                                           numericInput("fold_change_cutoff_gsea", "choose fold change cutoff", value = 0.05, min = 0, step = 0.01)),
-                           plotOutput("gsea"))
+                                           textOutput("fc_cutoff")),
+                                    br(),
+                                    br(),
+                                    br(),
+                                    br(),
+                           plotlyOutput("gsea"))
                   )
       )
     )
@@ -1738,18 +1743,18 @@ server <- function(input, output, session) {
     tt <- protein_table()
     
     # filter the data according to user selection
-    req(input$p_value_cutoff_gsea)
-    req(input$fold_change_cutoff_gsea)
-    p_cut <- input$p_value_cutoff_gsea
-    fc_cut <- input$fold_change_cutoff_gsea
+    req(input$p_value_cutoff)
+    req(input$fold_change_cutoff)
+    p_cut <- input$p_value_cutoff
+    fc_cut <- input$fold_change_cutoff
     
     mask <- tt$adj.P.Val < p_cut & 
       abs(tt$logFC) > fc_cut
     
     deGenes <- rownames(tt)[mask]
 
-    req(input$p_value_correction_gsea)
-    p_correct <- input$p_value_correction_gsea
+    req(input$p_value_correction)
+    p_correct <- input$p_value_correction
     
     ans.kegg <- enrichKEGG(
       deGenes,
@@ -1764,11 +1769,37 @@ server <- function(input, output, session) {
     )
   })
   
-  output$gsea<- renderPlot({
+  output$p_correct <- renderText({
+    req(input$p_value_correction)
+    paste(
+      "p-value correction method:",
+      input$p_value_correction
+    )
+  })
+  
+  
+  output$p_cutoff <- renderText({
+    req(input$p_value_cutoff)
+    paste(
+      "p-value cutoff:",
+      input$p_value_cutoff
+    )
+    
+  })
+  output$fc_cutoff <- renderText({
+    req(input$fold_change_cutoff)
+    paste(
+      "fold change cutoff:",
+      input$fold_change_cutoff
+    )
+  })
+  
+  output$gsea<- renderPlotly({
     req(result_kegg())
     ans.kegg <- result_kegg()
+    tab.kegg <- as.data.frame(ans.kegg)
     
-    dotplot(ans.kegg, showCategory=20) + ggtitle("KEGG")
+    plot_ly(data=tab.kegg, x=~GeneRatio, y=~Description, type = "scatter", color= ~p.adjust, size=~Count, text=~geneID)
   })
   
 }

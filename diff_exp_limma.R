@@ -323,7 +323,6 @@ ans.kegg <- enrichKEGG(
 
 tab.kegg <- as.data.frame(ans.kegg)
 tab.kegg<- subset(tab.kegg, Count>5)
-tab.kegg[1:5, 1:6]
 
 library(enrichplot)
 p1 <- graphics::barplot(ans.kegg, showCategory=10)
@@ -334,14 +333,7 @@ p2
 
 cowplot::plot_grid(p1, p2, ncol=2, labels=LETTERS[1:2])
 
-plot_ly(x=tab.kegg$Description, y=tab.kegg$Count, type = "bar")
-
-
-# plot_ly(x=dimred_umap$UMAP1,
-#         y=dimred_umap$UMAP2, 
-#         z=dimred_umap$UMAP3, 
-#         type="scatter3d", 
-#         mode="markers",
-#         color=meta_data_0$Batch) 
-
+library(plotly)
+p3 <- plot_ly(data=tab.kegg, x=~GeneRatio, y=~Description, type = "scatter", color= ~p.adjust, size=~Count, text=~geneID)
+p3
 
