@@ -55,7 +55,7 @@ evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data
 #   labs(y=paste("intensity of", selectedProtein))
 
 # log transform expression values
-evidence_data <- log10(evidence_data) 
+evidence_data <- log2(evidence_data) 
 
 protein_matrix <- as.matrix(evidence_data)
 protein_matrix <- sweep(protein_matrix, 2, colMedians(protein_matrix), FUN="-")
@@ -198,11 +198,18 @@ fviz_pca_ind(data.pca, col.ind = "cos2",
 
 library(sva)
 
+evidence_data <- data.frame(evidence_data)
 # batch effects obtained --> use combat to correct
 batch <- meta_data_0$Batch
+group <- meta_data_0$Group
 
+model <- model.matrix(~0 + group, data = evidence_data)
 
-combat_edata1 = ComBat(dat=evidence_data, batch=batch)
+qr(model)$rank < ncol(model)
+n.batch <- nlevels(as.factor(batch))
+ncol(model)
+
+combat_edata1 = ComBat(dat=evidence_data, batch=batch, mod = model)
 
 # or use limma
 y2 <- removeBatchEffect(evidence_data, batch)
@@ -221,7 +228,7 @@ design <- model.matrix(~0+factor(meta_data_0$Group))
 colnames(design) <- c("EC", "HC", "VP")
 
 # Fit the expression matrix to a linear model
-fit <- lmFit(evidence_data_de, design)
+fit <- lmFit(evidence_data, design)
 
 # EC vs HC
 cont_matrix_1 <- makeContrasts(ECvsHC = EC-HC,levels=design)
@@ -300,14 +307,12 @@ library("edgeR")
 
 
 # top table of significant genes is the starting point of the analysis
-tt <- top_genes_2
+tt <- top_genes_1
 
 mask <- tt$adj.P.Val < 1 &
   abs(tt$logFC) > 0.0005
 deGenes <- rownames(tt)[mask]
 head(deGenes)
-
-library(clusterProfiler)
 
 ans.kegg <- enrichKEGG(
   deGenes,
@@ -322,7 +327,13 @@ ans.kegg <- enrichKEGG(
 )
 
 tab.kegg <- as.data.frame(ans.kegg)
-tab.kegg<- subset(tab.kegg, Count>5)
+#tab.kegg<- subset(tab.kegg, Count>5)
+# 
+# tab.kegg$GeneRatio[1] <- "10/53"
+# tab.kegg$Count[1] <- 10
+
+tab.kegg$denominator <- as.numeric(gsub("^\\d+/(\\d+)$", "\\1", tab.kegg$GeneRatio))
+tab.kegg$decimal_gene_ratio <- tab.kegg$Count / tab.kegg$denominator
 
 library(enrichplot)
 p1 <- graphics::barplot(ans.kegg, showCategory=10)
@@ -334,6 +345,20 @@ p2
 cowplot::plot_grid(p1, p2, ncol=2, labels=LETTERS[1:2])
 
 library(plotly)
-p3 <- plot_ly(data=tab.kegg, x=~GeneRatio, y=~Description, type = "scatter", color= ~p.adjust, size=~Count, text=~geneID)
+p3 <- plot_ly(data=tab.kegg, 
+              x=~decimal_gene_ratio, 
+              y=~Description, 
+              type = "scatter", 
+              color= ~p.adjust, 
+              size=~decimal_gene_ratio, 
+              text=~GeneRatio,
+              hovertemplate= paste('%{y}', '<br>Gene ratio: %{text}<br><extra></extra>')) %>%
+  layout(xaxis=list(
+    title="Gene Ratio"
+    ))
+  
 p3
+
+
+
 

@@ -513,11 +513,34 @@ if (length(peptide_file) > 1) {
   sce <- getWithColData(scp, "proteins_imptd")
   
   batch <- colData(sce)$Raw.file
-  model <- model.matrix(~0 + SampleType, data = colData(sce))
+  model <- model.matrix(~SampleType, data = colData(sce))
+  
+  (qr(model)$rank < ncol(model))
   
   assay(sce) <- ComBat(dat = assay(sce),
-                       batch = batch)#,
-                       #mod = model)
+                       batch = batch,
+                       mod = model)
+
+
+  Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
+    out <- tryCatch(
+      {
+        i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                               batch = i_batch,
+                               mod = i_model)
+        print("batch corrected and optimized")
+      } ,
+      error = function(cond) {
+        i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                               batch = i_batch)
+        print("confounder detected! just batch corrected")
+      }
+    )
+    return(out)
+  }
+  
+  assay(sce) <- Combat_batchC(assay(sce), batch, model) 
+  
   
   
   scp <- addAssay(scp,
@@ -554,8 +577,9 @@ scp[["proteins_dim_red"]] <- runPCA(scp[["proteins_dim_red"]],
 
 plotReducedDim(scp[["proteins_dim_red"]],
                dimred = "PCA",
-               colour_by = "SampleType",
-               point_alpha = 1)
+               colour_by = "Channel",
+               point_alpha = 1,
+               )
 
 # UMAP
 scp[["proteins_dim_red"]] <- runUMAP(scp[["proteins_dim_red"]],

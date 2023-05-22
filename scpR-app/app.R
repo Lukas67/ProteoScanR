@@ -150,12 +150,11 @@ ui <- fluidPage(
                                     column(width = 4,
                                            textOutput("p_cutoff")),
                                     column(width=4,
-                                           textOutput("fc_cutoff")),
-                                    br(),
-                                    br(),
-                                    br(),
-                                    br(),
-                           plotlyOutput("gsea"))
+                                           textOutput("fc_cutoff"))
+                                    ),
+                           br(),
+                           materialSwitch("design_plot_gsea", label = "change Plot design"),
+                           plotlyOutput("gsea")
                   )
       )
     )
@@ -795,14 +794,33 @@ server <- function(input, output, session) {
           if (input$batch_c == "ComBat") {
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_imptd")
+              
               batch <- colData(sce)$Raw.file
               # can be used to aim batch correction for desired result
-              model <- model.matrix(~0 + SampleType, data = colData(sce))
+              model <- model.matrix(~SampleType, data = colData(sce))
               
-              assay(sce) <- ComBat(dat = assay(sce),
-                                   batch = batch)#,
-              #mod = model)
               
+              Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
+                i_exp_matrix <- tryCatch(
+                  {
+                    i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                                         batch = i_batch,
+                                         mod = i_model)
+                    errMsg("batch corrected and optimized")
+                    return(i_exp_matrix)
+                  },
+                  error = function(cond) {
+                    i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                                           batch = i_batch)
+                    errMsg("confounder detected! just batch corrected")
+                    return(i_exp_matrix)
+                  }
+                )
+
+              }
+              
+              assay(sce) <- Combat_batchC(assay(sce), batch, model) 
+
               scp_0 <- addAssay(scp_0,
                                 y = sce,
                                 name = "proteins_batchC")
@@ -1698,20 +1716,36 @@ server <- function(input, output, session) {
     FCcutoff <- input$fold_change_cutoff
     pCutoff <- input$p_value_cutoff
     
-    # define factor levels for significance
     toptable$Significance <- "not significant"
-    toptable$Significance[(abs(toptable$logFC) > FCcutoff)] <- "fold change"
-    toptable$Significance[(toptable$P.Value < pCutoff)] <- "p-value"
-    toptable$Significance[(toptable$P.Value < pCutoff) & (abs(toptable$logFC) > 
-                                                            FCcutoff)] <- "fold change & p-value"
-    toptable$Significance <- factor(toptable$Sig, levels = c("not significant", "fold change", 
-                                                             "p-value", "fold change & p-value"))
+    toptable$Significance[(toptable$logFC > FCcutoff)] <- "upregulated"
+    toptable$Significance[(toptable$logFC < -1*(FCcutoff))] <- "downregulated"
+    toptable$Significance[(toptable$adj.P.Val < pCutoff)] <- "p-value"
     
-    p <- ggplot(toptable, aes(x = logFC, y = -log10(P.Value), text=protein)) +
-      geom_point(aes(color = Significance), alpha = 1/2, shape = 19, size = 1.5, na.rm = TRUE) +
-      theme(legend.position = "top")
+    toptable$Significance[(toptable$adj.P.Val < pCutoff) & (toptable$logFC > FCcutoff)] <- "significantly upregulated"
+    
+    toptable$Significance[(toptable$adj.P.Val < pCutoff) & (toptable$logFC < -1*(FCcutoff))] <- "significantly downregulated"
+    
+    toptable$Significance <- factor(toptable$Sig, levels = c("not significant",
+                                                             "upregulated",
+                                                             "downregulated",
+                                                             "p-value", 
+                                                             "significantly upregulated",
+                                                             "significantly downregulated"
+    ))
+    
+    p <- ggplot(toptable, aes(x = logFC, y = -log10(adj.P.Val), text=protein)) +
+      geom_point(aes(color = Significance), alpha = 3/4, shape = 19, size = 1.5, na.rm = TRUE) +
+      theme_bw() +
+      theme(legend.position = "top") +
+      scale_color_manual(values = c("not significant" = "grey",
+                                    "upregulated" = "#44AA99",
+                                    "downregulated" = "#AA4499",
+                                    "p-value" = "#88CCEE", 
+                                    "significantly upregulated" = "green",
+                                    "significantly downregulated" = "red"))
     
     ggplotly(p, tooltip = "text")
+    
 
   })
   
@@ -1725,8 +1759,8 @@ server <- function(input, output, session) {
   # show significant proteins in the table
   output$protein_table <- DT::renderDataTable({
     req(protein_table())
-    protein_table() %>%
-      mutate_if(is.numeric, round, digits=5)
+    protein_table()# %>%
+#      mutate_if(is.numeric, round, digits=10)
   })
   
   # venn diagram for significant proteins
@@ -1763,7 +1797,7 @@ server <- function(input, output, session) {
       pvalueCutoff = p_cut,
       pAdjustMethod = p_correct,
       minGSSize = 10,
-      maxGSSize = 500,
+      maxGSSize = Inf,
       qvalueCutoff = 0.2,
       use_internal_data = FALSE
     )
@@ -1799,7 +1833,30 @@ server <- function(input, output, session) {
     ans.kegg <- result_kegg()
     tab.kegg <- as.data.frame(ans.kegg)
     
-    plot_ly(data=tab.kegg, x=~GeneRatio, y=~Description, type = "scatter", color= ~p.adjust, size=~Count, text=~geneID)
+    if (input$design_plot_gsea) {
+      
+      tab.kegg$denominator <- as.numeric(gsub("^\\d+/(\\d+)$", "\\1", tab.kegg$GeneRatio))
+      tab.kegg$decimal_gene_ratio <- tab.kegg$Count / tab.kegg$denominator
+      
+      plot_ly(data=tab.kegg,
+              x=~decimal_gene_ratio,
+              y=~Description,
+              type = "scatter",
+              color= ~p.adjust,
+              size=~decimal_gene_ratio,
+              text=~GeneRatio,
+              hovertemplate= paste('%{y}',
+                                   '<br>Gene ratio: %{text}<br>
+                                   <extra></extra>')
+              ) %>%
+        layout(xaxis=list(
+          title="Gene Ratio"
+        ))
+    } else {
+      graphics::barplot(ans.kegg, showCategory=10)
+    }
+
+    
   })
   
 }
