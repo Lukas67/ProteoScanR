@@ -17,6 +17,7 @@ library("stats")
 library("impute")
 library("sva")
 library("plotly")
+library("clusterProfiler")
 
 reactlog::reactlog_enable()
 
@@ -72,8 +73,8 @@ ui <- fluidPage(
       #create tabs
       tabsetPanel(type = "tabs",
                   tabPanel("Overview",
-                           plotOutput("overview_plot"),
-                           verbatimTextOutput("debug")),
+                           verbatimTextOutput("debug"),
+                           plotOutput("overview_plot")),
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
                   tabPanel("Reporter Ion Intensity", 
                            selectInput("color_variable_ri", "select variable to indicate", ""),
@@ -211,6 +212,7 @@ boxcox_1.default <-
   }
 
 
+
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=30*1024^2)
@@ -218,10 +220,34 @@ server <- function(input, output, session) {
   session$onSessionEnded(function() {
     stopApp()
   })
+
+  Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
+    i_exp_matrix <- tryCatch(
+      {
+        i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                               batch = i_batch,
+                               mod = i_model)
+        return(i_exp_matrix)
+      },
+      error = function(cond) {
+        i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                               batch = i_batch)
+        errMsg("confounder detected! Batch and eventually your desired effect corrected. reconsider your experimental design")
+        return(i_exp_matrix)
+      }
+    )
+  }
   
+  
+    
   #basic error handling
   errMsg <- reactiveVal()
-  output$debug <- renderPrint(errMsg())
+  output$debug <- renderPrint({
+    req(errMsg())
+    if (!is.null(errMsg())) {
+      errMsg()
+    }
+    })
   
   # Help Button and content of the help menu
   observeEvent(input$help,{
@@ -308,6 +334,7 @@ server <- function(input, output, session) {
   # result of analysis pipleline
   scp <- eventReactive(input$update_button, {
     tryCatch({
+      errMsg(NULL)
       withProgress(message= "running analysis", value=0, {
         req(input$evidence_file)
         req(meta_data)
@@ -794,30 +821,8 @@ server <- function(input, output, session) {
           if (input$batch_c == "ComBat") {
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_imptd")
-              
               batch <- colData(sce)$Raw.file
-              # can be used to aim batch correction for desired result
               model <- model.matrix(~SampleType, data = colData(sce))
-              
-              
-              Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
-                i_exp_matrix <- tryCatch(
-                  {
-                    i_exp_matrix <- ComBat(dat = i_exp_matrix,
-                                         batch = i_batch,
-                                         mod = i_model)
-                    errMsg("batch corrected and optimized")
-                    return(i_exp_matrix)
-                  },
-                  error = function(cond) {
-                    i_exp_matrix <- ComBat(dat = i_exp_matrix,
-                                           batch = i_batch)
-                    errMsg("confounder detected! just batch corrected")
-                    return(i_exp_matrix)
-                  }
-                )
-
-              }
               
               assay(sce) <- Combat_batchC(assay(sce), batch, model) 
 
@@ -840,7 +845,9 @@ server <- function(input, output, session) {
                                             to = "proteins_dim_red") 
             } else {
               batch <- meta_data_0$Batch
-              evidence_data <- ComBat(dat=evidence_data, batch=batch)
+              model <- model.matrix(~Group, data=meta_data_0)
+              
+              evidence_data <- Combat_batchC(evidence_data, batch, model)
             }
           } else if (input$batch_c == "None") {
             if (input$file_level == FALSE) {

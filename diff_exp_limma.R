@@ -16,12 +16,12 @@ evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 
 # handle exclusion dependencies
-selectedSampleType_to_exclude <- c("Pool")
-      
-meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
+# selectedSampleType_to_exclude <- c("Pool")
+#       
+# meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
+# 
+# evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
 
-
-evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
 # plot basic counts
 #barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
 
@@ -125,34 +125,34 @@ evidence_data <- data.frame(protein_matrix)
 
 
 
-library('corrr')
-library("ggcorrplot")
-library("FactoMineR")
-library("factoextra")
-
-corr_matrix <- cor(evidence_data)
-ggcorrplot(corr_matrix)
-
-# in this case a correlation within the batches can be clearly observed 
-
-# apply pca on covariance matrix
-data.pca <- princomp(corr_matrix)
-summary(data.pca)
-# scree plot for explained variance by principle component
-# in this case the first compononents explain the majority of variance 
-fviz_eig(data.pca)
-
-# in the biplot the batch effect can be further evaluated.
-# samples within batches show the same vectors
-fviz_pca_var(data.pca, col.var = "black")
-
-
-
-# get results of pca
-fviz_pca_ind(data.pca, col.ind = "cos2", 
-             gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
-             repel = TRUE # Avoid text overlapping (slow if many points)
-)
+# library('corrr')
+# library("ggcorrplot")
+# library("FactoMineR")
+# library("factoextra")
+# 
+# corr_matrix <- cor(evidence_data)
+# ggcorrplot(corr_matrix)
+# 
+# # in this case a correlation within the batches can be clearly observed 
+# 
+# # apply pca on covariance matrix
+# data.pca <- princomp(corr_matrix)
+# summary(data.pca)
+# # scree plot for explained variance by principle component
+# # in this case the first compononents explain the majority of variance 
+# fviz_eig(data.pca)
+# 
+# # in the biplot the batch effect can be further evaluated.
+# # samples within batches show the same vectors
+# fviz_pca_var(data.pca, col.var = "black")
+# 
+# 
+# 
+# # get results of pca
+# fviz_pca_ind(data.pca, col.ind = "cos2", 
+#              gradient.cols = c("#00AFBB", "#E7B800", "#FC4E07"),
+#              repel = TRUE # Avoid text overlapping (slow if many points)
+# )
 
 
 # library("scater")
@@ -203,29 +203,46 @@ evidence_data <- data.frame(evidence_data)
 batch <- meta_data_0$Batch
 group <- meta_data_0$Group
 
-model <- model.matrix(~0 + group, data = evidence_data)
+model <- model.matrix(~0+group, data = evidence_data)
 
-qr(model)$rank < ncol(model)
-n.batch <- nlevels(as.factor(batch))
-ncol(model)
+Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
+  i_exp_matrix <- tryCatch(
+    {
+      i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                             batch = i_batch,
+                             mod = i_model)
+      return(i_exp_matrix)
+    },
+    error = function(cond) {
+      i_exp_matrix <- ComBat(dat = i_exp_matrix,
+                             batch = i_batch)
+      print(paste("confounder detected! just batch corrected. reconsider your experimental design", cond))
+      return(i_exp_matrix)
+    }
+  )
+}
 
-combat_edata1 = ComBat(dat=evidence_data, batch=batch, mod = model)
 
-# or use limma
-y2 <- removeBatchEffect(evidence_data, batch)
 
-# compare corrected batch effects
-boxplot(as.data.frame(evidence_data),main="Original")
-boxplot(as.data.frame(y2),main="Batch corrected with Limma")
-boxplot(as.data.frame(combat_edata1),main="Batch corrected with Combat")
+
+
+combat_edata = Combat_batchC(evidence_data, batch, model)
+
+# # or use limma
+# y2 <- removeBatchEffect(evidence_data, batch)
+# 
+# # compare corrected batch effects
+# boxplot(as.data.frame(evidence_data),main="Original")
+# boxplot(as.data.frame(y2),main="Batch corrected with Limma")
+# boxplot(as.data.frame(combat_edata1),main="Batch corrected with Combat")
 
 # Perform differential expression analysis between each of the two groups
-evidence_data_de <- combat_edata1
+evidence_data <- combat_edata
 
 
 # create design matrix consisting of group variables
 design <- model.matrix(~0+factor(meta_data_0$Group))
-colnames(design) <- c("EC", "HC", "VP")
+colnames(design) <- c("EC", "HC", "Pool", "VP")
 
 # Fit the expression matrix to a linear model
 fit <- lmFit(evidence_data, design)
