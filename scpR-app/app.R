@@ -18,6 +18,8 @@ library("impute")
 library("sva")
 library("plotly")
 library("clusterProfiler")
+library("infotheo")
+
 
 reactlog::reactlog_enable()
 
@@ -63,7 +65,7 @@ ui <- fluidPage(
       switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
       conditionalPanel(condition = "input.opts_multiple_batches", 
                        selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with mean", "replace with median")),
-                       selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("ComBat", "None"))
+                       selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("None", "ComBat"))
                        )
       
     ),
@@ -76,6 +78,10 @@ ui <- fluidPage(
                            verbatimTextOutput("debug"),
                            plotOutput("overview_plot")),
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
+                  tabPanel("Normalization validation",
+                           selectInput("selectedSampleType_normval", "Select SampleType to validate", ""),
+                           plotOutput("norm_val_plot")
+                           ),
                   tabPanel("Reporter Ion Intensity", 
                            selectInput("color_variable_ri", "select variable to indicate", ""),
                            plotOutput("RI_intensity")),
@@ -489,6 +495,7 @@ server <- function(input, output, session) {
           rownames(evidence_data) <- evidence_data$ID
           evidence_data <- evidence_data[, !(names(evidence_data) %in% c("ID"))]
           evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
+          evidence_data[evidence_data == 0] <- NA
         } 
         
 
@@ -497,6 +504,7 @@ server <- function(input, output, session) {
         transform_base_bc <- "None"
         
         if (input$transform_base == "log2") {
+          print("log2 transformation")
           if (input$file_level == FALSE) {
             scp_0 <- logTransform(scp_0,
                                   base = 2,
@@ -507,6 +515,7 @@ server <- function(input, output, session) {
           }
         }
         else if (input$transform_base == "log10") {
+          print("log10 transformation")
           if (input$file_level == FALSE) {
             scp_0 <- logTransform(scp_0,
                                   base = 10,
@@ -517,6 +526,7 @@ server <- function(input, output, session) {
           }
         }
         else if (input$transform_base == "sqrt") {
+          print("sqrt transformation")
           if (input$file_level == FALSE) {
             scp_0 <- sweep(scp_0, i="proteins",
                            MARGIN = 2,
@@ -528,6 +538,7 @@ server <- function(input, output, session) {
           }
         }
         else if (input$transform_base == "quadratic") {
+          print("quadratic transformation")
           if (input$file_level == FALSE) {
             scp_0 <- sweep(scp_0, i="proteins",
                            MARGIN = 2,
@@ -539,12 +550,13 @@ server <- function(input, output, session) {
           }
         }
         else if (input$transform_base == "BoxCox") {
+          print("boxcox transformation")
           if (input$file_level == FALSE) {
             protein_matrix <- assay(scp_0[["proteins"]])
             b <- boxcox_1(stats::lm(protein_matrix ~ 1))
             # Exact lambda
             lambda <- b$x[which.max(b$y)]
-            print(lambda)
+            print(paste("Lambda:", lambda))
             
             
             if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
@@ -629,6 +641,7 @@ server <- function(input, output, session) {
           }
         }
         else if (input$transform_base == "None") {
+          print("no transformation applied")
           if (input$file_level == FALSE) {
             sce <- getWithColData(scp_0, "proteins")
             
@@ -646,7 +659,8 @@ server <- function(input, output, session) {
         
         incProgress(15/17, detail=paste("normalizing proteins"))
         req(input$norm_method)
-        if (input$norm_method == "SCoPE2" && input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10") {
+        if (input$norm_method == "SCoPE2" && (input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10")) {
+          print("SCoPE2 normalization on log transformed values")
           if (input$file_level == FALSE) {
             # center cols with median
             scp_0 <- sweep(scp_0, i = "proteins_transf",
@@ -673,7 +687,8 @@ server <- function(input, output, session) {
             evidence_data <- data.frame(protein_matrix)
           }
           
-        } else if (input$norm_method == "SCoPE2" && input$transform_base != "log2" | input$transform_base != "log10" | transform_base_bc != "log10") {
+        } else if (input$norm_method == "SCoPE2" && (input$transform_base != "log2" | input$transform_base != "log10" | transform_base_bc != "log10")) {
+          print("SCoPE2 normalization")
           if (input$file_level == FALSE) {
             # center cols with median
             scp_0 <- sweep(scp_0, i = "proteins_transf",
@@ -701,6 +716,7 @@ server <- function(input, output, session) {
           }
           
         } else if (input$norm_method == "CONSTANd") {
+          print("CONSTANd normalization")
           if (input$file_level == FALSE) {
             # apply matrix raking --> row means and col means equal Nrows and Ncols  
             protein_matrix <- assay(scp_0[["proteins_transf"]])
@@ -721,6 +737,7 @@ server <- function(input, output, session) {
             evidence_data <- CONSTANd(evidence_data)
           }
         } else if (input$norm_method == "None") {
+          print("no normalization applied")
           if (input$file_level == FALSE) {
             sce <- getWithColData(scp_0, "proteins_transf")
             
@@ -745,6 +762,7 @@ server <- function(input, output, session) {
         if (length(peptide_file) > 1) {
           incProgress(16/17, detail=paste("running missing value imputation"))
           if (input$missing_v == "KNN") {
+            print("KNN missing value imputation")
             if (input$file_level == FALSE) {
               scp_0 <- impute(scp_0,
                               i = "proteins_norm",
@@ -754,7 +772,6 @@ server <- function(input, output, session) {
                               maxp = Inf,
                               rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
             } else {
-              evidence_data[evidence_data == 0] <- NA
               protein_matrix <- as.matrix(evidence_data)
               protein_matrix <- impute.knn(protein_matrix,
                                            k=5,
@@ -765,6 +782,7 @@ server <- function(input, output, session) {
               evidence_data <- data.frame(protein_matrix$data)
             }
           } else if (input$missing_v == "drop rows") {
+            print("dropping rows with missing values")
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_norm")
               
@@ -778,11 +796,11 @@ server <- function(input, output, session) {
               
               scp_0 <- filterNA(scp_0, pNA = 0, "proteins_imptd")
             } else {
-              evidence_data[evidence_data == 0] <- NA
               evidence_data <- na.omit(evidence_data)
             }
             
           } else if (input$missing_v == "replace with mean") {
+            print("replacing missing values with mean")
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_norm")
               
@@ -800,6 +818,7 @@ server <- function(input, output, session) {
             }
             
           } else if (input$missing_v == "replace with median") {
+            print("replacing missing values with median")
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_norm")
               
@@ -819,6 +838,7 @@ server <- function(input, output, session) {
           
           incProgress(16/17, detail=paste("running batch correction"))
           if (input$batch_c == "ComBat") {
+            print("running ComBat")
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_imptd")
               batch <- colData(sce)$Raw.file
@@ -850,6 +870,7 @@ server <- function(input, output, session) {
               evidence_data <- Combat_batchC(evidence_data, batch, model)
             }
           } else if (input$batch_c == "None") {
+            print("no batch correction applied")
             if (input$file_level == FALSE) {
               sce <- getWithColData(scp_0, "proteins_imptd")
               
@@ -1504,6 +1525,54 @@ server <- function(input, output, session) {
   }
   
   
+  observe({
+    req(sample_types())
+    updateSelectInput(session, "selectedSampleType_normval", choices = sample_types())
+  })
+  
+  norm_method_val <- eventReactive(input$update_button,{
+    req(input$norm_method)
+    return(paste(input$norm_method))
+  })
+  
+  transform_base_val <- eventReactive(input$update_button,{
+    req(input$transform_base)
+    return(paste(input$transform_base))
+  })
+  
+  
+  output$norm_val_plot <- renderPlot({
+    if (input$file_level == FALSE) {
+      req(scp())
+      scp_0 <- scp()
+      # select data according to the procedure undertaken
+      data_final <- assay(scp_0[["proteins_dim_red"]])
+      data_raw <- assay(scp_0[["proteins"]])
+      
+      req(input$selectedSampleType_normval)
+      req(norm_method_val())
+      req(transform_base_val())
+      
+      # select data according to groups to observe mutual information within
+      data_final <- data_final[, which(scp_0$SampleType == input$selectedSampleType_normval)]
+      data_raw <- data_raw[, which(scp_0$SampleType == input$selectedSampleType_normval)]
+      
+      # discretize by equal frequencies
+      data_final <- discretize(data_final)
+      data_raw <- discretize(data_raw)
+      
+      # mutual information is returned in nats
+      mi_final <- mutinformation(data_final)
+      mi_raw <- mutinformation(data_raw)
+      
+      gain <- stack(mi_final-mi_raw)$value
+      boxplot(gain, main=paste("Change in mutual information after transformation:", 
+                               transform_base_val(), 
+                               "and norm_method:", norm_method_val()), 
+              xlab=paste(input$selectedSampleType_normval), 
+              ylab="Change in natural unit of information")
+    }
+  })
     
 
   ### Statistic Module ###

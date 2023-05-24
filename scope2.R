@@ -515,13 +515,6 @@ if (length(peptide_file) > 1) {
   batch <- colData(sce)$Raw.file
   model <- model.matrix(~SampleType, data = colData(sce))
   
-  (qr(model)$rank < ncol(model))
-  
-  assay(sce) <- ComBat(dat = assay(sce),
-                       batch = batch,
-                       mod = model)
-
-
   Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
     out <- tryCatch(
       {
@@ -536,7 +529,7 @@ if (length(peptide_file) > 1) {
         print("confounder detected! just batch corrected")
       }
     )
-    return(out)
+    return(i_exp_matrix)
   }
   
   assay(sce) <- Combat_batchC(assay(sce), batch, model) 
@@ -845,6 +838,27 @@ plot_ly(x=dimred$PC1,
         mode="markers",
         color=scp$Raw.file)
 
-selection <- "Channel"
 
-scp_0[["proteins_dim_red"]][[selection]]
+
+## validate normalization
+
+# select data according to the procedure undertaken
+data_final <- assay(scp[["proteins_dim_red"]])
+data_raw <- assay(scp[["proteins"]])
+
+# select data according to groups to observe mutual information within
+data_final <- data_final[, which(scp$SampleType == "PreOp")]
+data_raw <- data_raw[, which(scp$SampleType == "PreOp")]
+            
+# discretize by equal frequencies
+data_final <- discretize(data_final)
+data_raw <- discretize(data_raw)
+
+library("infotheo")
+
+# mutual information is returned in nats
+mi_final <- mutinformation(data_final)
+mi_raw <- mutinformation(data_raw)
+
+gain <- mi_final-mi_raw
+boxplot(stack(gain)$value)

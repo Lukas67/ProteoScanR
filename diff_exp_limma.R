@@ -16,11 +16,11 @@ evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 
 # handle exclusion dependencies
-# selectedSampleType_to_exclude <- c("Pool")
-#       
-# meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
-# 
-# evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
+selectedSampleType_to_exclude <- c("Pool")
+
+meta_data_0 <- meta_data_0[!(meta_data_0$Group %in%  selectedSampleType_to_exclude), ]
+
+evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
 
 # plot basic counts
 #barplot(log10(dim(evidence_data)[1]), main = "log Count of rows")
@@ -56,12 +56,83 @@ evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 # log transform expression values
 evidence_data <- log2(evidence_data) 
+evidence_data_transf <- evidence_data
+
 
 protein_matrix <- as.matrix(evidence_data)
 protein_matrix <- sweep(protein_matrix, 2, colMedians(protein_matrix), FUN="-")
 # #normalize rowwise
 protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="-")
 evidence_data <- data.frame(protein_matrix)
+
+
+# validate the normalization by entropy estimation with k-nearest neighbor
+library("rmi")
+
+
+
+# split the data according to the column for selection of group
+group_select <- "HC"
+
+evidence_data_group_transf <- evidence_data_transf[ , which(meta_data_0$Group == group_select)]
+evidence_data_group_transf <- data.frame(rowMeans(evidence_data_group_transf))
+colnames(evidence_data_group_transf) <- paste(group_select, "_raw")
+
+
+evidence_data_group_norm <- evidence_data[ , which(meta_data_0$Group == group_select)]
+evidence_data_group_norm <- data.frame(rowMeans(evidence_data_group_norm))
+colnames(evidence_data_group_norm) <- paste(group_select, "_norm")
+
+grp_comp_df <- cbind(evidence_data_group_transf, evidence_data_group_norm)
+
+
+data <- as.matrix(grp_comp_df)
+splits = c(1,1)
+
+entropy <- lnn_mi(data, splits)
+
+
+# compare mutual info between group 
+group_select2 <- "EC"
+
+evidence_data_grp1 <- evidence_data[ , which(meta_data_0$Group == group_select)]
+evidence_data_grp1 <- data.frame(rowMeans(evidence_data_grp1))
+
+evidence_data_grp2 <- evidence_data[ , which(meta_data_0$Group == group_select2)]
+evidence_data_grp2 <- data.frame(rowMeans(evidence_data_grp2))
+
+grp_comp_df <- cbind(evidence_data_grp1, evidence_data_grp2)
+
+
+data <- as.matrix(grp_comp_df)
+splits = c(1,1)
+
+entropy <- lnn_mi(data, splits)
+
+
+# compare mutual info between batches 
+batch_select1 <- "Batch_1"
+batch_select2 <- "Batch_2"
+batch_select3 <- "Batch_3"
+
+evidence_data_btch1 <- evidence_data[ , which(meta_data_0$Batch == batch_select1)]
+evidence_data_btch1 <- data.frame(rowMeans(evidence_data_btch1))
+
+evidence_data_btch2 <- evidence_data[ , which(meta_data_0$Batch == batch_select2)]
+evidence_data_btch2 <- data.frame(rowMeans(evidence_data_btch2))
+
+evidence_data_btch3 <- evidence_data[ , which(meta_data_0$Batch == batch_select3)]
+evidence_data_btch3 <- data.frame(rowMeans(evidence_data_btch3))
+
+
+btch_comp_df <- cbind(evidence_data_btch1, evidence_data_btch2, evidence_data_btch3)
+
+
+data <- as.matrix(btch_comp_df)
+splits = c(1,1)
+
+entropy <- lnn_mi(data, splits)
+
 
 
 # evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
@@ -203,7 +274,7 @@ evidence_data <- data.frame(evidence_data)
 batch <- meta_data_0$Batch
 group <- meta_data_0$Group
 
-model <- model.matrix(~0+group, data = evidence_data)
+model <- model.matrix(~group, data = evidence_data)
 
 Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
   i_exp_matrix <- tryCatch(
@@ -222,14 +293,14 @@ Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
   )
 }
 
-
+qr(model)$rank < ncol(model)
 
 
 
 combat_edata = Combat_batchC(evidence_data, batch, model)
 
 # # or use limma
-# y2 <- removeBatchEffect(evidence_data, batch)
+y2 <- removeBatchEffect(evidence_data, batch)
 # 
 # # compare corrected batch effects
 # boxplot(as.data.frame(evidence_data),main="Original")
@@ -241,11 +312,13 @@ evidence_data <- combat_edata
 
 
 # create design matrix consisting of group variables
-design <- model.matrix(~0+factor(meta_data_0$Group))
-colnames(design) <- c("EC", "HC", "Pool", "VP")
+design <- model.matrix(~0+factor(meta_data_0$Group) + factor(meta_data_0$Batch))
+colnames(design) <- c("EC", "HC", "Pool", "VP", "Batch_2", "Batch_3")
 
 # Fit the expression matrix to a linear model
 fit <- lmFit(evidence_data, design)
+bayes_fit <- eBayes(fit)
+
 
 # EC vs HC
 cont_matrix_1 <- makeContrasts(ECvsHC = EC-HC,levels=design)
