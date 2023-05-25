@@ -756,6 +756,7 @@ server <- function(input, output, session) {
             assay(scp_0[["proteins_norm"]]) <- protein_matrix$normalized_data
           } else {
             evidence_data <- CONSTANd(evidence_data)
+            evidence_data <- evidence_data$normalized_data
           }
         } else if (input$norm_method == "None") {
           print("no normalization applied")
