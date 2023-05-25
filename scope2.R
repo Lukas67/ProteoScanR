@@ -841,6 +841,7 @@ plot_ly(x=dimred$PC1,
 
 
 ## validate normalization
+library("infotheo")
 
 # select data according to the procedure undertaken
 data_final <- assay(scp[["proteins_dim_red"]])
@@ -854,7 +855,6 @@ data_raw <- data_raw[, which(scp$SampleType == "PreOp")]
 data_final <- discretize(data_final)
 data_raw <- discretize(data_raw)
 
-library("infotheo")
 
 # mutual information is returned in nats
 mi_final <- mutinformation(data_final)
@@ -862,3 +862,88 @@ mi_raw <- mutinformation(data_raw)
 
 gain <- mi_final-mi_raw
 boxplot(stack(gain)$value)
+
+mi_final_stack <- data.frame(stack(mi_final))
+mi_raw_stack <- data.frame(stack(mi_raw))
+
+mi_total <- cbind(mi_final_stack$value, mi_raw_stack$value)
+colnames(mi_total) <- c("MI_final", "MI_raw")
+
+to_plot <- melt(mi_total)
+
+ggplot(to_plot, aes(x=Var2, y=value)) +
+  geom_boxplot(aes(fill=Var2)) +
+  ggtitle(paste("Change in mutual information after transformation:", 
+                "transform_base_val()", 
+                "and norm_method:", "norm_method_val()")) +
+  xlab(paste("input$selectedSampleType_normval")) +
+  ylab("Change in natural unit of information") + 
+  guides(fill=guide_legend(title=""))
+
+
+# inter group comparision of information content before and after the processes 
+
+data_final <- assay(scp[["proteins_dim_red"]])
+data_raw <- assay(scp[["proteins"]])
+
+user_choice <- "PreOP-S_24h"
+# split user choice of comp back to sample types
+user_choice_vector <- strsplit(user_choice, split = "-")
+# and assign them to a variable
+choice_A <- user_choice_vector[[1]][1]
+choice_B <- user_choice_vector[[1]][2]
+
+
+data_final_group1 <- discretize(data_final[, which(scp$SampleType == choice_A)])
+data_raw_group1 <- discretize(data_raw[, which(scp$SampleType == choice_A)])
+
+data_final_group2 <- discretize(data_final[, which(scp$SampleType == choice_B)])
+data_raw_group2 <- discretize(data_raw[, which(scp$SampleType == choice_B)])
+
+colnames(data_final_group1) <- paste( colnames(data_final_group1), "grp1")
+colnames(data_final_group2) <- paste( colnames(data_final_group2), "grp2")
+
+colnames(data_raw_group1) <- paste( colnames(data_raw_group1), "grp1")
+colnames(data_raw_group2) <- paste( colnames(data_raw_group2), "grp2")
+
+data_final <- cbind(data_final_group1, data_final_group2)
+data_raw <- cbind(data_raw_group1, data_raw_group2)
+
+mi_final <- mutinformation(data_final)
+mi_raw <- mutinformation(data_raw)
+
+
+extr_val_above_diag <- function(mat) {
+  vec <- c()
+  for(row in 1:nrow(mat))
+  {
+    
+    # looping over columns
+    for(col in 1:ncol(mat))
+    {
+      # if column number is greater than row
+      if(col > row)
+      {
+        # printing the element of the matrix
+        vec <- append(vec, mat[row,col])
+      }
+    }
+  }
+  return(vec)
+}
+
+mi_final <- extr_val_above_diag(mi_final)
+mi_raw <- extr_val_above_diag(mi_raw)
+
+mi_total <- data.frame(mi_final=mi_final, mi_raw=mi_raw)
+
+to_plot <- melt(mi_total)
+
+ggplot(to_plot, aes(x=variable, y=value)) +
+  geom_boxplot(aes(fill=variable)) +
+  ggtitle(paste("Change in mutual information after transformation:", 
+                "transform_base_val()", 
+                "and norm_method:", "norm_method_val()")) +
+  xlab(paste("Comparison between sample types")) +
+  ylab("Change in natural unit of information") + 
+  guides(fill=guide_legend(title=""))

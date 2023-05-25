@@ -80,7 +80,9 @@ ui <- fluidPage(
                   tabPanel("Summary Barplot", plotOutput("summary_bar")),
                   tabPanel("Normalization validation",
                            selectInput("selectedSampleType_normval", "Select SampleType to validate", ""),
-                           plotOutput("norm_val_plot")
+                           plotOutput("norm_val_plot_intra_group"),
+                           selectInput("selectedComp_normval", "Choose comparison for observation", ""),
+                           plotOutput("norm_val_plot_inter_group")
                            ),
                   tabPanel("Reporter Ion Intensity", 
                            selectInput("color_variable_ri", "select variable to indicate", ""),
@@ -337,18 +339,39 @@ server <- function(input, output, session) {
     return(meta_data_0)
   })
   
+  
+  # read in expression set seperately for fetching raw data
+  exp_set_raw <- eventReactive(input$update_button, {
+    if (input$file_level == TRUE) {
+      req(input$evidence_file)
+      req(meta_data())
+      
+      meta_data_0 <- meta_data()
+      evidence_data <- read.delim(input$evidence_file$datapath)
+      
+      #handle ID column
+      rownames(evidence_data) <- evidence_data$ID
+      evidence_data <- evidence_data[, !(names(evidence_data) %in% c("ID"))]
+      
+      #handle columns to exclude
+      evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
+      evidence_data[evidence_data == 0] <- NA
+      return(evidence_data)
+    }
+  })
+  
   # result of analysis pipleline
   scp <- eventReactive(input$update_button, {
     tryCatch({
       errMsg(NULL)
       withProgress(message= "running analysis", value=0, {
-        req(input$evidence_file)
-        req(meta_data)
         
-        evidence_data <- read.delim(input$evidence_file$datapath)
+        req(meta_data)
         meta_data_0 <- meta_data()
         
         if (input$file_level == FALSE) {
+          req(input$evidence_file)
+          evidence_data <- read.delim(input$evidence_file$datapath)
           
           incProgress(1/17, detail = paste("read Data"))
           scp_0 <- readSCP(featureData = evidence_data,
@@ -492,10 +515,8 @@ server <- function(input, output, session) {
           
           
         } else {
-          rownames(evidence_data) <- evidence_data$ID
-          evidence_data <- evidence_data[, !(names(evidence_data) %in% c("ID"))]
-          evidence_data <- evidence_data[ , which(meta_data_0$ID == colnames(evidence_data))]
-          evidence_data[evidence_data == 0] <- NA
+          req(exp_set_raw())
+          evidence_data <- exp_set_raw()
         } 
         
 
@@ -985,9 +1006,8 @@ server <- function(input, output, session) {
   })
   
   
-  
   # reactive element for the comp list --> update if the scp object changes
-  comp_list <- reactive({
+  comp_list <- eventReactive(input$update_button, {
     if (input$file_level == FALSE) {
       req(scp())
       scp_0 <- scp()
@@ -1541,40 +1561,167 @@ server <- function(input, output, session) {
   })
   
   
-  output$norm_val_plot <- renderPlot({
+  ## Validation of the procedures
+  output$norm_val_plot_intra_group <- renderPlot({
+    
+    req(scp())
+    scp_0 <- scp()
+  
     if (input$file_level == FALSE) {
-      req(scp())
-      scp_0 <- scp()
       # select data according to the procedure undertaken
       data_final <- assay(scp_0[["proteins_dim_red"]])
       data_raw <- assay(scp_0[["proteins"]])
-      
+
+      # select data according to groups to observe mutual information within
+      data_final <- data_final[, which(scp_0$SampleType == input$selectedSampleType_normval)]
+      data_raw <- data_raw[, which(scp_0$SampleType == input$selectedSampleType_normval)]
+            
       req(input$selectedSampleType_normval)
       req(norm_method_val())
       req(transform_base_val())
       
+    } else {
+      data_final <- scp_0
+      
+      req(exp_set_raw())
+      data_raw <- exp_set_raw()
+      
+      req(meta_data())
+      meta_data_0 <- meta_data()
+      
       # select data according to groups to observe mutual information within
-      data_final <- data_final[, which(scp_0$SampleType == input$selectedSampleType_normval)]
-      data_raw <- data_raw[, which(scp_0$SampleType == input$selectedSampleType_normval)]
+      data_final <- data_final[, which(meta_data_0$Group == input$selectedSampleType_normval)]
+      data_raw <- data_raw[, which(meta_data_0$Group == input$selectedSampleType_normval)]
       
-      # discretize by equal frequencies
-      data_final <- discretize(data_final)
-      data_raw <- discretize(data_raw)
-      
-      # mutual information is returned in nats
-      mi_final <- mutinformation(data_final)
-      mi_raw <- mutinformation(data_raw)
-      
-      gain <- stack(mi_final-mi_raw)$value
-      boxplot(gain, main=paste("Change in mutual information after transformation:", 
-                               transform_base_val(), 
-                               "and norm_method:", norm_method_val()), 
-              xlab=paste(input$selectedSampleType_normval), 
-              ylab="Change in natural unit of information")
     }
-  })
     
 
+    
+    # discretize by equal frequencies
+    data_final <- discretize(data_final)
+    data_raw <- discretize(data_raw)
+    
+    # mutual information is returned in nats
+    mi_final <- mutinformation(data_final)
+    mi_raw <- mutinformation(data_raw)
+    
+    mi_final_stack <- data.frame(stack(mi_final))
+    mi_raw_stack <- data.frame(stack(mi_raw))
+    
+    mi_total <- cbind(mi_final_stack$value, mi_raw_stack$value)
+    colnames(mi_total) <- c("MI_final", "MI_raw")
+    
+    to_plot <- melt(mi_total)
+    
+    ggplot(to_plot, aes(x=Var2, y=value)) +
+      geom_boxplot(aes(fill=Var2)) +
+      ggtitle(paste("Change in mutual information after transformation:", 
+                    transform_base_val(), 
+                    "and norm_method:", norm_method_val())) +
+      xlab(paste(input$selectedSampleType_normval)) +
+      ylab("natural unit of information (nat)")+ 
+      guides(fill=guide_legend(title=""))
+  })
+    
+  
+  observe({
+    updateSelectInput(session, "selectedComp_normval", choices = comp_list())
+  })
+  
+  
+  output$norm_val_plot_inter_group <- renderPlot({
+    
+    req(scp())
+    scp_0 <- scp()
+    
+    req(input$selectedComp_normval)
+    user_choice <- input$selectedComp_normval
+    
+    # split user choice of comp back to sample types
+    user_choice_vector <- strsplit(user_choice, split = "-")
+    # and assign them to a variable
+    choice_A <- user_choice_vector[[1]][1]
+    choice_B <- user_choice_vector[[1]][2]
+    
+    if (input$file_level == FALSE) {
+      
+      # select data according to the procedure undertaken
+      data_final <- assay(scp_0[["proteins_dim_red"]])
+      data_raw <- assay(scp_0[["proteins"]])
+
+      # select data according to groups to observe mutual information within
+      data_final_group1 <- discretize(data_final[, which(scp_0$SampleType == choice_A)])
+      data_raw_group1 <- discretize(data_raw[, which(scp_0$SampleType == choice_A)])
+      
+      data_final_group2 <- discretize(data_final[, which(scp_0$SampleType == choice_B)])
+      data_raw_group2 <- discretize(data_raw[, which(scp_0$SampleType == choice_B)])
+      
+    } else {
+      data_final <- scp_0
+      
+      req(exp_set_raw())
+      data_raw <- exp_set_raw()
+      
+      req(meta_data())
+      meta_data_0 <- meta_data()
+      
+      # select data according to groups to observe mutual information within
+      data_final_group1 <- discretize(data_final[, which(meta_data_0$Group == choice_A)])
+      data_raw_group1 <- discretize(data_raw[, which(meta_data_0$Group == choice_A)])
+      
+      data_final_group2 <- discretize(data_final[, which(meta_data_0$Group == choice_B)])
+      data_raw_group2 <- discretize(data_raw[, which(meta_data_0$Group == choice_B)])
+      
+    }
+  
+    data_final <- cbind(data_final_group1, data_final_group2)
+    data_raw <- cbind(data_raw_group1, data_raw_group2)
+    
+    mi_final <- mutinformation(data_final)
+    mi_raw <- mutinformation(data_raw)
+    
+    extr_val_above_diag <- function(mat) {
+      vec <- c()
+      for(row in 1:nrow(mat))
+      {
+        
+        # looping over columns
+        for(col in 1:ncol(mat))
+        {
+          # if column number is greater than row
+          if(col > row)
+          {
+            # printing the element of the matrix
+            vec <- append(vec, mat[row,col])
+          }
+        }
+      }
+      return(vec)
+    }
+    
+    mi_final <- extr_val_above_diag(mi_final)
+    mi_raw <- extr_val_above_diag(mi_raw)
+    
+    mi_total <- data.frame(MI_final=mi_final, MI_raw=mi_raw)
+    
+    to_plot <- melt(mi_total)
+    
+    req(norm_method_val())
+    req(transform_base_val())
+
+    ggplot(to_plot, aes(x=variable, y=value)) +
+      geom_boxplot(aes(fill=variable)) +
+      ggtitle(paste("Change in mutual information after transformation:", 
+                    transform_base_val(), 
+                    "and norm_method:", norm_method_val())) +
+      xlab(paste(input$selectedComp_normval)) +
+      ylab("natural unit of information (nat)")+ 
+      guides(fill=guide_legend(title=""))
+  })
+  
+  
+  
+  
   ### Statistic Module ###
   observeEvent(input$model_design, {
     updateSelectInput(session, "selectedComp_stat", choices = sample_types())
