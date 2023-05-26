@@ -151,7 +151,7 @@ ui <- fluidPage(
                            plotlyOutput("volcano"),
                            DT::dataTableOutput("protein_table")
                   ),
-                  tabPanel("Gene set enrichment",
+                  tabPanel("Protein set enrichment",
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
@@ -1752,12 +1752,14 @@ server <- function(input, output, session) {
       # Create a design matrix
       if (input$model_design == "All pairwise comparison") {
         if (input$file_level == FALSE) {
-          design <- model.matrix(~0+factor(scp_0$SampleType))
-          colnames(design) <- unique(scp_0$SampleType)
+          SampleType <- scp_0$SampleType
+          design <- model.matrix(~0+SampleType)
+          colnames(design) <- sub("SampleType", "", colnames(design))
           fit <- lmFit(exp_matrix_0, design)
         } else {
-          design <- model.matrix(~0+factor(meta_data_0$Group))
-          colnames(design) <- unique(meta_data_0$Group)
+          Group <- meta_data_0$Group
+          design <- model.matrix(~0+Group)
+          colnames(design) <- sub("Group", "", colnames(design))
           fit <- lmFit(exp_matrix_0, design)
         }
 
@@ -1767,34 +1769,29 @@ server <- function(input, output, session) {
         if (input$file_level == FALSE) {
           # fetch user selection
           req(input$selectedComp_stat)
-          scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-          exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-          colnames(exp_matrix_0) <- scp_0$SampleType
-          
-          design <- model.matrix(~0+factor(scp_0$SampleType))
-          colnames(design) <- unique(scp_0$SampleType)
+
+          SampleType <- scp_0$SampleType
+          design <- model.matrix(~0+SampleType)
+          colnames(design) <- sub("SampleType", "", colnames(design))
           
           fit <- lmFit(exp_matrix_0, design)
           
           user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          
           fit <- contrasts.fit(fit, cont_matrix)
         } else {
-          # fetch user selection
           req(input$selectedComp_stat)
-          meta_data_0 <- meta_data_0[meta_data_0$Group %in% input$selectedComp_stat, ]
           
-          exp_matrix_0 <- exp_matrix_0[, as.numeric(rownames(meta_data_0))]
-          colnames(exp_matrix_0) <- meta_data_0$Group
-          
-          design <- model.matrix(~0+factor(meta_data_0$Group))
-          colnames(design) <- unique(meta_data_0$Group)
-
+          Group <- meta_data_0$Group
+          design <- model.matrix(~0+Group)
+          colnames(design) <- sub("Group", "", colnames(design))
           
           fit <- lmFit(exp_matrix_0, design)
           
           user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          
           fit <- contrasts.fit(fit, cont_matrix)
         }
       }
@@ -1803,31 +1800,41 @@ server <- function(input, output, session) {
           req(input$col_factors)
           req(input$selectedComp_stat)
           
-          scp_0 <- scp_0[, scp_0$SampleType %in%  input$selectedComp_stat]
-          exp_matrix_0 <- data.frame(assay(scp_0[["proteins_dim_red"]]))
-          colnames(exp_matrix_0) <- scp_0$SampleType
-          
           fetched_factor <- colData(scp_0)[input$col_factors]
-          design_frame <- cbind(fetched_factor, scp_0$SampleType)
-          colnames(design_frame)[-1] <- "SampleType"
+          design_frame <- cbind(scp_0$SampleType, fetched_factor)
+          
+          colnames(design_frame) <- c("SampleType", input$col_factors)
+          
           
           design <- model.matrix(~0+ . , data=design_frame)
+          colnames(design)[1:length(unique(design_frame$SampleType))] <- sub("SampleType", "", colnames(design)[1:length(unique(design_frame$SampleType))])
+          
           fit <- lmFit(exp_matrix_0, design)
+
+          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          
+          fit <- contrasts.fit(fit, cont_matrix)
+          
         } else {
           req(input$col_factors)
           req(input$selectedComp_stat)
           
-          # create data 
-          meta_data_0 <- meta_data_0[meta_data_0$Group %in% input$selectedComp_stat, ]
-          exp_matrix_0 <- exp_matrix_0[, as.numeric(rownames(meta_data_0))]
-          colnames(exp_matrix_0) <- meta_data_0$Group
-          
           fetched_factor <- meta_data_0[input$col_factors]
-          design_frame <- cbind(fetched_factor, meta_data_0$Group)
-          colnames(design_frame)[-1] <- "Group"
+          design_frame <- cbind(meta_data_0$Group, fetched_factor)
+          
+          colnames(design_frame) <- c("Group", input$col_factors)
           
           design <- model.matrix(~0+ . , data=design_frame)
+          colnames(design)[1:length(unique(design_frame$Group))] <- sub("Group", "", colnames(design)[1:length(unique(design_frame$Group))])
+
           fit <- lmFit(exp_matrix_0, design)
+          
+          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
+          
+          fit <- contrasts.fit(fit, cont_matrix)
+          
         }
       }
       
@@ -1957,6 +1964,13 @@ server <- function(input, output, session) {
                                                              "significantly downregulated"
     ))
     
+    req(input$p_value_correction)
+    if (input$p_value_correction == "none") {
+      p_val_correct <- "p-value"
+    } else {
+      p_val_correct <- "adj.p.value"
+    }
+    
     p <- ggplot(toptable, aes(x = logFC, y = -log10(adj.P.Val), text=protein)) +
       geom_point(aes(color = Significance), alpha = 3/4, shape = 19, size = 1.5, na.rm = TRUE) +
       theme_bw() +
@@ -1966,7 +1980,8 @@ server <- function(input, output, session) {
                                     "downregulated" = "#AA4499",
                                     "p-value" = "#88CCEE", 
                                     "significantly upregulated" = "green",
-                                    "significantly downregulated" = "red"))
+                                    "significantly downregulated" = "red")) +
+      labs(y=p_val_correct)
     
     ggplotly(p, tooltip = "text")
     
@@ -2074,7 +2089,8 @@ server <- function(input, output, session) {
                                    <extra></extra>')
               ) %>%
         layout(xaxis=list(
-          title="Gene Ratio"
+          title="Gene Ratio",
+          range=c(0,1)
         ))
     } else {
       graphics::barplot(ans.kegg, showCategory=10)

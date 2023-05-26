@@ -66,74 +66,32 @@ protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="-")
 evidence_data <- data.frame(protein_matrix)
 
 
-# validate the normalization by entropy estimation with k-nearest neighbor
-library("rmi")
 
-
-
-# split the data according to the column for selection of group
-group_select <- "HC"
-
-evidence_data_group_transf <- evidence_data_transf[ , which(meta_data_0$Group == group_select)]
-evidence_data_group_transf <- data.frame(rowMeans(evidence_data_group_transf))
-colnames(evidence_data_group_transf) <- paste(group_select, "_raw")
-
-
-evidence_data_group_norm <- evidence_data[ , which(meta_data_0$Group == group_select)]
-evidence_data_group_norm <- data.frame(rowMeans(evidence_data_group_norm))
-colnames(evidence_data_group_norm) <- paste(group_select, "_norm")
-
-grp_comp_df <- cbind(evidence_data_group_transf, evidence_data_group_norm)
-
-
-data <- as.matrix(grp_comp_df)
-splits = c(1,1)
-
-entropy <- lnn_mi(data, splits)
-
-
-# compare mutual info between group 
-group_select2 <- "EC"
-
-evidence_data_grp1 <- evidence_data[ , which(meta_data_0$Group == group_select)]
-evidence_data_grp1 <- data.frame(rowMeans(evidence_data_grp1))
-
-evidence_data_grp2 <- evidence_data[ , which(meta_data_0$Group == group_select2)]
-evidence_data_grp2 <- data.frame(rowMeans(evidence_data_grp2))
-
-grp_comp_df <- cbind(evidence_data_grp1, evidence_data_grp2)
-
-
-data <- as.matrix(grp_comp_df)
-splits = c(1,1)
-
-entropy <- lnn_mi(data, splits)
-
-
-# compare mutual info between batches 
-batch_select1 <- "Batch_1"
-batch_select2 <- "Batch_2"
-batch_select3 <- "Batch_3"
-
-evidence_data_btch1 <- evidence_data[ , which(meta_data_0$Batch == batch_select1)]
-evidence_data_btch1 <- data.frame(rowMeans(evidence_data_btch1))
-
-evidence_data_btch2 <- evidence_data[ , which(meta_data_0$Batch == batch_select2)]
-evidence_data_btch2 <- data.frame(rowMeans(evidence_data_btch2))
-
-evidence_data_btch3 <- evidence_data[ , which(meta_data_0$Batch == batch_select3)]
-evidence_data_btch3 <- data.frame(rowMeans(evidence_data_btch3))
-
-
-btch_comp_df <- cbind(evidence_data_btch1, evidence_data_btch2, evidence_data_btch3)
-
-
-data <- as.matrix(btch_comp_df)
-splits = c(1,1)
-
-entropy <- lnn_mi(data, splits)
-
-
+# 
+# # compare mutual info between batches 
+# batch_select1 <- "Batch_1"
+# batch_select2 <- "Batch_2"
+# batch_select3 <- "Batch_3"
+# 
+# evidence_data_btch1 <- evidence_data[ , which(meta_data_0$Batch == batch_select1)]
+# evidence_data_btch1 <- data.frame(rowMeans(evidence_data_btch1))
+# 
+# evidence_data_btch2 <- evidence_data[ , which(meta_data_0$Batch == batch_select2)]
+# evidence_data_btch2 <- data.frame(rowMeans(evidence_data_btch2))
+# 
+# evidence_data_btch3 <- evidence_data[ , which(meta_data_0$Batch == batch_select3)]
+# evidence_data_btch3 <- data.frame(rowMeans(evidence_data_btch3))
+# 
+# 
+# btch_comp_df <- cbind(evidence_data_btch1, evidence_data_btch2, evidence_data_btch3)
+# 
+# 
+# data <- as.matrix(btch_comp_df)
+# splits = c(1,1)
+# 
+# entropy <- lnn_mi(data, splits)
+# 
+# 
 
 # evidence_data <- replace(evidence_data, is.na(evidence_data), median(unlist(evidence_data), na.rm = TRUE))
 
@@ -315,13 +273,14 @@ evidence_data <- combat_edata
 design <- model.matrix(~0+factor(meta_data_0$Group) + factor(meta_data_0$Batch))
 colnames(design) <- c("EC", "HC", "Pool", "VP", "Batch_2", "Batch_3")
 
+
 # Fit the expression matrix to a linear model
 fit <- lmFit(evidence_data, design)
 bayes_fit <- eBayes(fit)
 
 
 # EC vs HC
-cont_matrix_1 <- makeContrasts(ECvsHC = EC-HC,levels=design)
+cont_matrix_1 <- makeContrasts(contrasts ="EC-HC",levels=design)
 # Compute contrast
 fit_contrast_1 <- contrasts.fit(fit, cont_matrix_1)
 # Bayes statistics of differential expression
@@ -329,7 +288,7 @@ fit_contrast_1 <- eBayes(fit_contrast_1)
 # Generate a vocalno plot to visualize differential expression
 volcanoplot(fit_contrast_1, main= "EC versus HC")
 # Generate a list of top 100 differentially expressed genes
-top_genes_1 <- topTable(fit_contrast_1, number = 100, adjust = "BH")
+top_genes_1 <- topTable(fit_contrast_1, number = Inf, adjust = "BH")
 # Summary of results (number of differentially expressed genes)
 result_1 <- decideTests(fit_contrast_1)
 summary(result_1)
@@ -343,7 +302,7 @@ fit_contrast_2 <- eBayes(fit_contrast_2)
 # Generate a vocalno plot to visualize differential expression
 volcanoplot(fit_contrast_2, main= "EC versus VP")
 # Generate a list of top 100 differentially expressed genes
-top_genes_2 <- topTable(fit_contrast_2, number = 100, adjust = "BH")
+top_genes_2 <- topTable(fit_contrast_2, number = Inf, adjust = "BH")
 # Summary of results (number of differentially expressed genes)
 result_2 <- decideTests(fit_contrast_2)
 summary(result_2)
@@ -357,7 +316,7 @@ fit_contrast_3 <- eBayes(fit_contrast_3)
 # Generate a vocalno plot to visualize differential expression
 volcanoplot(fit_contrast_3, main="HC versus VP")
 # Generate a list of top 100 differentially expressed genes
-top_genes_3 <- topTable(fit_contrast_3, number = 100, adjust = "BH")
+top_genes_3 <- topTable(fit_contrast_3, number = Inf, adjust = "BH")
 # Summary of results (number of differentially expressed genes)
 result_3 <- decideTests(fit_contrast_3)
 summary(result_3)
@@ -450,5 +409,58 @@ p3 <- plot_ly(data=tab.kegg,
 p3
 
 
+library("org.Hs.eg.db")
+library("AnnotationDbi")
+
+myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t)
+myPval$UNIPROT <- rownames(tt)
+
+entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
+
+myPval <- merge(myPval, entrez_ids, by="UNIPROT")
+
+myPval2 <- data.frame(myPval$t.val)
+myPval2$ENTREZID <- myPval$ENTREZID
+
+GO_enrichment <- enrichGO(
+  myPval2$ENTREZID,
+  org.Hs.eg.db,
+  keyType = "ENTREZID",
+  ont = "MF",
+  pvalueCutoff = 0.05,
+  pAdjustMethod = "BH",
+  qvalueCutoff = 0.2,
+  minGSSize = 10,
+  maxGSSize = 500,
+  readable = FALSE,
+  pool = FALSE
+)
+
+plotGOgraph(GO_enrichment)
+
+
+
+
+
+
+
+
+
+library("piano")
+
+
+library("UniProt.ws")
+
+
+myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t)
+myPval$UNIPROT <- rownames(tt)
+
+
+#myGSC <- loadGSC("/home/lukas/Downloads/msigdb.v2023.1.Hs.entrez.gmt")
+
+
+
+  
+runGSA(tt$t, gsc=myGSC)
 
 
