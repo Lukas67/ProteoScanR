@@ -19,9 +19,9 @@ library("sva")
 library("plotly")
 library("clusterProfiler")
 library("infotheo")
-library("org.Hs.eg.db")
-library("AnnotationDbi")
-library("piano")
+# library("org.Hs.eg.db")
+# library("AnnotationDbi")
+# library("piano")
 
 
 
@@ -170,6 +170,7 @@ ui <- fluidPage(
                            plotlyOutput("gsea")
                   ),
                   tabPanel("Protein set enrichment Ontology based",
+                           fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text")),
                            actionButton("go_ontology", label = "Run ontology"),
                            br(),
                            fluidRow(width=12,
@@ -181,7 +182,6 @@ ui <- fluidPage(
                                            textOutput("fc_cutoff"))
                            ),
                            br(),
-                           fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text")),
                            plotOutput("go_network"),
                            plotOutput("go_heatmap")
                            )
@@ -243,7 +243,7 @@ boxcox_1.default <-
 
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
-  options(shiny.maxRequestSize=30*1024^2)
+  options(shiny.maxRequestSize=50*1024^2)
 
   session$onSessionEnded(function() {
     stopApp()
