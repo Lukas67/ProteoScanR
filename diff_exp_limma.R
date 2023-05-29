@@ -448,19 +448,52 @@ plotGOgraph(GO_enrichment)
 
 library("piano")
 
-
-library("UniProt.ws")
-
-
-myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t)
+# parse data
+myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t, logFC=tt$logFC)
 myPval$UNIPROT <- rownames(tt)
 
+library("org.Hs.eg.db")
+library("AnnotationDbi")
 
-#myGSC <- loadGSC("/home/lukas/Downloads/msigdb.v2023.1.Hs.entrez.gmt")
+# fetch Entrez IDs
+entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
+myPval <- merge(myPval, entrez_ids, by="UNIPROT")
+
+# check nNA
+nrow(myPval)
+nrow(myPval[which(is.na(myPval$ENTREZID)) , ])
+
+# check duplicates 
+nrow(myPval)
+length(unique(myPval$ENTREZID))
+
+myPval <- myPval[which(!is.na(myPval$ENTREZID)) , ]
+myPval <- myPval[!duplicated(myPval$ENTREZID) , ]
 
 
+rownames(myPval) <- myPval$ENTREZID
 
-  
-runGSA(tt$t, gsc=myGSC)
+# gene set collection
+myGSC <- loadGSC("/home/lukas/Downloads/c7.all.v2023.1.Hs.entrez.gmt")
+
+
+logFCs <- data.frame(myPval$logFC)
+rownames(logFCs) <- rownames(myPval)
+
+pVals <- data.frame(myPval$p.val)
+rownames(pVals) <- rownames(myPval)
+
+gsaRes <- runGSA(geneLevelStats = pVals,
+                 directions = logFCs,
+                 gsc=myGSC)
+
+nw <- networkPlot(gsaRes,class="non")
+
+networkPlot2(gsaRes,class="non")
+
+GSAheatmap(gsaRes)
+
+nrow(tt[tt$P.Value < 0.05 & abs(tt$logFC) > 0.5, ])
+
 
 

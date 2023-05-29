@@ -19,6 +19,10 @@ library("sva")
 library("plotly")
 library("clusterProfiler")
 library("infotheo")
+library("org.Hs.eg.db")
+library("AnnotationDbi")
+library("piano")
+
 
 
 reactlog::reactlog_enable()
@@ -151,7 +155,7 @@ ui <- fluidPage(
                            plotlyOutput("volcano"),
                            DT::dataTableOutput("protein_table")
                   ),
-                  tabPanel("Protein set enrichment",
+                  tabPanel("Protein set enrichment Pathway based",
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
@@ -164,7 +168,23 @@ ui <- fluidPage(
                            br(),
                            materialSwitch("design_plot_gsea", label = "change Plot design"),
                            plotlyOutput("gsea")
-                  )
+                  ),
+                  tabPanel("Protein set enrichment Ontology based",
+                           actionButton("go_ontology", label = "Run ontology"),
+                           br(),
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           textOutput("p_correct")),
+                                    column(width = 4,
+                                           textOutput("p_cutoff")),
+                                    column(width=4,
+                                           textOutput("fc_cutoff"))
+                           ),
+                           br(),
+                           fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text")),
+                           plotOutput("go_network"),
+                           plotOutput("go_heatmap")
+                           )
       )
     )
   )
@@ -2012,34 +2032,39 @@ server <- function(input, output, session) {
   # gene set enrichment analysis 
   
   result_kegg <- reactive({
-    req(protein_table())
-    tt <- protein_table()
-    
-    # filter the data according to user selection
-    req(input$p_value_cutoff)
-    req(input$fold_change_cutoff)
-    p_cut <- input$p_value_cutoff
-    fc_cut <- input$fold_change_cutoff
-    
-    mask <- tt$adj.P.Val < p_cut & 
-      abs(tt$logFC) > fc_cut
-    
-    deGenes <- rownames(tt)[mask]
-
-    req(input$p_value_correction)
-    p_correct <- input$p_value_correction
-    
-    ans.kegg <- enrichKEGG(
-      deGenes,
-      organism = "hsa",
-      keyType = "uniprot",
-      pvalueCutoff = p_cut,
-      pAdjustMethod = p_correct,
-      minGSSize = 10,
-      maxGSSize = Inf,
-      qvalueCutoff = 0.2,
-      use_internal_data = FALSE
-    )
+    withProgress(message = "running pathway analysis", value = 0, {
+      incProgress(1/2, detail = paste("reading data"))
+      req(protein_table())
+      tt <- protein_table()
+      
+      # filter the data according to user selection
+      req(input$p_value_cutoff)
+      req(input$fold_change_cutoff)
+      p_cut <- input$p_value_cutoff
+      fc_cut <- input$fold_change_cutoff
+      
+      mask <- tt$adj.P.Val < p_cut & 
+        abs(tt$logFC) > fc_cut
+      
+      deGenes <- rownames(tt)[mask]
+      
+      req(input$p_value_correction)
+      p_correct <- input$p_value_correction
+      
+      incProgress(2/2, detail = paste("running pathway enrichment"))
+      ans.kegg <- enrichKEGG(
+        deGenes,
+        organism = "hsa",
+        keyType = "uniprot",
+        pvalueCutoff = p_cut,
+        pAdjustMethod = p_correct,
+        minGSSize = 10,
+        maxGSSize = Inf,
+        qvalueCutoff = 0.2,
+        use_internal_data = FALSE
+      )
+    })
+    return(ans.kegg)
   })
   
   output$p_correct <- renderText({
@@ -2095,11 +2120,97 @@ server <- function(input, output, session) {
     } else {
       graphics::barplot(ans.kegg, showCategory=10)
     }
-
-    
   })
   
+  result_piano <- eventReactive(input$go_ontology, {
+    withProgress(message = "running protein set analysis ontology", value = 0, {
+      req(protein_table())
+      tt <- protein_table()
+      
+      # parse data
+      myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t, logFC=tt$logFC)
+      myPval$UNIPROT <- rownames(tt)
+      
+      incProgress(1/3, detail = paste("fetching entrez IDs"))
+      entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
+      myPval <- merge(myPval, entrez_ids, by="UNIPROT")
+      
+      # drop duplicates and nas
+      myPval <- myPval[which(!is.na(myPval$ENTREZID)) , ]
+      myPval <- myPval[!duplicated(myPval$ENTREZID) , ]
+      
+      rownames(myPval) <- myPval$ENTREZID
+      
+      incProgress(2/3, detail= paste("loading protein set collection"))
+      req(input$geneset_collection)
+      myGSC <- loadGSC(input$geneset_collection$datapath)
+      
+      
+      incProgress(3/3, detail=paste("running protein set analysis"))
+      logFCs <- data.frame(myPval$logFC)
+      rownames(logFCs) <- rownames(myPval)
+      
+      pVals <- data.frame(myPval$p.val)
+      rownames(pVals) <- rownames(myPval)
+      
+      req(input$p_value_correction)
+      p_correct <- input$p_value_correction
+      
+      gsaRes <- runGSA(geneLevelStats = pVals,
+                       directions = logFCs,
+                       gsc=myGSC,
+                       adjMethod = p_correct)
+      
+    })
+    return(gsaRes)
+  })
+  
+  output$go_network <- renderPlot({
+    withProgress(message = "Plotting network", value=0,{
+      incProgress(1/2, detail=paste("reading data"))
+      req(result_piano())
+      gsaRes <- result_piano()
+      
+      req(input$p_value_cutoff)
+      req(input$fold_change_cutoff)
+      p_cut <- input$p_value_cutoff
+      fc_cut <- input$fold_change_cutoff
+      
+      incProgress(2/2, detail = paste("rendering network"))
+      networkPlot(gsaRes,class="non", significance = p_cut)
+    })
+  })
+  
+  output$go_heatmap <- renderPlot({
+    withProgress(message = "Plotting heatmap", value=0, 
+                 {
+                   incProgress(1/2, detail = paste("reading data"))
+                   req(result_piano())
+                   gsaRes <- result_piano()
+                   
+                   req(input$p_value_cutoff)
+                   req(input$fold_change_cutoff)
+                   p_cut <- input$p_value_cutoff
+                   fc_cut <- input$fold_change_cutoff
+                   
+                   req(protein_table())
+                   tt <- protein_table()
+                   
+                   heat_cutoff <- nrow(tt[tt$P.Value < p_cut & abs(tt$logFC) > fc_cut, ])
+                   
+                   incProgress(2/2, detail=paste("rendering heatmap"))
+                   GSAheatmap(gsaRes, cutoff = heat_cutoff, adjusted = TRUE)
+                 })
+  })
+  
+
+  
 }
+  
+
+
+  
+  
 
 
 # Run the application 
