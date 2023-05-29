@@ -19,10 +19,11 @@ library("sva")
 library("plotly")
 library("clusterProfiler")
 library("infotheo")
-# library("org.Hs.eg.db")
-# library("AnnotationDbi")
-# library("piano")
-
+library("org.Hs.eg.db")
+library("AnnotationDbi")
+library("piano")
+library("snowfall")
+library("parallel")
 
 
 reactlog::reactlog_enable()
@@ -45,7 +46,7 @@ ui <- fluidPage(
       fileInput("evidence_file", "Upload tabdel (.txt) PSM file", accept = c("text")),
       fileInput("sample_annotation_file", "Upload tabdel (.txt) sample annotation file", accept = c("text")),
       selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
-            
+      
       conditionalPanel(condition = "!input.file_level", 
                        # cutoff for PIF
                        numericInput("PIF_cutoff", "Input cutoff value for parental ion fraction. PSMs larger than the value remain", 0.1, min = 0, max=1, step = 0.1),
@@ -70,7 +71,7 @@ ui <- fluidPage(
       conditionalPanel(condition = "input.opts_multiple_batches", 
                        selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with mean", "replace with median")),
                        selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("None", "ComBat"))
-                       )
+      )
       
     ),
     
@@ -87,7 +88,7 @@ ui <- fluidPage(
                            plotOutput("norm_val_plot_intra_group"),
                            selectInput("selectedComp_normval", "Choose comparison for observation", ""),
                            plotOutput("norm_val_plot_inter_group")
-                           ),
+                  ),
                   tabPanel("Reporter Ion Intensity", 
                            selectInput("color_variable_ri", "select variable to indicate", ""),
                            plotOutput("RI_intensity")),
@@ -97,7 +98,7 @@ ui <- fluidPage(
                                             plotOutput("CV_median")),
                            plotOutput("corr_matrix"), width="100%"),
                   tabPanel("Dimensionality reduction",
-                           materialSwitch(inputId = "third_dim", value = F, label="Want to enter the 3rd dimension?", status = "danger"),
+                           materialSwitch(inputId = "third_dim", value = F, label="3d", status = "danger"),
                            fluidRow(width=12,
                                     column(width=4,
                                            selectInput("color_variable_dim_red", "select variable to color", "")),
@@ -107,25 +108,25 @@ ui <- fluidPage(
                                                      column(width=4,
                                                             selectInput("size_variable_dim_red", "select variable to size", ""))
                                     )
-                                    ),
+                           ),
                            conditionalPanel(condition = "!input.third_dim",
                                             fluidPage(
                                               plotOutput("PCA"), 
                                               plotOutput("UMAP")
-                                              )
-                                            ),
+                                            )
+                           ),
                            conditionalPanel(condition = "input.third_dim",
                                             fluidPage(
                                               plotlyOutput("PCA_third_dim"),
                                               plotlyOutput("UMAP_third_dim")
-                                              )
                                             )
-                           ),
+                           )
+                  ),
                   tabPanel("Feature wise output", 
                            selectizeInput("selectedProtein", "Choose protein for observation", ""),
                            conditionalPanel(condition = "input.file_level",
                                             selectInput("color_variable_feature", "select variable to color", "")
-                                            ),
+                           ),
                            plotOutput("feature_subset")),
                   
                   tabPanel("Statistics",
@@ -159,32 +160,46 @@ ui <- fluidPage(
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
-                                           textOutput("p_correct")),
+                                           textOutput("p_correct_1")),
                                     column(width = 4,
-                                           textOutput("p_cutoff")),
+                                           textOutput("p_cutoff_1")),
                                     column(width=4,
-                                           textOutput("fc_cutoff"))
-                                    ),
+                                           textOutput("fc_cutoff_1"))
+                           ),
                            br(),
                            materialSwitch("design_plot_gsea", label = "change Plot design"),
                            plotlyOutput("gsea")
                   ),
                   tabPanel("Protein set enrichment Ontology based",
-                           fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text")),
-                           actionButton("go_ontology", label = "Run ontology"),
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           br(),
+                                           fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text"))),
+                                    column(width = 4,
+                                           br(),
+                                           actionButton("go_ontology", label = "Run ontology", size="large")),
+                                    column(width=4,
+                                           br(),
+                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="blue", offStatus = "orange"))
+                           ),
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
-                                           textOutput("p_correct")),
+                                           textOutput("p_correct_2")),
                                     column(width = 4,
-                                           textOutput("p_cutoff")),
+                                           textOutput("p_cutoff_2")),
                                     column(width=4,
-                                           textOutput("fc_cutoff"))
+                                           textOutput("fc_cutoff_2"))
                            ),
                            br(),
-                           plotOutput("go_network"),
-                           plotOutput("go_heatmap")
-                           )
+
+                           conditionalPanel("!input.go_plot_switch",
+                                            plotOutput("go_network", width = "1000px", height = "1000px")
+                                            ),
+                           conditionalPanel("input.go_plot_switch",
+                                            plotOutput("go_heatmap", width = "1000px", height = "1000px")
+                                            )
+                  )
       )
     )
   )
@@ -244,11 +259,11 @@ boxcox_1.default <-
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=50*1024^2)
-
+  
   session$onSessionEnded(function() {
     stopApp()
   })
-
+  
   Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
     i_exp_matrix <- tryCatch(
       {
@@ -267,7 +282,7 @@ server <- function(input, output, session) {
   }
   
   
-    
+  
   #basic error handling
   errMsg <- reactiveVal()
   output$debug <- renderPrint({
@@ -275,7 +290,7 @@ server <- function(input, output, session) {
     if (!is.null(errMsg())) {
       errMsg()
     }
-    })
+  })
   
   # Help Button and content of the help menu
   observeEvent(input$help,{
@@ -539,7 +554,7 @@ server <- function(input, output, session) {
           evidence_data <- exp_set_raw()
         } 
         
-
+        
         incProgress(14/17, detail=paste("transforming protein data"))
         req(input$transform_base)
         transform_base_bc <- "None"
@@ -887,7 +902,7 @@ server <- function(input, output, session) {
               model <- model.matrix(~SampleType, data = colData(sce))
               
               assay(sce) <- Combat_batchC(assay(sce), batch, model) 
-
+              
               scp_0 <- addAssay(scp_0,
                                 y = sce,
                                 name = "proteins_batchC")
@@ -972,7 +987,7 @@ server <- function(input, output, session) {
     finally = invalidateLater(1))
   })
   
-
+  
   # expression matrix is used by plot functions
   exp_matrix <- reactive({
     req(scp())
@@ -1003,14 +1018,14 @@ server <- function(input, output, session) {
   # reactive element for the protein list --> update if the scp object changes
   protein_list <- eventReactive(input$update_button, {
     req(scp())
-      if (input$file_level == FALSE) {
-        req(scp()[["proteins"]])
-        scp_0 <- scp()
-        list <- rowData(scp_0)[["proteins"]][,1]
-      } else {
-        list <- rownames(scp())
-      }
-      return(list)
+    if (input$file_level == FALSE) {
+      req(scp()[["proteins"]])
+      scp_0 <- scp()
+      list <- rowData(scp_0)[["proteins"]][,1]
+    } else {
+      list <- rownames(scp())
+    }
+    return(list)
   })
   
   # observer for the CONSTANd normalization dependency to check before analysis
@@ -1039,7 +1054,7 @@ server <- function(input, output, session) {
     }
     return(list)
   })
-
+  
   columns <- eventReactive(input$update_button, {
     if (input$file_level == FALSE) {
       req(scp())
@@ -1069,7 +1084,7 @@ server <- function(input, output, session) {
       list <- meta_data_0$Group
     }
     return(list)
-    })
+  })
   
   ## Output of analysis pipeline 
   # pathway of the data first tab
@@ -1124,7 +1139,7 @@ server <- function(input, output, session) {
     } else{
       meta_data_0 <- meta_data()
       evidence_data <- scp()
-
+      
       evidence_data_medians <- data.frame(median_intensity = colMedians(as.matrix(evidence_data)))
       evidence_data_medians %>%
         ggplot() +
@@ -1231,7 +1246,7 @@ server <- function(input, output, session) {
     }
     meta_data_0 <- meta_data()
     scp_0 <- scp()
-        
+    
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
@@ -1245,7 +1260,7 @@ server <- function(input, output, session) {
                      point_alpha = 1,
                      point_size=3)
     } else {
-
+      
       dimred_pca <- dimred_pca_expr_set()
       
       ggplot(dimred_pca, aes(x=PC1, 
@@ -1277,7 +1292,7 @@ server <- function(input, output, session) {
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
     
-      
+    
     if (input$file_level == FALSE) {
       
       dimred_pca <- data.frame(reducedDim(scp_0[["proteins_dim_red"]], "PCA"))
@@ -1291,7 +1306,7 @@ server <- function(input, output, session) {
     } else {
       
       dimred_pca <- dimred_pca_expr_set()
-
+      
       plot_ly(x=dimred_pca$PC1,
               y=dimred_pca$PC2,
               z=dimred_pca$PC3,
@@ -1347,12 +1362,12 @@ server <- function(input, output, session) {
                      point_size = 3)      
     } else {
       dimred_umap <- dimred_umap_expr_set()
-
+      
       ggplot(dimred_umap, aes(x=UMAP1, 
-                             y=UMAP2, 
-                             color= color_variable_dim_red,
-                             shape = shape_variable_dim_red,
-                             size = size_variable_dim_red)) +
+                              y=UMAP2, 
+                              color= color_variable_dim_red,
+                              shape = shape_variable_dim_red,
+                              size = size_variable_dim_red)) +
         geom_point(alpha=3/4)
     } 
   })
@@ -1371,12 +1386,12 @@ server <- function(input, output, session) {
     
     meta_data_0 <- meta_data()
     scp_0 <- scp()    
-  
+    
     color_variable_dim_red <- extract_null(input$color_variable_dim_red)
     shape_variable_dim_red <- extract_null(input$shape_variable_dim_red)
     size_variable_dim_red <- extract_null(input$size_variable_dim_red)
     
-
+    
     
     if (input$file_level == FALSE) {
       dimred_umap <- data.frame(reducedDim(scp_0[["proteins_dim_red"]], "UMAP"))
@@ -1445,20 +1460,20 @@ server <- function(input, output, session) {
       
       req(meta_data())
       meta_data_0 <- meta_data()
-
+      
       to_plot <- data.frame(t(scp_0[input$selectedProtein, ]))
       
       color_variable_feature <- extract_null(input$color_variable_feature)
       
       d = data.frame(melt(to_plot))
-
+      
       ggplot(data = d,
              mapping = aes(x = variable, y = value, fill=color_variable_feature)) + 
         geom_col(position = position_dodge()) +
         labs(y=paste("intensity of", input$selectedProtein))
     }
   })
-
+  
   # plot MA plot for the constand method
   output$MAplot <- renderPlot({
     req(input$selectedComp)
@@ -1539,7 +1554,7 @@ server <- function(input, output, session) {
       
       MAplot(exp_matrix_0[,index_A[[1]]], exp_matrix_0[,index_B[[1]]])
     }
-
+    
   })
   
   #create interface for the constand normalization method
@@ -1587,16 +1602,16 @@ server <- function(input, output, session) {
     
     req(scp())
     scp_0 <- scp()
-  
+    
     if (input$file_level == FALSE) {
       # select data according to the procedure undertaken
       data_final <- assay(scp_0[["proteins_dim_red"]])
       data_raw <- assay(scp_0[["proteins"]])
-
+      
       # select data according to groups to observe mutual information within
       data_final <- data_final[, which(scp_0$SampleType == input$selectedSampleType_normval)]
       data_raw <- data_raw[, which(scp_0$SampleType == input$selectedSampleType_normval)]
-            
+      
       req(input$selectedSampleType_normval)
       req(norm_method_val())
       req(transform_base_val())
@@ -1616,7 +1631,7 @@ server <- function(input, output, session) {
       
     }
     
-
+    
     
     # discretize by equal frequencies
     data_final <- discretize(data_final)
@@ -1643,7 +1658,7 @@ server <- function(input, output, session) {
       ylab("natural unit of information (nat)")+ 
       guides(fill=guide_legend(title=""))
   })
-    
+  
   
   observe({
     updateSelectInput(session, "selectedComp_normval", choices = comp_list())
@@ -1669,7 +1684,7 @@ server <- function(input, output, session) {
       # select data according to the procedure undertaken
       data_final <- assay(scp_0[["proteins_dim_red"]])
       data_raw <- assay(scp_0[["proteins"]])
-
+      
       # select data according to groups to observe mutual information within
       data_final_group1 <- discretize(data_final[, which(scp_0$SampleType == choice_A)])
       data_raw_group1 <- discretize(data_raw[, which(scp_0$SampleType == choice_A)])
@@ -1694,7 +1709,7 @@ server <- function(input, output, session) {
       data_raw_group2 <- discretize(data_raw[, which(meta_data_0$Group == choice_B)])
       
     }
-  
+    
     data_final <- cbind(data_final_group1, data_final_group2)
     data_raw <- cbind(data_raw_group1, data_raw_group2)
     
@@ -1729,7 +1744,7 @@ server <- function(input, output, session) {
     
     req(norm_method_val())
     req(transform_base_val())
-
+    
     ggplot(to_plot, aes(x=variable, y=value)) +
       geom_boxplot(aes(fill=variable)) +
       ggtitle(paste("Change in mutual information after transformation:", 
@@ -1782,14 +1797,14 @@ server <- function(input, output, session) {
           colnames(design) <- sub("Group", "", colnames(design))
           fit <- lmFit(exp_matrix_0, design)
         }
-
+        
       }
       #Differential Expression with defined Contrasts
       else if (input$model_design == "Differential Expression with defined Contrasts") {
         if (input$file_level == FALSE) {
           # fetch user selection
           req(input$selectedComp_stat)
-
+          
           SampleType <- scp_0$SampleType
           design <- model.matrix(~0+SampleType)
           colnames(design) <- sub("SampleType", "", colnames(design))
@@ -1830,7 +1845,7 @@ server <- function(input, output, session) {
           colnames(design)[1:length(unique(design_frame$SampleType))] <- sub("SampleType", "", colnames(design)[1:length(unique(design_frame$SampleType))])
           
           fit <- lmFit(exp_matrix_0, design)
-
+          
           user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
           
@@ -1847,7 +1862,7 @@ server <- function(input, output, session) {
           
           design <- model.matrix(~0+ . , data=design_frame)
           colnames(design)[1:length(unique(design_frame$Group))] <- sub("Group", "", colnames(design)[1:length(unique(design_frame$Group))])
-
+          
           fit <- lmFit(exp_matrix_0, design)
           
           user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
@@ -1864,7 +1879,7 @@ server <- function(input, output, session) {
     })
     return(fit)
   })
-
+  
   ## Dependencies  
   # initial qq counter for the first plot 
   qq_count <- reactiveVal(1)
@@ -1908,9 +1923,9 @@ server <- function(input, output, session) {
   output$qqPlot <- renderPlot({
     exp_matrix_0 <- exp_matrix()
     sample_types <- unique(colnames(exp_matrix_0))
-
+    
     i <- qq_count()
-
+    
     qqnorm(exp_matrix_0[[sample_types[i]]], main=paste("QQ-plot of ", sample_types[i]))
     qqline(exp_matrix_0[[sample_types[i]]])
   })
@@ -1934,13 +1949,13 @@ server <- function(input, output, session) {
       )
     )
   }
-
+  
   # additional ui for statistic module
   output$sample_select <- renderUI({
     req(input$model_design == "Differential Expression with defined Contrasts" | input$model_design == "Multi factor additivity")
     selectInput("selectedComp_stat", "choose your contrast of interest", "", multiple = T)
   })
-
+  
   # Ui for multifactorial model
   output$add_factor <- renderUI({
     req(input$model_design == "Multi factor additivity")
@@ -2005,7 +2020,7 @@ server <- function(input, output, session) {
     
     ggplotly(p, tooltip = "text")
     
-
+    
   })
   
   # reactive element for toptable
@@ -2019,7 +2034,7 @@ server <- function(input, output, session) {
   output$protein_table <- DT::renderDataTable({
     req(protein_table())
     protein_table()# %>%
-#      mutate_if(is.numeric, round, digits=10)
+    #      mutate_if(is.numeric, round, digits=10)
   })
   
   # venn diagram for significant proteins
@@ -2033,7 +2048,7 @@ server <- function(input, output, session) {
   
   result_kegg <- reactive({
     withProgress(message = "running pathway analysis", value = 0, {
-      incProgress(1/2, detail = paste("reading data"))
+      incProgress(1/3, detail = paste("reading data"))
       req(protein_table())
       tt <- protein_table()
       
@@ -2051,7 +2066,7 @@ server <- function(input, output, session) {
       req(input$p_value_correction)
       p_correct <- input$p_value_correction
       
-      incProgress(2/2, detail = paste("running pathway enrichment"))
+      incProgress(2/3, detail = paste("running pathway enrichment"))
       ans.kegg <- enrichKEGG(
         deGenes,
         organism = "hsa",
@@ -2063,11 +2078,12 @@ server <- function(input, output, session) {
         qvalueCutoff = 0.2,
         use_internal_data = FALSE
       )
+      incProgress(3/3, detail = paste("success"))
     })
     return(ans.kegg)
   })
   
-  output$p_correct <- renderText({
+  output$p_correct_1 <- output$p_correct_2 <- renderText({
     req(input$p_value_correction)
     paste(
       "p-value correction method:",
@@ -2076,7 +2092,7 @@ server <- function(input, output, session) {
   })
   
   
-  output$p_cutoff <- renderText({
+  output$p_cutoff_1 <- output$p_cutoff_2  <- renderText({
     req(input$p_value_cutoff)
     paste(
       "p-value cutoff:",
@@ -2084,7 +2100,7 @@ server <- function(input, output, session) {
     )
     
   })
-  output$fc_cutoff <- renderText({
+  output$fc_cutoff_1 <- output$fc_cutoff_2 <- renderText({
     req(input$fold_change_cutoff)
     paste(
       "fold change cutoff:",
@@ -2112,7 +2128,7 @@ server <- function(input, output, session) {
               hovertemplate= paste('%{y}',
                                    '<br>Gene ratio: %{text}<br>
                                    <extra></extra>')
-              ) %>%
+      ) %>%
         layout(xaxis=list(
           title="Gene Ratio",
           range=c(0,1)
@@ -2131,7 +2147,7 @@ server <- function(input, output, session) {
       myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t, logFC=tt$logFC)
       myPval$UNIPROT <- rownames(tt)
       
-      incProgress(1/3, detail = paste("fetching entrez IDs"))
+      incProgress(1/4, detail = paste("fetching entrez IDs"))
       entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
       myPval <- merge(myPval, entrez_ids, by="UNIPROT")
       
@@ -2141,12 +2157,12 @@ server <- function(input, output, session) {
       
       rownames(myPval) <- myPval$ENTREZID
       
-      incProgress(2/3, detail= paste("loading protein set collection"))
+      incProgress(2/4, detail= paste("loading protein set collection"))
       req(input$geneset_collection)
       myGSC <- loadGSC(input$geneset_collection$datapath)
       
       
-      incProgress(3/3, detail=paste("running protein set analysis"))
+      incProgress(3/4, detail=paste("running protein set analysis"))
       logFCs <- data.frame(myPval$logFC)
       rownames(logFCs) <- rownames(myPval)
       
@@ -2156,18 +2172,24 @@ server <- function(input, output, session) {
       req(input$p_value_correction)
       p_correct <- input$p_value_correction
       
+      cores <- detectCores()
+      
       gsaRes <- runGSA(geneLevelStats = pVals,
                        directions = logFCs,
                        gsc=myGSC,
-                       adjMethod = p_correct)
+                       adjMethod = p_correct,
+                       ncpus = cores
+                       )
+      incProgress(4/4, detail=paste("success"))
       
     })
     return(gsaRes)
   })
   
+  
   output$go_network <- renderPlot({
     withProgress(message = "Plotting network", value=0,{
-      incProgress(1/2, detail=paste("reading data"))
+      incProgress(1/3, detail=paste("reading data"))
       req(result_piano())
       gsaRes <- result_piano()
       
@@ -2176,15 +2198,17 @@ server <- function(input, output, session) {
       p_cut <- input$p_value_cutoff
       fc_cut <- input$fold_change_cutoff
       
-      incProgress(2/2, detail = paste("rendering network"))
+      incProgress(2/3, detail = paste("rendering network"))
       networkPlot(gsaRes,class="non", significance = p_cut)
+      
+      incProgress(3/3, detail = paste("success"))
     })
   })
   
   output$go_heatmap <- renderPlot({
     withProgress(message = "Plotting heatmap", value=0, 
                  {
-                   incProgress(1/2, detail = paste("reading data"))
+                   incProgress(1/3, detail = paste("reading data"))
                    req(result_piano())
                    gsaRes <- result_piano()
                    
@@ -2196,21 +2220,22 @@ server <- function(input, output, session) {
                    req(protein_table())
                    tt <- protein_table()
                    
-                   heat_cutoff <- nrow(tt[tt$P.Value < p_cut & abs(tt$logFC) > fc_cut, ])
+                   heat_cutoff <- nrow(tt[tt$adj.P.Value < p_cut & abs(tt$logFC) > fc_cut, ])
                    
-                   incProgress(2/2, detail=paste("rendering heatmap"))
+                   incProgress(2/3, detail=paste("rendering heatmap"))
                    GSAheatmap(gsaRes, cutoff = heat_cutoff, adjusted = TRUE)
+                   incProgress(3/3, detail = "success")
                  })
   })
   
-
+  
   
 }
-  
 
 
-  
-  
+
+
+
 
 
 # Run the application 

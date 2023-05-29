@@ -483,17 +483,34 @@ rownames(logFCs) <- rownames(myPval)
 pVals <- data.frame(myPval$p.val)
 rownames(pVals) <- rownames(myPval)
 
+library("snowfall")
+library("parallel")
+
+cores <- detectCores()
+
 gsaRes <- runGSA(geneLevelStats = pVals,
                  directions = logFCs,
-                 gsc=myGSC)
+                 gsc=myGSC, 
+                 ncpus = cores)
 
-nw <- networkPlot(gsaRes,class="non")
 
-networkPlot2(gsaRes,class="non")
+gsa_results <- GSAsummaryTable(gsaRes = gsaRes)
 
-GSAheatmap(gsaRes)
 
-nrow(tt[tt$P.Value < 0.05 & abs(tt$logFC) > 0.5, ])
+par(mar = c(1, 1, 1, 1))
+networkPlot(gsaRes,class="non")
+
+
+
+
+networkPlot2(gsaRes, class="non", significance = 0.5, shiny = T)
+
+
+
+cut <- nrow(tt[tt$adj.P.Value < 0.0005 & abs(tt$logFC) > 0.5, ])
+
+GSAheatmap(gsaRes, cutoff=cut)
+
 
 
 
