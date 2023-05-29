@@ -174,13 +174,16 @@ ui <- fluidPage(
                            fluidRow(width=12,
                                     column(width=4,
                                            br(),
+                                           br(),
                                            fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text"))),
                                     column(width = 4,
                                            br(),
-                                           actionButton("go_ontology", label = "Run ontology", size="large")),
+                                           br(),
+                                           br(),
+                                           actionButton("go_ontology", label = "Run ontology", class = "btn-success")),
                                     column(width=4,
                                            br(),
-                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="blue", offStatus = "orange"))
+                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="primary", offStatus = "info"))
                            ),
                            br(),
                            fluidRow(width=12,
@@ -2199,7 +2202,7 @@ server <- function(input, output, session) {
       fc_cut <- input$fold_change_cutoff
       
       incProgress(2/3, detail = paste("rendering network"))
-      networkPlot(gsaRes,class="non", significance = p_cut)
+      networkPlot2(gsaRes,class="non", significance = p_cut)
       
       incProgress(3/3, detail = paste("success"))
     })
@@ -2220,7 +2223,7 @@ server <- function(input, output, session) {
                    req(protein_table())
                    tt <- protein_table()
                    
-                   heat_cutoff <- nrow(tt[tt$adj.P.Value < p_cut & abs(tt$logFC) > fc_cut, ])
+                   heat_cutoff <- nrow(tt[tt$adj.P.Value < p_cut & abs(tt$logFC) > fc_cut])
                    
                    incProgress(2/3, detail=paste("rendering heatmap"))
                    GSAheatmap(gsaRes, cutoff = heat_cutoff, adjusted = TRUE)

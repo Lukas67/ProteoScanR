@@ -507,7 +507,7 @@ networkPlot2(gsaRes, class="non", significance = 0.5, shiny = T)
 
 
 
-cut <- nrow(tt[tt$adj.P.Value < 0.0005 & abs(tt$logFC) > 0.5, ])
+cut <- nrow(tt[tt$adj.P.Value < 1 & abs(tt$logFC) > 0.0001])
 
 GSAheatmap(gsaRes, cutoff=cut)
 
