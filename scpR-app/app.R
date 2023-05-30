@@ -199,10 +199,10 @@ ui <- fluidPage(
                            ),
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
-                                            visNetworkOutput("go_network", width = "1200px", height = "1300px")
+                                            visNetworkOutput("go_network", width = "1200px", height = "1200px")
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "1200px", height = "1300px")
+                                            plotOutput("go_heatmap", width = "1200px", height = "1200px")
                                             )
                   )
       )
