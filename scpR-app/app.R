@@ -26,9 +26,6 @@ library("snowfall")
 library("parallel")
 library("visNetwork")
 
-require(shiny)
-require(visNetwork)
-
 
 
 reactlog::reactlog_enable()
@@ -88,7 +85,7 @@ ui <- fluidPage(
                            verbatimTextOutput("debug"),
                            plotOutput("overview_plot")),
                   tabPanel("Summary Barplot", id="summary_pane",
-                           plotOutput("summary_bar")),
+                           plotOutput("summary_bar", width = "auto")),
                   tabPanel("Normalization validation", id="normval_pane",
                            selectInput("selectedSampleType_normval", "Select SampleType to validate", ""),
                            plotOutput("norm_val_plot_intra_group"),
@@ -102,7 +99,7 @@ ui <- fluidPage(
                            conditionalPanel(condition = "!input.file_level", id="razor_prot_pane",
                                             selectInput("color_variable_cv", "select variable to indicate", ""),
                                             plotOutput("CV_median")),
-                           plotOutput("corr_matrix"), width="100%"),
+                           plotOutput("corr_matrix")),
                   tabPanel("Dimensionality reduction", id="dimred_pane",
                            materialSwitch(inputId = "third_dim", value = F, label="3d", status = "danger"),
                            fluidRow(width=12,
@@ -174,7 +171,7 @@ ui <- fluidPage(
                            ),
                            br(),
                            materialSwitch("design_plot_gsea", label = "change Plot design"),
-                           plotlyOutput("gsea")
+                           plotlyOutput("gsea", height="auto", width = "auto")
                   ),
                   tabPanel("Protein set enrichment Ontology based", id="psa_ont_pane",
                            fluidRow(width=12,
@@ -202,10 +199,10 @@ ui <- fluidPage(
                            ),
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
-                                            visNetworkOutput("go_network", width = "100%", height = "200%")
+                                            visNetworkOutput("go_network", width = "1200px", height = "1300px")
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "100%", height = "200%")
+                                            plotOutput("go_heatmap", width = "1200px", height = "1300px")
                                             )
                   )
       )
@@ -1123,7 +1120,7 @@ server <- function(input, output, session) {
         labs(x = "log10 of number of PSMs, Peptides and Proteins", y = "Counts") +
         scale_fill_manual(values = c("#E69F00", "#56B4E9", "#009E73"))
     } else {
-      barplot(log10(dim(scp())[1]), main = "log Count of rows")
+      barplot(log10(dim(scp())[1]), main = "log Count of rows", horiz=T, )
     }
   })
   

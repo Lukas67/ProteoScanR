@@ -67,6 +67,11 @@ evidence_data <- data.frame(protein_matrix)
 
 
 
+
+
+
+
+
 # 
 # # compare mutual info between batches 
 # batch_select1 <- "Batch_1"
