@@ -501,9 +501,14 @@ par(mar = c(1, 1, 1, 1))
 networkPlot(gsaRes,class="non")
 
 
+nw <- networkPlot2(gsaRes, class="non", significance = 0.5, shiny = T)
+
+library("visNetwork")
+
+visNetwork(nodes = nw$x$nodes, edges = nw$x$edges)
 
 
-networkPlot2(gsaRes, class="non", significance = 0.5, shiny = T)
+
 
 
 

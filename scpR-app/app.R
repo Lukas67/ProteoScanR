@@ -24,6 +24,11 @@ library("AnnotationDbi")
 library("piano")
 library("snowfall")
 library("parallel")
+library("visNetwork")
+
+require(shiny)
+require(visNetwork)
+
 
 
 reactlog::reactlog_enable()
@@ -36,7 +41,7 @@ ui <- fluidPage(
   
   # Sidebar
   sidebarLayout(
-    sidebarPanel(
+    sidebarPanel(id="settings_pane",
       # the button to rule them all
       actionButton("update_button", "Press to run/update"),
       actionButton("help", "Help"),
@@ -47,7 +52,7 @@ ui <- fluidPage(
       fileInput("sample_annotation_file", "Upload tabdel (.txt) sample annotation file", accept = c("text")),
       selectInput("selectedSampleType_to_exclude", "Select SampleType to exclude", "", multiple=T),
       
-      conditionalPanel(condition = "!input.file_level", 
+      conditionalPanel(id="full_control_pane", condition = "!input.file_level", 
                        # cutoff for PIF
                        numericInput("PIF_cutoff", "Input cutoff value for parental ion fraction. PSMs larger than the value remain", 0.1, min = 0, max=1, step = 0.1),
                        
@@ -68,7 +73,7 @@ ui <- fluidPage(
       selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
       # multiple batch handling
       switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
-      conditionalPanel(condition = "input.opts_multiple_batches", 
+      conditionalPanel(id="multiple_batch_pane",condition = "input.opts_multiple_batches", 
                        selectInput(inputId = "missing_v", "Choose method for missing value handling", choices=c("KNN", "drop rows", "replace with mean", "replace with median")),
                        selectInput(inputId = "batch_c", "Choose method for batch correction", choices=c("None", "ComBat"))
       )
@@ -76,60 +81,61 @@ ui <- fluidPage(
     ),
     
     # Main Panel for the output
-    mainPanel(
+    mainPanel(id="output_pane",
       #create tabs
-      tabsetPanel(type = "tabs",
-                  tabPanel("Overview",
+      tabsetPanel(id="outbut_tabset", type = "tabs",
+                  tabPanel("Overview", id="overview_pane",
                            verbatimTextOutput("debug"),
                            plotOutput("overview_plot")),
-                  tabPanel("Summary Barplot", plotOutput("summary_bar")),
-                  tabPanel("Normalization validation",
+                  tabPanel("Summary Barplot", id="summary_pane",
+                           plotOutput("summary_bar")),
+                  tabPanel("Normalization validation", id="normval_pane",
                            selectInput("selectedSampleType_normval", "Select SampleType to validate", ""),
                            plotOutput("norm_val_plot_intra_group"),
                            selectInput("selectedComp_normval", "Choose comparison for observation", ""),
                            plotOutput("norm_val_plot_inter_group")
                   ),
-                  tabPanel("Reporter Ion Intensity", 
+                  tabPanel("Reporter Ion Intensity", id="ri_pane",
                            selectInput("color_variable_ri", "select variable to indicate", ""),
                            plotOutput("RI_intensity")),
-                  tabPanel("Covariance and correlation",
-                           conditionalPanel(condition = "!input.file_level",
+                  tabPanel("Covariance and correlation", id="cov_cor_pane",
+                           conditionalPanel(condition = "!input.file_level", id="razor_prot_pane",
                                             selectInput("color_variable_cv", "select variable to indicate", ""),
                                             plotOutput("CV_median")),
                            plotOutput("corr_matrix"), width="100%"),
-                  tabPanel("Dimensionality reduction",
+                  tabPanel("Dimensionality reduction", id="dimred_pane",
                            materialSwitch(inputId = "third_dim", value = F, label="3d", status = "danger"),
                            fluidRow(width=12,
                                     column(width=4,
                                            selectInput("color_variable_dim_red", "select variable to color", "")),
-                                    conditionalPanel(condition = "!input.third_dim",
+                                    conditionalPanel(condition = "!input.third_dim", id="dimred_3d_set_pane",
                                                      column(width = 4,
                                                             selectInput("shape_variable_dim_red", "select variable to shape", "")),
                                                      column(width=4,
                                                             selectInput("size_variable_dim_red", "select variable to size", ""))
                                     )
                            ),
-                           conditionalPanel(condition = "!input.third_dim",
+                           conditionalPanel(condition = "!input.third_dim", id="dimred_2d_pane",
                                             fluidPage(
                                               plotOutput("PCA"), 
                                               plotOutput("UMAP")
                                             )
                            ),
-                           conditionalPanel(condition = "input.third_dim",
+                           conditionalPanel(condition = "input.third_dim", id="dimred_3d_pane",
                                             fluidPage(
                                               plotlyOutput("PCA_third_dim"),
                                               plotlyOutput("UMAP_third_dim")
                                             )
                            )
                   ),
-                  tabPanel("Feature wise output", 
+                  tabPanel("Feature wise output", id="feature_wise_pane",
                            selectizeInput("selectedProtein", "Choose protein for observation", ""),
-                           conditionalPanel(condition = "input.file_level",
+                           conditionalPanel(condition = "input.file_level", id="color_settings_pane",
                                             selectInput("color_variable_feature", "select variable to color", "")
                            ),
                            plotOutput("feature_subset")),
                   
-                  tabPanel("Statistics",
+                  tabPanel("Statistics", id="stats_pane",
                            actionButton("run_statistics", "Press to run statistics"),
                            actionButton("qqplot", "check dependencies for linear model"),
                            fluidRow(width=12,
@@ -156,7 +162,7 @@ ui <- fluidPage(
                            plotlyOutput("volcano"),
                            DT::dataTableOutput("protein_table")
                   ),
-                  tabPanel("Protein set enrichment Pathway based",
+                  tabPanel("Protein set enrichment Pathway based", id="psa_pathw_pane",
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
@@ -170,7 +176,7 @@ ui <- fluidPage(
                            materialSwitch("design_plot_gsea", label = "change Plot design"),
                            plotlyOutput("gsea")
                   ),
-                  tabPanel("Protein set enrichment Ontology based",
+                  tabPanel("Protein set enrichment Ontology based", id="psa_ont_pane",
                            fluidRow(width=12,
                                     column(width=4,
                                            br(),
@@ -195,12 +201,11 @@ ui <- fluidPage(
                                            textOutput("fc_cutoff_2"))
                            ),
                            br(),
-
-                           conditionalPanel("!input.go_plot_switch",
-                                            plotOutput("go_network", width = "1000px", height = "1000px")
+                           conditionalPanel("!input.go_plot_switch", id="network_pane",
+                                            visNetworkOutput("go_network", width = "100%", height = "200%")
                                             ),
-                           conditionalPanel("input.go_plot_switch",
-                                            plotOutput("go_heatmap", width = "1000px", height = "1000px")
+                           conditionalPanel("input.go_plot_switch", id="heatmap_pane",
+                                            plotOutput("go_heatmap", width = "100%", height = "200%")
                                             )
                   )
       )
@@ -262,6 +267,9 @@ boxcox_1.default <-
 # Define server logic required to draw a histogram
 server <- function(input, output, session) {
   options(shiny.maxRequestSize=50*1024^2)
+  
+
+  
   
   session$onSessionEnded(function() {
     stopApp()
@@ -2190,22 +2198,24 @@ server <- function(input, output, session) {
   })
   
   
-  output$go_network <- renderPlot({
+  
+  output$go_network <- renderVisNetwork({
     withProgress(message = "Plotting network", value=0,{
       incProgress(1/3, detail=paste("reading data"))
       req(result_piano())
       gsaRes <- result_piano()
-      
+
       req(input$p_value_cutoff)
       req(input$fold_change_cutoff)
       p_cut <- input$p_value_cutoff
       fc_cut <- input$fold_change_cutoff
-      
+
       incProgress(2/3, detail = paste("rendering network"))
-      networkPlot2(gsaRes,class="non", significance = p_cut)
-      
+      nw <- networkPlot2(gsaRes, class="non", significance = p_cut, shiny=T)
+
       incProgress(3/3, detail = paste("success"))
     })
+    nw
   })
   
   output$go_heatmap <- renderPlot({
