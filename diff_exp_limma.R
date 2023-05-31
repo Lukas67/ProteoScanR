@@ -13,8 +13,6 @@ rownames(evidence_data) <- evidence_data$ID
 evidence_data <- evidence_data[ , !(names(evidence_data) %in% c("ID"))]
 
 
-
-
 # handle exclusion dependencies
 selectedSampleType_to_exclude <- c("Pool")
 
@@ -66,11 +64,22 @@ protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="-")
 evidence_data <- data.frame(protein_matrix)
 
 
+protein_matrix <- as.data.frame(normalize.quantiles(as.matrix(evidence_data)))
+rownames(protein_matrix) <- rownames(evidence_data)
+colnames(protein_matrix) <- colnames(evidence_data)
+evidence_data <- protein_matrix
+
+
+boxplot(evidence_data)
+boxplot(evidence_data_transf)
 
 
 
+summary(evidence_data)
+summary(evidence_data_transf)
 
-
+hist(evidence_data)
+hist(evidence_data_transf)
 
 # 
 # # compare mutual info between batches 

@@ -203,7 +203,7 @@ normalize_data <- boxGrob("normalize data",
                           box_gp = plot_box_setting,
                           txt_gp = default_txt_setting)
 
-normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
+normalize_opts <- boxGrob("options:\ncol-Median,row_Mean\nCONSTANd\nNone",
                           box_gp = opts_box_setting,
                           txt_gp = opts_txt_setting,
                           just="center")
@@ -410,7 +410,7 @@ normalize_data <- boxGrob("normalize data",
                           box_gp = plot_box_setting,
                           txt_gp = default_txt_setting)
 
-normalize_opts <- boxGrob("options:\nSCoPE2\nCONSTANd\nNone",
+normalize_opts <- boxGrob("options:\ncol-Median,row_Mean\nCONSTANd\nNone",
                           box_gp = opts_box_setting,
                           txt_gp = opts_txt_setting,
                           just="center")

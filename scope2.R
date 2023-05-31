@@ -413,72 +413,90 @@ assay(scp[["proteins_transf"]]) <- protein_matrix
  
  # CONSTANd normalization method
 
-# make MA plot first
-MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
-  # catch unequal size of matrices
-  if (dim(x)[2] != dim(y)[2]) {
-    if (dim(x)[2] > dim(y)[2]) {
-      x <- x[, 1:dim(y)[2]]
-    } else if (dim(y)[2] > dim(x)[2]) {
-      y <- y[, 1:dim(x)[2]]
-    }
-  }
-  
-  # make an MA plot of y vs. x that shows the rolling average,
-  M <- log2(y/x)
-  xlab = 'A'
-  if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
-  A <- (log2(y/r)+log2(x/r))/2
-  if (use.order) {
-    orig.order <- order(A)
-    A <- orig.order
-    M <- M[orig.order]
-    xlab = "original rank of feature magnitude within IPS"
-  }
-  # select only finite values
-  use <- is.finite(M)
-  A <- A[use]
-  M <- M[use]
-  # plot
-  print(var(M))
-  plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
-  # rolling average
-  if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
-}
-
-MAplot(assay(scp[["proteins_transf"]])[,1:6], assay(scp[["proteins_transf"]])[,7:12])
-
-#find all pairwise indeces
-st_indeces <- split(seq_along(scp$SampleType), scp$SampleType)
-
-comp_list <- apply(combn(unique(scp$SampleType),2),2,paste, collapse="-")
-
-index_combis <- apply(combn(st_indeces,2),2,paste)
-
-user_choice <- comp_list[1]
-user_choice_vector <- strsplit(user_choice, split = "-")
-choice_A <- user_choice_vector[[1]][1]
-choice_B <- user_choice_vector[[1]][2]
-index_A <- st_indeces[choice_A]
-index_B <- st_indeces[choice_B]
-
-MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
+# # make MA plot first
+# MAplot <- function(x,y,use.order=FALSE, R=NULL, cex=1.6, showavg=TRUE) {
+#   # catch unequal size of matrices
+#   if (dim(x)[2] != dim(y)[2]) {
+#     if (dim(x)[2] > dim(y)[2]) {
+#       x <- x[, 1:dim(y)[2]]
+#     } else if (dim(y)[2] > dim(x)[2]) {
+#       y <- y[, 1:dim(x)[2]]
+#     }
+#   }
+#   
+#   # make an MA plot of y vs. x that shows the rolling average,
+#   M <- log2(y/x)
+#   xlab = 'A'
+#   if (!is.null(R)) {r <- R; xlab = "A (re-scaled)"} else r <- 1
+#   A <- (log2(y/r)+log2(x/r))/2
+#   if (use.order) {
+#     orig.order <- order(A)
+#     A <- orig.order
+#     M <- M[orig.order]
+#     xlab = "original rank of feature magnitude within IPS"
+#   }
+#   # select only finite values
+#   use <- is.finite(M)
+#   A <- A[use]
+#   M <- M[use]
+#   # plot
+#   print(var(M))
+#   plot(A, M, xlab=xlab, cex.lab=cex, cex.axis=cex)
+#   # rolling average
+#   if (showavg) { lines(lowess(M~A), col='red', lwd=5) }
+# }
+# 
+# MAplot(assay(scp[["proteins_transf"]])[,1:6], assay(scp[["proteins_transf"]])[,7:12])
+# 
+# #find all pairwise indeces
+# st_indeces <- split(seq_along(scp$SampleType), scp$SampleType)
+# 
+# comp_list <- apply(combn(unique(scp$SampleType),2),2,paste, collapse="-")
+# 
+# index_combis <- apply(combn(st_indeces,2),2,paste)
+# 
+# user_choice <- comp_list[1]
+# user_choice_vector <- strsplit(user_choice, split = "-")
+# choice_A <- user_choice_vector[[1]][1]
+# choice_B <- user_choice_vector[[1]][2]
+# index_A <- st_indeces[choice_A]
+# index_B <- st_indeces[choice_B]
+# 
+# MAplot(assay(scp[["proteins_transf"]][,index_A[[1]]]), assay(scp[["proteins_transf"]][,index_B[[1]]]))
+# 
+# protein_matrix <- assay(scp[["proteins_transf"]])
+# protein_matrix <- CONSTANd(protein_matrix)
+# 
+# sce <- getWithColData(scp, "proteins")
+# 
+# scp <- addAssay(scp,
+#                 y = sce,
+#                 name = "proteins_norm")
+# 
+# scp <- addAssayLinkOneToOne(scp,
+#                             from = "proteins_transf",
+#                             to = "proteins_norm")
+# 
+# #assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
+# assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
 
 protein_matrix <- assay(scp[["proteins_transf"]])
-protein_matrix <- CONSTANd(protein_matrix)
 
-sce <- getWithColData(scp, "proteins")
+sce <- getWithColData(scp, "proteins_transf")
 
 scp <- addAssay(scp,
-                y = sce,
-                name = "proteins_norm")
+                  y = sce,
+                  name = "proteins_norm")
 
 scp <- addAssayLinkOneToOne(scp,
-                            from = "proteins_transf",
-                            to = "proteins_norm")
+                              from = "proteins_transf",
+                              to = "proteins_norm")
 
-#assay(scp[["proteins_norm"]]) <- assay(scp[["proteins_transf"]])
-assay(scp[["proteins_norm"]]) <- protein_matrix$normalized_data
+protein_matrix <- normalizeQuantiles(protein_matrix)
+
+assay(scp[["proteins_norm"]]) <- protein_matrix
+
+
 
 
 # missing value imputation
@@ -501,14 +519,36 @@ library(impute)
 library(sva)
 
 if (length(peptide_file) > 1) {
-  scp <- impute(scp,
-                i = "proteins_norm",
-                name = "proteins_imptd",
-                method = "knn",
-                k = 3, rowmax = 1, colmax= 1,
-                maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
-} 
+  # scp <- impute(scp,
+  #               i = "proteins_norm",
+  #               name = "proteins_imptd",
+  #               method = "knn",
+  #               k = 3, rowmax = 1, colmax= 1,
+  #               maxp = Inf, rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+  protein_matrix <- assay(scp[["proteins_norm"]])
   
+  sce <- getWithColData(scp, "proteins_norm")
+  
+  scp <- addAssay(scp,
+                  y = sce,
+                  name = "proteins_imptd")
+  
+  scp <- addAssayLinkOneToOne(scp,
+                              from = "proteins_norm",
+                              to = "proteins_imptd")
+  
+  protein_matrix <- impute.knn(protein_matrix, 
+                               k=3, 
+                               rowmax = 1, 
+                               colmax = 1, 
+                               maxp = Inf, 
+                               rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+  
+  
+  assay(scp[["proteins_imptd"]]) <- protein_matrix$data
+  } 
+
+
   
   sce <- getWithColData(scp, "proteins_imptd")
   

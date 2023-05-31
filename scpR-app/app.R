@@ -67,7 +67,7 @@ ui <- fluidPage(
       # choose log transform base
       selectInput("transform_base", "Choose method for protein data transformation", choices = c("log2", "log10", "sqrt", "quadratic", "BoxCox", "None")),
       # normalization method 
-      selectInput("norm_method", "Choose method for protein data normalization", choices = c("SCoPE2", "None", "CONSTANd")),
+      selectInput("norm_method", "Choose method for protein data normalization", choices = c("col-Median,row_Mean", "None", "CONSTANd", "Quantile")),
       # multiple batch handling
       switchInput(inputId = "opts_multiple_batches", onLabel = "Advanced", offLabel = "Default", value = F, label="Options for multiple batches"),
       conditionalPanel(id="multiple_batch_pane",condition = "input.opts_multiple_batches", 
@@ -306,7 +306,7 @@ server <- function(input, output, session) {
                           title = "Proteomics Workbench",
                           HTML("Created by Lukas Gamp.<br> <br>
       Workflow as described in the publication: <br>
-      Multiplexed single-cell proteomics using SCoPE2 <br>
+      Multiplexed single-cell proteomics using col-Median,row_Mean <br>
              10.1038/s41596-021-00616-z <br>
              <br>
              <br>
@@ -405,8 +405,8 @@ server <- function(input, output, session) {
   
   # result of analysis pipleline
   scp <- eventReactive(input$update_button, {
-    tryCatch({
-      errMsg(NULL)
+    # tryCatch({
+    #   errMsg(NULL)
       withProgress(message= "running analysis", value=0, {
         
         req(meta_data)
@@ -723,8 +723,8 @@ server <- function(input, output, session) {
         
         incProgress(15/17, detail=paste("normalizing proteins"))
         req(input$norm_method)
-        if (input$norm_method == "SCoPE2" && (input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10")) {
-          print("SCoPE2 normalization on log transformed values")
+        if (input$norm_method == "col-Median,row_Mean" && (input$transform_base == "log2" | input$transform_base == "log10" | transform_base_bc == "log10")) {
+          print("col-Median,row_Mean normalization on log transformed values")
           if (input$file_level == FALSE) {
             # center cols with median
             scp_0 <- sweep(scp_0, i = "proteins_transf",
@@ -751,8 +751,8 @@ server <- function(input, output, session) {
             evidence_data <- data.frame(protein_matrix)
           }
           
-        } else if (input$norm_method == "SCoPE2" && (input$transform_base != "log2" | input$transform_base != "log10" | transform_base_bc != "log10")) {
-          print("SCoPE2 normalization")
+        } else if (input$norm_method == "col-Median,row_Mean" && (input$transform_base != "log2" | input$transform_base != "log10" | transform_base_bc != "log10")) {
+          print("col-Median,row_Mean normalization")
           if (input$file_level == FALSE) {
             # center cols with median
             scp_0 <- sweep(scp_0, i = "proteins_transf",
@@ -815,6 +815,31 @@ server <- function(input, output, session) {
                                           to = "proteins_norm")
           } else {
             evidence_data <- evidence_data
+          } 
+        } else if (input$norm_method == "Quantile") {
+          print("quantile normalization applied")
+          if (input$file_level == FALSE) {
+            protein_matrix <- assay(scp_0[["proteins_transf"]])
+            
+            sce <- getWithColData(scp_0, "proteins_transf")
+            
+            scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_norm")
+            
+            scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_transf",
+                                          to = "proteins_norm")
+            
+            protein_matrix <- normalizeQuantiles(protein_matrix)
+            
+            assay(scp_0[["proteins_norm"]]) <- protein_matrix
+            
+          } else {
+            protein_matrix <- evidence_data
+            protein_matrix <- normalizeQuantiles(evidence_data)
+
+            evidence_data <- protein_matrix
           }
         }
         
@@ -829,13 +854,31 @@ server <- function(input, output, session) {
           if (input$missing_v == "KNN") {
             print("KNN missing value imputation")
             if (input$file_level == FALSE) {
-              scp_0 <- impute(scp_0,
-                              i = "proteins_norm",
-                              name = "proteins_imptd",
-                              method = "knn",
-                              k = 3, rowmax = 1, colmax= 1,
-                              maxp = Inf,
-                              rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+              protein_matrix <- assay(scp_0[["proteins_norm"]])
+              
+              sce <- getWithColData(scp_0, "proteins_norm")
+              
+              scp_0 <- addAssay(scp_0,
+                              y = sce,
+                              name = "proteins_imptd")
+              
+              scp_0 <- addAssayLinkOneToOne(scp_0,
+                                          from = "proteins_norm",
+                                          to = "proteins_imptd")
+              
+              protein_matrix <- impute.knn(protein_matrix, 
+                                           k=5, 
+                                           rowmax = 1, 
+                                           colmax = 1, 
+                                           maxp = Inf, 
+                                           rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+              
+              protein_matrix <- data.frame(protein_matrix$data)
+              
+              colnames(protein_matrix) <- colnames(assay(scp_0[["proteins_imptd"]]))
+              rownames(protein_matrix) <- rownames(assay(scp_0[["proteins_imptd"]]))
+              
+              assay(scp_0[["proteins_imptd"]]) <- protein_matrix
             } else {
               protein_matrix <- as.matrix(evidence_data)
               protein_matrix <- impute.knn(protein_matrix,
@@ -988,11 +1031,11 @@ server <- function(input, output, session) {
       } else {
         return(evidence_data)
       }
-    }, error = function(err) {
-      print("error handler")
-      errMsg("Whoops something went wrong")
-    },
-    finally = invalidateLater(1))
+    # }, error = function(err) {
+    #   print("error handler")
+    #   errMsg("Whoops something went wrong")
+    # },
+    # finally = invalidateLater(1))
   })
   
   
@@ -1819,7 +1862,7 @@ server <- function(input, output, session) {
           
           fit <- lmFit(exp_matrix_0, design)
           
-          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          user_contrast <- paste(input$selectedComp_stat, collapse = "-")
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
           
           fit <- contrasts.fit(fit, cont_matrix)
@@ -1832,7 +1875,7 @@ server <- function(input, output, session) {
           
           fit <- lmFit(exp_matrix_0, design)
           
-          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          user_contrast <- paste(input$selectedComp_stat, collapse = "-")
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
           
           fit <- contrasts.fit(fit, cont_matrix)
@@ -1854,7 +1897,7 @@ server <- function(input, output, session) {
           
           fit <- lmFit(exp_matrix_0, design)
           
-          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+          user_contrast <- paste(input$selectedComp_stat, collapse = "-")
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
           
           fit <- contrasts.fit(fit, cont_matrix)
@@ -1870,12 +1913,13 @@ server <- function(input, output, session) {
           
           design <- model.matrix(~0+ . , data=design_frame)
           colnames(design)[1:length(unique(design_frame$Group))] <- sub("Group", "", colnames(design)[1:length(unique(design_frame$Group))])
+          print(design)
           
           fit <- lmFit(exp_matrix_0, design)
-          
-          user_contrast <- paste(input$selectedComp_stat, sep = "-", collapse = NULL)
+ 
+          user_contrast <- paste(input$selectedComp_stat, collapse = "-")
           cont_matrix <- makeContrasts(contrasts=user_contrast,levels=colnames(design))
-          
+
           fit <- contrasts.fit(fit, cont_matrix)
           
         }
