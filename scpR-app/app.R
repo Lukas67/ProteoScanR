@@ -160,6 +160,7 @@ ui <- fluidPage(
                            DT::dataTableOutput("protein_table")
                   ),
                   tabPanel("Protein set enrichment Pathway based", id="psa_pathw_pane",
+                           actionButton("run_kegg", "Press to run pathway enrichment"),
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
@@ -170,7 +171,15 @@ ui <- fluidPage(
                                            textOutput("fc_cutoff_1"))
                            ),
                            br(),
-                           materialSwitch("design_plot_gsea", label = "change Plot design"),
+                           fluidRow(width=12,
+                                    column(width=4,
+                                           materialSwitch("design_plot_gsea", label = "change Plot design")),
+                                    column(width = 4,
+                                           materialSwitch("panel_as_universe", label = "use detected proteins as background")),
+                                    column(width=4,
+                                           fileInput("custom_universe", "Upload tabdel (.txt) uniprot_id background (w.col header)", accept = c("text")))
+                           ),
+                           
                            plotlyOutput("gsea", height="auto", width = "auto")
                   ),
                   tabPanel("Protein set enrichment Ontology based", id="psa_ont_pane",
@@ -2098,7 +2107,7 @@ server <- function(input, output, session) {
   
   # gene set enrichment analysis 
   
-  result_kegg <- reactive({
+  result_kegg <- eventReactive(input$run_kegg, {
     withProgress(message = "running pathway analysis", value = 0, {
       incProgress(1/3, detail = paste("reading data"))
       req(protein_table())
@@ -2115,6 +2124,20 @@ server <- function(input, output, session) {
       
       deGenes <- rownames(tt)[mask]
       
+      if (input$panel_as_universe) {
+        background <- rownames(tt)
+      } else {
+        background <- NULL
+      }
+      
+      if (!is.null(input$custom_universe) & !(input$panel_as_universe)) {
+        background <- read.delim(input$custom_universe$datapath)
+        background <- as.vector(background[1])
+        background <- background[[1]]
+      } else {
+        background <- background
+      }
+      
       req(input$p_value_correction)
       p_correct <- input$p_value_correction
       
@@ -2128,7 +2151,8 @@ server <- function(input, output, session) {
         minGSSize = 10,
         maxGSSize = Inf,
         qvalueCutoff = 0.2,
-        use_internal_data = FALSE
+        use_internal_data = FALSE,
+        universe = background
       )
       incProgress(3/3, detail = paste("success"))
     })

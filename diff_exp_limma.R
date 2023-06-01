@@ -64,24 +64,7 @@ protein_matrix <- sweep(protein_matrix, 1, rowMeans(protein_matrix), FUN="-")
 evidence_data <- data.frame(protein_matrix)
 
 
-protein_matrix <- as.data.frame(normalize.quantiles(as.matrix(evidence_data)))
-rownames(protein_matrix) <- rownames(evidence_data)
-colnames(protein_matrix) <- colnames(evidence_data)
-evidence_data <- protein_matrix
 
-
-boxplot(evidence_data)
-boxplot(evidence_data_transf)
-
-
-
-summary(evidence_data)
-summary(evidence_data_transf)
-
-hist(evidence_data)
-hist(evidence_data_transf)
-
-# 
 # # compare mutual info between batches 
 # batch_select1 <- "Batch_1"
 # batch_select2 <- "Batch_2"
@@ -372,6 +355,19 @@ library("edgeR")
 # top table of significant genes is the starting point of the analysis
 tt <- top_genes_1
 
+background_genes <- data.frame(rownames(tt))
+
+library(tidyverse)
+write_delim(
+  background_genes,
+  "/home/lukas/Downloads/background_genes.txt",
+  delim = " ",
+)
+
+background <- read.delim("/home/lukas/Downloads/background_genes.txt") 
+background <- as.vector(background[1])
+background <- background[[1]]
+
 mask <- tt$adj.P.Val < 1 &
   abs(tt$logFC) > 0.0005
 deGenes <- rownames(tt)[mask]
@@ -386,7 +382,8 @@ ans.kegg <- enrichKEGG(
   minGSSize = 10,
   maxGSSize = 500,
   qvalueCutoff = 0.2,
-  use_internal_data = FALSE
+  use_internal_data = FALSE,
+  universe = background
 )
 
 tab.kegg <- as.data.frame(ans.kegg)
