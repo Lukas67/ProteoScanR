@@ -185,14 +185,14 @@ ui <- fluidPage(
                            ),
                            conditionalPanel("!input.pw_plot_switch", id="network_pane",
                                             conditionalPanel("!input.design_plot_gsea",
-                                                             visNetworkOutput("gsea_network_1", width = "1400px", height="1000px")
+                                                             visNetworkOutput("gsea_network_1", width = "1300px", height="800px")
                                                              ),
                                             conditionalPanel("input.design_plot_gsea",
-                                                             plotOutput("gsea_network_2", width = "1400px", height="1000px")
+                                                             plotOutput("gsea_network_2", width = "1300px", height="800px")
                                                              )
                            ),
                            conditionalPanel("input.pw_plot_switch",
-                                            plotlyOutput("gsea", width="1500px", height = "auto"),
+                                            plotlyOutput("gsea", width="1300px", height = "auto"),
                            ),
                 
                   ),
@@ -228,14 +228,14 @@ ui <- fluidPage(
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
                                             conditionalPanel("!input.design_plot_go",
-                                                             visNetworkOutput("go_network_1", width = "1300px", height = "1000px")
+                                                             visNetworkOutput("go_network_1", width = "1300px", height = "800px")
                                                              ),
                                             conditionalPanel("input.design_plot_go",
-                                                             plotOutput("go_network_2", width = "1300px", height = "1200px")
+                                                             plotOutput("go_network_2", width = "1300px", height = "800px")
                                                              )
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "1500px", height = "1000px")
+                                            plotOutput("go_heatmap", width = "1800px", height = "auto")
                                             ), 
                   )
       )
