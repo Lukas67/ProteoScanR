@@ -22,8 +22,8 @@ library("infotheo")
 library("org.Hs.eg.db")
 library("AnnotationDbi")
 library("piano")
-library("snowfall")
-library("parallel")
+#library("snowfall")
+#library("parallel")
 library("visNetwork")
 
 
@@ -185,14 +185,14 @@ ui <- fluidPage(
                            ),
                            conditionalPanel("!input.pw_plot_switch", id="network_pane",
                                             conditionalPanel("!input.design_plot_gsea",
-                                                             visNetworkOutput("gsea_network_1", width = "1200px", height="1200px")
+                                                             visNetworkOutput("gsea_network_1", width = "1400px", height="1000px")
                                                              ),
                                             conditionalPanel("input.design_plot_gsea",
-                                                             plotOutput("gsea_network_2", height="1200px", width = "1200px")
+                                                             plotOutput("gsea_network_2", width = "1400px", height="1000px")
                                                              )
                            ),
-                           conditionalPanel("input.pw_plot_switch", id="heatmap_pane",
-                                            plotlyOutput("gsea", height="auto", width = "auto"),
+                           conditionalPanel("input.pw_plot_switch",
+                                            plotlyOutput("gsea", width="1500px", height = "auto"),
                            ),
                 
                   ),
@@ -228,15 +228,15 @@ ui <- fluidPage(
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
                                             conditionalPanel("!input.design_plot_go",
-                                                             visNetworkOutput("go_network_1", width = "1200px", height = "1200px")
+                                                             visNetworkOutput("go_network_1", width = "1300px", height = "1000px")
                                                              ),
                                             conditionalPanel("input.design_plot_go",
-                                                             plotOutput("go_network_2")
+                                                             plotOutput("go_network_2", width = "1300px", height = "1200px")
                                                              )
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "1200px", height = "1200px")
-                                            )
+                                            plotOutput("go_heatmap", width = "1500px", height = "1000px")
+                                            ), 
                   )
       )
     )
@@ -2313,13 +2313,13 @@ server <- function(input, output, session) {
       req(input$p_value_correction)
       p_correct <- input$p_value_correction
       
-      cores <- detectCores()
+#      cores <- detectCores()
       
       gsaRes <- runGSA(geneLevelStats = pVals,
                        directions = logFCs,
                        gsc=myGSC,
-                       adjMethod = p_correct,
-                       ncpus = cores
+                       adjMethod = p_correct#,
+#                       ncpus = cores
                        )
       incProgress(4/4, detail=paste("success"))
       
@@ -2337,9 +2337,7 @@ server <- function(input, output, session) {
         gsaRes <- result_piano()
         
         req(input$p_value_cutoff)
-        req(input$fold_change_cutoff)
         p_cut <- input$p_value_cutoff
-        fc_cut <- input$fold_change_cutoff
         
         incProgress(2/3, detail = paste("rendering network"))
         nw <- networkPlot2(gsaRes, class="non", significance = p_cut, shiny=T)
@@ -2357,9 +2355,7 @@ server <- function(input, output, session) {
         gsaRes <- result_piano()
         
         req(input$p_value_cutoff)
-        req(input$fold_change_cutoff)
         p_cut <- input$p_value_cutoff
-        fc_cut <- input$fold_change_cutoff
         
         incProgress(2/3, detail = paste("rendering network"))
         nw <- networkPlot(gsaRes, class="non", significance = p_cut)
