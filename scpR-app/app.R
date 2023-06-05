@@ -160,7 +160,20 @@ ui <- fluidPage(
                            DT::dataTableOutput("protein_table")
                   ),
                   tabPanel("Protein set enrichment Pathway based", id="psa_pathw_pane",
-                           actionButton("run_kegg", "Press to run pathway enrichment"),
+                           br(),
+                           actionButton("run_kegg", "Press to run pathway enrichment", class="btn-success"),
+                           br(),
+                           br(),
+                           fluidRow(width=12,
+                                    column(width = 3,
+                                           switchInput("pw_plot_switch", label="switch between visualizations", onLabel="Bar/Dot", offLabel="Network", onStatus="primary", offStatus = "info")),
+                                    column(width = 3,
+                                           materialSwitch("design_plot_gsea", label = "change Plot design")),
+                                    column(width = 3,
+                                           materialSwitch("panel_as_universe", label = "use detected proteins as background")),
+                                    column(width=3,
+                                           fileInput("custom_universe", "Upload tabdel (.txt) uniprot_id background (w.col header)", accept = c("text")))
+                           ),
                            br(),
                            fluidRow(width=12,
                                     column(width=4,
@@ -170,19 +183,23 @@ ui <- fluidPage(
                                     column(width=4,
                                            textOutput("fc_cutoff_1"))
                            ),
-                           br(),
-                           fluidRow(width=12,
-                                    column(width=4,
-                                           materialSwitch("design_plot_gsea", label = "change Plot design")),
-                                    column(width = 4,
-                                           materialSwitch("panel_as_universe", label = "use detected proteins as background")),
-                                    column(width=4,
-                                           fileInput("custom_universe", "Upload tabdel (.txt) uniprot_id background (w.col header)", accept = c("text")))
+                           conditionalPanel("!input.pw_plot_switch", id="network_pane",
+                                            conditionalPanel("!input.design_plot_gsea",
+                                                             visNetworkOutput("gsea_network_1", width = "1200px", height="1200px")
+                                                             ),
+                                            conditionalPanel("input.design_plot_gsea",
+                                                             plotOutput("gsea_network_2", height="1200px", width = "1200px")
+                                                             )
                            ),
-                           
-                           plotlyOutput("gsea", height="auto", width = "auto")
+                           conditionalPanel("input.pw_plot_switch", id="heatmap_pane",
+                                            plotlyOutput("gsea", height="auto", width = "auto"),
+                           ),
+                
                   ),
                   tabPanel("Protein set enrichment Ontology based", id="psa_ont_pane",
+                           br(),
+                           actionButton("go_ontology", label = "Run ontology", class = "btn-success"),
+                           br(),
                            fluidRow(width=12,
                                     column(width=4,
                                            br(),
@@ -192,10 +209,12 @@ ui <- fluidPage(
                                            br(),
                                            br(),
                                            br(),
-                                           actionButton("go_ontology", label = "Run ontology", class = "btn-success")),
+                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="primary", offStatus = "info")),
                                     column(width=4,
                                            br(),
-                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="primary", offStatus = "info"))
+                                           br(),
+                                           br(),
+                                           materialSwitch("design_plot_go", label = "change Plot design"))
                            ),
                            br(),
                            fluidRow(width=12,
@@ -208,7 +227,12 @@ ui <- fluidPage(
                            ),
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
-                                            visNetworkOutput("go_network", width = "1200px", height = "1200px")
+                                            conditionalPanel("!input.design_plot_go",
+                                                             visNetworkOutput("go_network_1", width = "1200px", height = "1200px")
+                                                             ),
+                                            conditionalPanel("input.design_plot_go",
+                                                             plotOutput("go_network_2")
+                                                             )
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
                                             plotOutput("go_heatmap", width = "1200px", height = "1200px")
@@ -2214,6 +2238,47 @@ server <- function(input, output, session) {
     }
   })
   
+  
+  gsea_network_data <- reactive({
+    req(result_kegg())
+    ans.kegg <- result_kegg()
+    
+    nw <- cnetplot(ans.kegg)
+    return(nw)
+  })
+  
+  
+  output$gsea_network_1 <- renderVisNetwork({
+    if (!input$design_plot_gsea & !input$pw_plot_switch) {
+      withProgress(message = "Plotting network", value=0,{
+        incProgress(1/3, detail=paste("reading data"))
+        req(gsea_network_data())
+        nw_data <- gsea_network_data()
+        
+        graph_info <- attributes(nw_data$data)$graph
+        incProgress(2/3, detail = paste("rendering network"))
+        nw <- visNetwork::visIgraph(graph_info, physics = T, smooth = T)
+        
+        incProgress(3/3, detail = paste("success"))
+      })
+      nw 
+    }
+  })
+  
+  output$gsea_network_2 <- renderPlot({
+    withProgress(message = "Plotting network", value=0,{
+      incProgress(1/3, detail=paste("reading data"))
+      req(gsea_network_data())
+      nw_data <- gsea_network_data()
+      
+      incProgress(2/3, detail = paste("rendering network"))
+      nw <- nw_data
+      
+      incProgress(3/3, detail = paste("success"))
+    })
+    nw
+  })
+  
   result_piano <- eventReactive(input$go_ontology, {
     withProgress(message = "running protein set analysis ontology", value = 0, {
       req(protein_table())
@@ -2264,24 +2329,47 @@ server <- function(input, output, session) {
   
   
   
-  output$go_network <- renderVisNetwork({
-    withProgress(message = "Plotting network", value=0,{
-      incProgress(1/3, detail=paste("reading data"))
-      req(result_piano())
-      gsaRes <- result_piano()
-
-      req(input$p_value_cutoff)
-      req(input$fold_change_cutoff)
-      p_cut <- input$p_value_cutoff
-      fc_cut <- input$fold_change_cutoff
-
-      incProgress(2/3, detail = paste("rendering network"))
-      nw <- networkPlot2(gsaRes, class="non", significance = p_cut, shiny=T)
-
-      incProgress(3/3, detail = paste("success"))
-    })
-    nw
+  output$go_network_1 <- renderVisNetwork({
+    if (!input$design_plot_go & !input$go_plot_switch) {
+      withProgress(message = "Plotting network", value=0,{
+        incProgress(1/3, detail=paste("reading data"))
+        req(result_piano())
+        gsaRes <- result_piano()
+        
+        req(input$p_value_cutoff)
+        req(input$fold_change_cutoff)
+        p_cut <- input$p_value_cutoff
+        fc_cut <- input$fold_change_cutoff
+        
+        incProgress(2/3, detail = paste("rendering network"))
+        nw <- networkPlot2(gsaRes, class="non", significance = p_cut, shiny=T)
+        
+        incProgress(3/3, detail = paste("success"))
+      })
+      nw
+    }
   })
+  
+  output$go_network_2 <- renderPlot({
+      withProgress(message = "Plotting network", value=0,{
+        incProgress(1/3, detail=paste("reading data"))
+        req(result_piano())
+        gsaRes <- result_piano()
+        
+        req(input$p_value_cutoff)
+        req(input$fold_change_cutoff)
+        p_cut <- input$p_value_cutoff
+        fc_cut <- input$fold_change_cutoff
+        
+        incProgress(2/3, detail = paste("rendering network"))
+        nw <- networkPlot(gsaRes, class="non", significance = p_cut)
+        
+        incProgress(3/3, detail = paste("success"))
+      })
+      nw 
+  })
+  
+  
   
   output$go_heatmap <- renderPlot({
     withProgress(message = "Plotting heatmap", value=0, 

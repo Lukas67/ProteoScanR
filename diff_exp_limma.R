@@ -382,9 +382,20 @@ ans.kegg <- enrichKEGG(
   minGSSize = 10,
   maxGSSize = 500,
   qvalueCutoff = 0.2,
-  use_internal_data = FALSE,
-  universe = background
+  use_internal_data = FALSE#,
+  #universe = background
 )
+
+nw <- cnetplot(ans.kegg)
+
+graph_info <- attributes(nw$data)$graph
+
+
+visNetwork::visIgraph(graph_info, physics = T, smooth = T)
+
+
+
+
 
 tab.kegg <- as.data.frame(ans.kegg)
 #tab.kegg<- subset(tab.kegg, Count>5)
