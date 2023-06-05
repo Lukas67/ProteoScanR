@@ -201,16 +201,20 @@ ui <- fluidPage(
                            actionButton("go_ontology", label = "Run ontology", class = "btn-success"),
                            br(),
                            fluidRow(width=12,
-                                    column(width=4,
+                                    column(width=3,
                                            br(),
                                            br(),
                                            fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text"))),
-                                    column(width = 4,
+                                    column(width = 3,
+                                           br(),
+                                           br(),
+                                           selectInput("gene_set_stat", label="select stat method", choices = c("fisher", "stouffer","reporter", "tailStrength", "wilcoxon", "mean", "median", "sum", "maxmean","gsea", "fgsea", "page"))),
+                                    column(width = 3,
                                            br(),
                                            br(),
                                            br(),
                                            switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="primary", offStatus = "info")),
-                                    column(width=4,
+                                    column(width=3,
                                            br(),
                                            br(),
                                            br(),
@@ -2285,11 +2289,11 @@ server <- function(input, output, session) {
       tt <- protein_table()
       
       # parse data
-      myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t, logFC=tt$logFC)
+      myPval <- data.frame(p.val=tt$adj.P.Val, t.val=tt$t, logFC=tt$logFC)
       myPval$UNIPROT <- rownames(tt)
-      
+
       incProgress(1/4, detail = paste("fetching entrez IDs"))
-      entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
+      entrez_ids <- AnnotationDbi::select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
       myPval <- merge(myPval, entrez_ids, by="UNIPROT")
       
       # drop duplicates and nas
@@ -2315,10 +2319,14 @@ server <- function(input, output, session) {
       
 #      cores <- detectCores()
       
+      req(input$gene_set_stat)
+      stat_meth <- input$gene_set_stat
+      
       gsaRes <- runGSA(geneLevelStats = pVals,
                        directions = logFCs,
                        gsc=myGSC,
-                       adjMethod = p_correct#,
+                       adjMethod = p_correct,
+                       geneSetStat = as.character(stat_meth)#,
 #                       ncpus = cores
                        )
       incProgress(4/4, detail=paste("success"))

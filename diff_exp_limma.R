@@ -471,14 +471,14 @@ plotGOgraph(GO_enrichment)
 library("piano")
 
 # parse data
-myPval <- data.frame(p.val=tt$P.Value, t.val=tt$t, logFC=tt$logFC)
+myPval <- data.frame(adj.p.val=tt$adj.P.Val, t.val=tt$t, logFC=tt$logFC)
 myPval$UNIPROT <- rownames(tt)
 
 library("org.Hs.eg.db")
 library("AnnotationDbi")
 
 # fetch Entrez IDs
-entrez_ids <- select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
+entrez_ids <- AnnotationDbi::select(org.Hs.eg.db, myPval$UNIPROT, "ENTREZID", "UNIPROT")
 myPval <- merge(myPval, entrez_ids, by="UNIPROT")
 
 # check nNA
@@ -502,7 +502,7 @@ myGSC <- loadGSC("/home/lukas/Downloads/c7.all.v2023.1.Hs.entrez.gmt")
 logFCs <- data.frame(myPval$logFC)
 rownames(logFCs) <- rownames(myPval)
 
-pVals <- data.frame(myPval$p.val)
+pVals <- data.frame(myPval$adj.p.val)
 rownames(pVals) <- rownames(myPval)
 
 library("snowfall")
@@ -513,31 +513,38 @@ cores <- detectCores()
 gsaRes <- runGSA(geneLevelStats = pVals,
                  directions = logFCs,
                  gsc=myGSC, 
-                 ncpus = cores)
+                 ncpus = cores,
+                 geneSetStat = "fisher")
+
+gsaRes_2 <- runGSA(geneLevelStats = pVals,
+                  directions = logFCs,
+                  gsc=myGSC, 
+                  ncpus = cores)
 
 
 gsa_results <- GSAsummaryTable(gsaRes = gsaRes)
-
+gsa_results_2 <- GSAsummaryTable(gsaRes = gsaRes_2)
 
 par(mar = c(1, 1, 1, 1))
 networkPlot(gsaRes,class="non")
 
 
-nw <- networkPlot2(gsaRes, class="non", significance = 0.5, shiny = T)
+nw <- networkPlot2(gsaRes_2, class="non", significance = 0.5, shiny = T)
 
 library("visNetwork")
 
 visNetwork(nodes = nw$x$nodes, edges = nw$x$edges)
 
 
-
+GSAheatmap(gsaRes_2)
 
 
 
 cut <- nrow(tt[tt$adj.P.Value < 1 & abs(tt$logFC) > 0.0001])
 
-GSAheatmap(gsaRes, cutoff=cut)
+GSAheatmap(gsaRes)
 
+res <- consensusHeatmap(resList = list(gsaRes, gsaRes))
 
 
 
