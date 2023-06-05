@@ -192,7 +192,7 @@ ui <- fluidPage(
                                                              )
                            ),
                            conditionalPanel("input.pw_plot_switch",
-                                            plotlyOutput("gsea", width="1300px", height = "auto"),
+                                            plotlyOutput("gsea", width="1300px", height = "800px"),
                            ),
                 
                   ),
@@ -235,7 +235,7 @@ ui <- fluidPage(
                                                              )
                                             ),
                            conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "1800px", height = "auto")
+                                            plotOutput("go_heatmap", width = "1800px", height = "800px")
                                             ), 
                   )
       )
