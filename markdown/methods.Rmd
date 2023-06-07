@@ -134,7 +134,7 @@ After these calculation the identified peptides can be aggregated according to i
 
 Further analysis is done with R and respective packages such as bioconductor. Since there is no state of the art established, analysis varies upon experimental design. The workflow of the analysis will be processed in a so called pipeline streamlining the data through steps where individual results can be observed in visualizations and indivdual calculations will be adapted according to user demands and experimental properties. 
 
-```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=16}
+```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=18}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -712,7 +712,7 @@ Limma outputs a table with all proteins, their respective logfold change, p-valu
 The third and most conservative option is the Holm method \citep{Holm1979} which controls the error sequentally in a family wise manner, which is considered as traditional in regards to the above mentioned experimental wise error rates. The above mentioned correction methods are ordered in the way from the most liberal to the most conservative one. The selection is supposed to give the user the possibility questioning results on multiple levels. 
 
 #### Protein set enrichment analysis
-After differential expression the upcoming question could be, in which context the up or down regulated proteins are. Enriched proteins can be understood as an overabundance within a specific set. This set can be a pathway or a selection of common denominators in biological contexts, such as cell types or oncological factors. The statistical testing to identify the overabundant proteins of a specific set is similar to a $\chi^2$ test developed by Karl Pearson \citep{Pearson1900} or the exact Fisher test \citep{Sprent2011} for tables with 4 fields in small sample sizes. Within the list are all truly differentially expressed genes, an annotation is the identification of a protein in the desired biological context. 
+After differential expression the upcoming question could be, in which context the up or down regulated proteins are. Enriched proteins can be understood as an over-representation (ORA = over-representation analysis) within a specific set. This set can be a pathway or a selection of common denominators in biological contexts, such as cell types or oncological factors. The statistical testing to identify the overabundant proteins of a specific set is similar to a $\chi^2$ test developed by Karl Pearson \citep{Pearson1900} or the exact Fisher test \citep{Sprent2011} for tables with 4 fields in small sample sizes. Within the list are all truly differentially expressed genes, an annotation is the identification of a protein in the desired biological context. 
 We expect that the values populate the fields in the table as follows:
 
 \begin{center}
@@ -732,16 +732,16 @@ We expect that the values populate the fields in the table as follows:
 Under the null hypothesis $H_{0}$ states that the distribution and population of the table is random and there is no clear tendency with significant evidence. Against that the alternative hypothesis $H_{A}$ says that there is an underlying tendency the table is populated. 
 This leads to our test statistics, the observed values (=$O$) in the table are significantly different to the expected (=$E=\frac{(A+B \lor C+D)}{N}$ ones. One approach is approximating $\chi^2= \sum_{i=1}^{n} \frac{(O_i - E_i)^2}{E_i}$ and deriving the p-value by the area under the density curve of the $\chi^2$ distribution $Q = \sum_{i=1}^{k} Z_{i}^{2}$. In the distribution $k$ is defined by the degrees of freedom (=df), what can be obtained by $k=(columns-1)*(rows-1)=df$ of our table. Another approach to obtain an exact p-value would be Fisher`s exact test, which states that the margins are distributed according to the hypergeometric distributions. The test statistic leads directly to the p-value with no need for approximation: 
 $p=1-\sum_{i=0}^{A-1}\frac{\binom{B}{i}\binom{D-B}{A+C-i}}{\binom{D}{A+C}}$
-Here D denotes either for the background distribution which can be the total number of proteins obtained in our experiment, all proteins with annotation or a custom selected background. These three options are implemented in the user interface.
-After obtaining the p-values for each protein set, the subsequent critical step involves the correction for multiple testing, considering the inherent risk of false positive results. Multiple testing correction methods adjust the significance thresholds to account for the increased probability of detecting false positives when performing multiple statistical tests. In this protein set enrichment analysis, the user is provided with a selection of established correction methods, akin to those commonly utilized in the field of differential expression analysis, ensuring robust and reliable interpretation of the results.
+Here D denotes either for the background distribution which can be the total number of proteins obtained in our experiment, all proteins with annotation or a custom selected background. The background indicates all proteins which could be positive tested for in our observed sample. The above mentioned three options are implemented in the user interface.
+After obtaining the p-values for each protein set, the subsequent critical step involves the correction for multiple testing, considering the inherent risk of false positive results. Multiple testing correction methods adjust the significance thresholds to account for the increased probability of detecting false positives when performing multiple statistical tests. In this protein set enrichment analysis, the user is provided with a selection of established correction methods, akin to those commonly utilized in the field of differential expression analysis, ensuring robust and reliable interpretation of the results. 
+Once the enriched protein pathways are determined, they can be visually represented using bar or dotplots, and a network of the found pathways. In the network ontologies are depicted as nodes, whereas edges show the strength of the interaction by thickness corresponding to the number of associated proteins. 
 
 ##### Pathway based protein enrichment analysis
-The pathway-based protein enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. Subsequently, the Fisher's exact test is applied to identify significantly enriched pathways. To focus on truly differentially expressed proteins, users have the flexibility to specify p-value and fold change cutoffs. Furthermore, the method for p-value correction can be selected based on user preference. Once the enriched protein pathways are determined, they can be visually represented using bar or dotplots, providing a clear and intuitive representation of the data.
+The pathway-based protein enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. 
 
-##### Ontology based protein enrichment analysis
-
-
-
+##### Custom ontology based protein enrichment analysis
+For custom ontologies the protein enrichment analysis is done using the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which can be either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties.
+For statistical testing the above explained Fisher exact test is used.
 
 
 

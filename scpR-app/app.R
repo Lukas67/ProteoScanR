@@ -184,10 +184,10 @@ ui <- fluidPage(
                                            textOutput("fc_cutoff_1"))
                            ),
                            conditionalPanel("!input.pw_plot_switch", id="network_pane",
-                                            conditionalPanel("!input.design_plot_gsea",
+                                            conditionalPanel("input.design_plot_gsea",
                                                              visNetworkOutput("gsea_network_1", width = "1300px", height="800px")
                                                              ),
-                                            conditionalPanel("input.design_plot_gsea",
+                                            conditionalPanel("!input.design_plot_gsea",
                                                              plotOutput("gsea_network_2", width = "1300px", height="800px")
                                                              )
                            ),
@@ -227,15 +227,15 @@ ui <- fluidPage(
                            ),
                            br(),
                            conditionalPanel("!input.go_plot_switch", id="network_pane",
-                                            conditionalPanel("!input.design_plot_go",
+                                            conditionalPanel("input.design_plot_go",
                                                              visNetworkOutput("go_network_1", width = "1300px", height = "800px")
                                                              ),
-                                            conditionalPanel("input.design_plot_go",
+                                            conditionalPanel("!input.design_plot_go",
                                                              plotOutput("go_network_2", width = "1300px", height = "800px")
                                                              )
                                             ),
                            conditionalPanel("input.go_plot_switch", id="dotplot_pane",
-                                            plotlyOutput("go_dotplot", width = "1300px")
+                                            plotlyOutput("go_dotplot", width = "1300px", height = "800px")
                                             ), 
                   )
       )
@@ -2248,7 +2248,7 @@ server <- function(input, output, session) {
   
   
   output$gsea_network_1 <- renderVisNetwork({
-    if (!input$design_plot_gsea & !input$pw_plot_switch) {
+    if (input$design_plot_gsea & !input$pw_plot_switch) {
       withProgress(message = "Plotting network", value=0,{
         incProgress(1/3, detail=paste("reading data"))
         req(gsea_network_data())
@@ -2330,7 +2330,7 @@ server <- function(input, output, session) {
   
   
   output$go_network_1 <- renderVisNetwork({
-    if (!input$design_plot_go & !input$go_plot_switch) {
+    if (input$design_plot_go & !input$go_plot_switch) {
       withProgress(message = "Plotting network", value=0,{
         incProgress(1/3, detail=paste("reading data"))
         req(result_piano())
