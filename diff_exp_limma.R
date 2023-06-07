@@ -398,10 +398,7 @@ visNetwork::visIgraph(graph_info, physics = T, smooth = T)
 
 
 tab.kegg <- as.data.frame(ans.kegg)
-#tab.kegg<- subset(tab.kegg, Count>5)
-# 
-# tab.kegg$GeneRatio[1] <- "10/53"
-# tab.kegg$Count[1] <- 10
+
 
 tab.kegg$denominator <- as.numeric(gsub("^\\d+/(\\d+)$", "\\1", tab.kegg$GeneRatio))
 tab.kegg$decimal_gene_ratio <- tab.kegg$Count / tab.kegg$denominator
@@ -536,8 +533,58 @@ library("visNetwork")
 visNetwork(nodes = nw$x$nodes, edges = nw$x$edges)
 
 
-GSAheatmap(gsaRes_2)
+GSAheatmap(gsaRes)
 
+
+
+
+
+
+
+
+gsa_results <- GSAsummaryTable(gsaRes = gsaRes)
+gsa_results$name_wo_suff <- gsub("_UP*", "", gsa_results$Name)
+gsa_results$name_wo_suff <- gsub("_DN*", "", gsa_results$name_wo_suff)
+
+gsa_results_total_count <- data.frame(aggregate(gsa_results$`Genes (tot)`, list(gsa_results$name_wo_suff), sum))
+colnames(gsa_results_total_count) <- c("Description", "count")
+
+gsa_results_total_pvals <- data.frame(aggregate(gsa_results$`p adj (non-dir.)`, list(gsa_results$name_wo_suff), mean))
+gsa_results_total_pvals <- data.frame(aggregate(gsa_results$`p (non-dir.)`, list(gsa_results$name_wo_suff), mean))
+
+colnames(gsa_results_total_pvals) <- c("Description", "p.adjust")
+
+gsa_results_total <- cbind(gsa_results_total_count, gsa_results_total_pvals)
+
+gsa_results_total$ratio <- paste(as.character(gsa_results_total$count), "/" ,as.character(length(gsa_results_total$Description)))
+
+gsa_results_total$decimal_ratio <- gsa_results_total$count / length(gsa_results_total$Description)
+
+gsa_results_total <- gsa_results_total[, !duplicated(colnames(gsa_results_total))]
+
+
+mask <- gsa_results_total$p.adjust < 0.5
+gsa_results_total <- gsa_results_total[1:100, ]
+
+
+library(plotly)
+
+plot_ly(data=gsa_results_total,
+        x=~count,
+        y=~Description,
+        type = "scatter",
+        color= ~p.adjust,
+        size=~decimal_ratio,
+        text=~ratio,
+        hovertemplate= paste('%{y}', '<br>Gene ratio: %{text}<br><extra></extra>')) %>%
+  layout(xaxis=list(
+    title="Gene Ratio"
+    ))
+
+
+ggplot(gsa_results_total, aes(x=Description, y=count, fill=p.adjust)) +
+  geom_bar(stat="identity") +
+  coord_flip()
 
 
 cut <- nrow(tt[tt$adj.P.Value < 1 & abs(tt$logFC) > 0.0001])

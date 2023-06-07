@@ -208,12 +208,12 @@ ui <- fluidPage(
                                     column(width = 3,
                                            br(),
                                            br(),
-                                           selectInput("gene_set_stat", label="select stat method", choices = c("fisher", "stouffer","reporter", "tailStrength", "wilcoxon", "mean", "median", "sum", "maxmean","gsea", "fgsea", "page"))),
+                                           selectInput("gene_set_stat", label="select stat method", choices = c("fisher", "stouffer","tailStrength"))),
                                     column(width = 3,
                                            br(),
                                            br(),
                                            br(),
-                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Heatmap", offLabel="Network", onStatus="primary", offStatus = "info")),
+                                           switchInput("go_plot_switch", label="switch between visualizations", onLabel="Dotplot", offLabel="Network", onStatus="primary", offStatus = "info")),
                                     column(width=3,
                                            br(),
                                            br(),
@@ -238,8 +238,8 @@ ui <- fluidPage(
                                                              plotOutput("go_network_2", width = "1300px", height = "800px")
                                                              )
                                             ),
-                           conditionalPanel("input.go_plot_switch", id="heatmap_pane",
-                                            plotOutput("go_heatmap", width = "1800px", height = "800px")
+                           conditionalPanel("input.go_plot_switch", id="dotplot_pane",
+                                            plotlyOutput("go_dotplot", width = "1300px")
                                             ), 
                   )
       )
@@ -1950,7 +1950,6 @@ server <- function(input, output, session) {
           
           design <- model.matrix(~0+ . , data=design_frame)
           colnames(design)[1:length(unique(design_frame$Group))] <- sub("Group", "", colnames(design)[1:length(unique(design_frame$Group))])
-          print(design)
           
           fit <- lmFit(exp_matrix_0, design)
  
@@ -2375,27 +2374,71 @@ server <- function(input, output, session) {
   
   
   
-  output$go_heatmap <- renderPlot({
-    withProgress(message = "Plotting heatmap", value=0, 
+  output$go_dotplot <- renderPlotly({
+    withProgress(message = "Plotting dotplot", value=0, 
                  {
                    incProgress(1/3, detail = paste("reading data"))
+                   
                    req(result_piano())
                    gsaRes <- result_piano()
                    
                    req(input$p_value_cutoff)
-                   req(input$fold_change_cutoff)
                    p_cut <- input$p_value_cutoff
-                   fc_cut <- input$fold_change_cutoff
                    
-                   req(protein_table())
-                   tt <- protein_table()
                    
-                   heat_cutoff <- nrow(tt[tt$adj.P.Value < p_cut & abs(tt$logFC) > fc_cut])
+                   gsa_results <- GSAsummaryTable(gsaRes = gsaRes)
+                   gsa_results$name_wo_suff <- gsub("_UP*", "", gsa_results$Name)
+                   gsa_results$name_wo_suff <- gsub("_DN*", "", gsa_results$name_wo_suff)
                    
-                   incProgress(2/3, detail=paste("rendering heatmap"))
-                   GSAheatmap(gsaRes, cutoff = heat_cutoff, adjusted = TRUE)
+                   
+                   gsa_results_total_count <- data.frame(aggregate(gsa_results$`Genes (tot)`, list(gsa_results$name_wo_suff), sum))
+                   colnames(gsa_results_total_count) <- c("Description", "count")
+                   
+                   
+                   gsa_results_total_pvals <- data.frame(aggregate(gsa_results$`p adj (non-dir.)`, list(gsa_results$name_wo_suff), mean))
+                   colnames(gsa_results_total_pvals) <- c("Description", "p.adjust")
+                   
+                   
+                   gsa_results_total <- cbind(gsa_results_total_count, gsa_results_total_pvals)
+                   
+                   
+                   gsa_results_total$ratio <- paste(as.character(gsa_results_total$count), "/" ,as.character(length(gsa_results_total$Description)))
+
+                                      
+                   gsa_results_total$decimal_ratio <- gsa_results_total$count / length(gsa_results_total$Description)
+                   
+                   
+                   gsa_results_total <- gsa_results_total[, !duplicated(colnames(gsa_results_total))]
+                   
+                   mask <- gsa_results_total$p.adjust < p_cut
+
+                   gsa_results_total <- gsa_results_total[mask, ]
+
+
+
+                   if (input$design_plot_go) {
+                     incProgress(2/3, detail=paste("rendering dotplot"))
+                     p1 <- plot_ly(data=gsa_results_total,
+                             x=~count,
+                             y=~Description,
+                             type = "scatter",
+                             color= ~p.adjust,
+                             size=~decimal_ratio,
+                             text=~ratio,
+                             hovertemplate= paste('%{y}', '<br>Gene ratio: %{text}<br><extra></extra>')) %>%
+                       layout(xaxis=list(
+                         title="Gene Ratio"
+                       ))
+                   } else {
+                     incProgress(2/3, detail=paste("rendering barplot"))
+                     p1 <- ggplot(gsa_results_total, aes(x=Description, y=count, fill=p.adjust)) +
+                       geom_bar(stat="identity") +
+                       coord_flip()
+                   }
+                   
                    incProgress(3/3, detail = "success")
                  })
+    p1
   })
   
   
