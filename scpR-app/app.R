@@ -22,8 +22,8 @@ library("infotheo")
 library("org.Hs.eg.db")
 library("AnnotationDbi")
 library("piano")
-#library("snowfall")
-#library("parallel")
+library("snowfall")
+library("parallel")
 library("visNetwork")
 
 
@@ -201,20 +201,16 @@ ui <- fluidPage(
                            actionButton("go_ontology", label = "Run ontology", class = "btn-success"),
                            br(),
                            fluidRow(width=12,
-                                    column(width=3,
+                                    column(width=4,
                                            br(),
                                            br(),
                                            fileInput("geneset_collection", "visit gsea-msigdb.org for your collection", accept = c("text"))),
-                                    column(width = 3,
-                                           br(),
-                                           br(),
-                                           selectInput("gene_set_stat", label="select stat method", choices = c("fisher", "stouffer","tailStrength"))),
-                                    column(width = 3,
+                                    column(width = 4,
                                            br(),
                                            br(),
                                            br(),
                                            switchInput("go_plot_switch", label="switch between visualizations", onLabel="Dotplot", offLabel="Network", onStatus="primary", offStatus = "info")),
-                                    column(width=3,
+                                    column(width=4,
                                            br(),
                                            br(),
                                            br(),
@@ -2316,18 +2312,15 @@ server <- function(input, output, session) {
       req(input$p_value_correction)
       p_correct <- input$p_value_correction
       
-#      cores <- detectCores()
-      
-      req(input$gene_set_stat)
-      stat_meth <- input$gene_set_stat
-      
-      gsaRes <- runGSA(geneLevelStats = pVals,
-                       directions = logFCs,
-                       gsc=myGSC,
-                       adjMethod = p_correct,
-                       geneSetStat = as.character(stat_meth)#,
-#                       ncpus = cores
-                       )
+     cores <- detectCores()
+
+     gsaRes <- runGSA(geneLevelStats = pVals,
+                      directions = logFCs,
+                      gsc=myGSC,
+                      adjMethod = p_correct,
+                      geneSetStat = "fisher",
+                      ncpus = cores
+                      )
       incProgress(4/4, detail=paste("success"))
       
     })
