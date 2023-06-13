@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.8)  13 JUN 2023 15:44
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.8)  13 JUN 2023 15:48
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -487,15 +487,8 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write4
 \openout4 = `Thesis.toc'.
 
-[3] [1]
-
-Package natbib Warning: Citation `Cobb' on page 2 undefined on input line 193.
-
-
-Package natbib Warning: Citation `2017' on page 2 undefined on input line 193.
-
-[2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
-<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=343, 1156.32pt x 1951.29pt>
+[3] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
+<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=346, 1156.32pt x 1951.29pt>
 File: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf Graphic file (type pdf)
 <use Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>
 Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 706.
@@ -504,11 +497,7 @@ Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flow
 LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1729.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [40]
-
-Package natbib Warning: There were undefined citations.
-
-[41] 
+) [40] [41] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./Thesis.aux)
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
@@ -520,18 +509,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12541 strings out of 477940
- 196641 string characters out of 5838203
+ 12545 strings out of 477940
+ 196702 string characters out of 5838203
  1863757 words of memory out of 5000000
- 32330 multiletter control sequences out of 15000+600000
+ 32333 multiletter control sequences out of 15000+600000
  548869 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,9n,76p,634b,8879s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,76p,634b,8881s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (45 pages, 401927 bytes).
+Output written on Thesis.pdf (45 pages, 401932 bytes).
 PDF statistics:
- 799 PDF objects out of 1000 (max. 8388607)
- 704 compressed objects within 8 object streams
- 237 named destinations out of 1000 (max. 500000)
+ 802 PDF objects out of 1000 (max. 8388607)
+ 707 compressed objects within 8 object streams
+ 238 named destinations out of 1000 (max. 500000)
  280 words of extra memory for PDF output out of 10000 (max. 10000000)
 
