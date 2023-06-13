@@ -4,48 +4,36 @@ output: pdf_document
 ---
 # Materials and Methods
 
-## Materials
+## Wetlab - Materials and Methods
+For testing and development of the pipeline the following materials and methods were performed. For the sample preparation protocol see appendix. 
 
-For analysis two types of cells were used. One type is the Jurkat-based cell line (J-lat) with integrated HIV. 
-
-The other type of cells are macrophages with a sample size of 72 cells. The analysis is done with two groups. A HIV negative (HIV-) control group and a HIV positive (HIV+) group. 
-
-### Cell Isolation
-
-### Lysis
+### Celltypes
+Macrophages from 12 healthy donors and 12 HIV patients with metabolic syndrome and 12 HIV patients without metabolic syndrome. Cell sorting was performed with FACSAria Fusion (BD Biosciences). 
 
 ### Digestion
+Protein digestion was performed using trypsin (Promega, Madison, WA) buffered in Triethylammonium bicarbonate buffer (TEAB). Reagents were handled with MANTIS automatic dispenser (Formulatrix, Bedford, MA).
 
+### Labeling
+Samples of test dataset were labeled with 12-plex TMTpro (Thermo Fisher) in anhydrous acetonitril (ACN) solution.
 
+### Pooling
+Carrier proteome was added to the 36 TMTpro sets before pooling sample types for each of the 36 MS-runs.
 
-#### Metabolic labeling
-
-
-
-
-#### Isobaric labeling
-
-##### Tandem mass tag (TMT)
-
-
-### Instrumentation
-
-#### Liquid chromatography
-
+### Liquid chromatography
 In order to separate peptides according to their chemical properties, size or species a liquid chromatography (LC) is recommended before ionization. For the reference data used for developing the pipeline the following intrumentation was used. 
 EASY-Spray™ HPLC column, ES802A, 2 $\mu$m × 75 $\mu$m ID × 250 mm (ThermoFisher Scientific)
 Acclaim PepMap trap column, 2 $\mu$m × 75 $\mu$m ID × 2 cm (ThermoFisher Scientific)
 
-#### Mass Spectrometry
+### Mass Spectrometry
 
-##### Ionization
+### Ionization
 For the reference data ESI ionization was used.
 
-##### MS/MS
+### Mass spectrometer
 For the reference data used for developing the pipeline an Orbitrap™ Fusion™ Lumos™ tribrid mass spectrometer (ThermoFisher Scientific) was used. The instrumentation uses two subsequent runs in the analyzer (=Orbitrap) to increase mass accuracy. 
 
 
-## Data
+## Computational methods
 ```{r Dataflow, eval=FALSE, include=FALSE}
 # library(DiagrammeR)
 # library(webshot)
@@ -78,37 +66,12 @@ For the reference data used for developing the pipeline an Orbitrap™ Fusion™
 ```
 
 ### Data-acquisition and raw-file analysis
-For the data-acquisition thermo fisher acquisition software was used.
-Raw-file analysis of the data was done with MaxQuant \citep{Cox2008} software package. 
-
-
-#### MS-Spectrum
- In this publication we will mainly focus on the data-acquisition with MaxQuant \citep{Cox2008}. 
-
-
-#### Three-dimensional peak detection
-
-
-
-#### Deisotoping 
-
-
-
-#### Label detection
-
-
-#### Improving peptide mass accuracy
-
-
-
-#### Peptide search 
-
-
-#### Protein assembly
-
+For the data-acquisition Thermo Fisher acquisition software was used.
+Raw-file analysis of the data was done with  MaxQuantCmd 2.2.0.0 \citep{Cox2008}.
+The default settings were used. TMTpro labels were corrected according to the isotopical distribution of the Lot-number provided by Thermo Fisher.
 
 ### Data processing
-Further analysis is done with R and respective packages such as bioconductor. Since there is no state of the art established, analysis varies upon experimental design. The workflow of the analysis will be processed in a so called pipeline streamlining the data through steps where individual results can be observed in visualizations and indivdual calculations will be adapted according to user demands and experimental properties. 
+Further analysis is done with R and respective packages such as bioconductor. Please find version info in the appendix.
 
 ```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=16}
 library(Gmisc, quietly = TRUE)
@@ -533,16 +496,16 @@ Example fo basic parameters and derivations include:
 
 #### Object oriented programming
 
-In order to streamline the analysis of multiple experiments, object oriented programming can be applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis \citep{Vanderaa2021}.
+In order to streamline the analysis of multiple experiments, object oriented programming was applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis \citep{Vanderaa2021}.
 
 #### Zero values
 Peptides with low abundance are often set to zero during analysis. However, assigning a value of zero may incorrectly suggest that the sample does not contain the respective peptide. Given that it is highly unlikely for a biological cell of a comparable type and function to not contain a particular protein, replacing the zero value with "not applicable" (NA) is crucial for understanding and interpreting MS data.
 
 #### Exclude reverse matches/contaminants
-Peptide sequences matching to the reverse protein sequences (=decoy database) are considered as possible contaminants. These matches can be excluded from further analysis.  
+Peptide sequences matching to the reverse protein sequences (=decoy database) are considered as possible contaminants. These matches were be excluded from further analysis.  
 
 #### Filter according to precursor ion fraction (PIF)
-During mass spectrometry, the ions detected in MS1 are further fragmented through collision during multiple MS runs. The resulting product ions are derived from precursor ions (also known as mother ions or parental ions). Contaminant peptides can co-migrate in this process and can be distinguished by the lower fraction of their respective precursor ions \citep{Tannous2020}. These peptides need to be filtered out during the analysis pipeline. A cutoff value, referenced in the SCoPE2 pipeline \citep{Specht2021}, is applied in the user interface, but it can be adjusted according to the needs of the biologist.
+During mass spectrometry, the ions detected in MS1 are further fragmented through collision during multiple MS runs. The resulting product ions are derived from precursor ions (also known as mother ions or parental ions). Contaminant peptides can co-migrate in this process and were distinguished by the lower fraction of their respective precursor ions \citep{Tannous2020}. These peptides need to be filtered out during the analysis pipeline. A cutoff value, referenced in the SCoPE2 pipeline \citep{Specht2021}, is applied in the user interface, but it can be adjusted according to the needs of the biologist.
 
 
 #### Filter by q-value

@@ -2,20 +2,75 @@
 title: ''
 output: pdf_document
 ---
-# Appendix(ces)
+# Appendix
 
-## Appendix A: additional tables 
+## Cells sorting protocol
+\begin{enumerate}
+\item 96 single cells from each donor were sorted into a single plate. Each well contained a single cell. As such, 12 different plates containing single cells from 12 different donors were prepared. 
+\item Carrier plates were also prepared. In the carrier plates, 100 cells from one donor were sorted into each well. 24 such wells (3 columns) were prepared for each donor.
+\end{enumerate}
 
-Insert content for additional tables here.
 
-\newpage
+### Digestion protocol
+\begin{enumerate}
+\item Prepare 25 ng/ $\mu$L trypsin in 100 mmol/L Triethylammonium bicarbonate buffer (TEAB).
+\item Add 25 ng/$\mu$L trypsin: 2 $\mu$L to the carrier samples, 1 $\mu$L to the single cell samples.
+\item Seal the plates.
+\item Centrifuge (2 min at 120 G).
+\item Incubate overnight at 37 °C.
+\end{enumerate}
 
-## Appendix B: additional figures
+### Labeling protocol
+\begin{enumerate}
+\item Let the TMTpro labels come to room temperature so that all the condensation on the tube is gone. Dissolve the TMTpro reagents in anhydrous acetonitril (ACN) to obtain a concentration of 10 $\mu$g/$\mu$L.
+\item Add 1 $\mu$L of TMTpro reagents according to the tables. For one set of plates, you will need 16 $\mu$L of each label. It is recommended to aliquot a slightly larger volume, around 20 $\mu$L.
+\item Seal the plates.
+\item Centrifuge for 2 minutes at 120 G.
+\item Incubate for 1 hour at room temperature.
+\item Prepare a 5% hydroxylamine solution in water.
+\item Add 1 $\mu$L of the 5% hydroxylamine solution to each well.
+\item Seal the plates.
+\item Centrifuge for 2 minutes at 120 G.
+\item Incubate for 1 hour at room temperature.
+\item Cover the plates with cap strips.
+\end{enumerate}
 
-Insert content for additional figures here. 
+### Pooling protocol
+\begin{enumerate}
+\item Wash a 10 $\mu$L glass microsyringe five times with ACN.
+\item Use the microsyringe to combine TMTpro-labeled samples into 36 LC autosampler vials with built-in glass inserts.
+\item Combine six carrier wells from each sample and add the carrier proteome to the 36 TMTpro sets.
+\item Combine the first set by taking well A1 from the first single-cell plate, well A2 from the second plate, well A3 from the third plate, and so on. For the next set, take well A1 from the second plate, well A2 from the third plate, and so on. Combine 12 sets following this scheme. Combine the next 24 sets by following the same scheme for rows B and C.
+\item Vacuum centrifuge the combined sets to dryness.
+\item Dissolve the dried samples in 7 $\mu$L of buffer A and transfer them to LC-MS/MS for further analysis.
+\end{enumerate}
 
-\newpage
+### R-version info
 
-## Appendix C: code
+\begin{verbatim}
+R version 4.3.0 (2023-04-21)
+Platform: x86_64-pc-linux-gnu (64-bit)
+Running under: Ubuntu 22.04.2 LTS
 
-Insert code (if any) used during your dissertation work here. 
+ [1] visNetwork_2.1.2            snowfall_1.84-6.2          
+ [3] snow_0.4-4                  piano_2.16.0               
+ [5] org.Hs.eg.db_3.17.0         AnnotationDbi_1.62.1       
+ [7] infotheo_1.2.0.1            clusterProfiler_4.8.1      
+ [9] plotly_4.10.1               sva_3.48.0                 
+[11] BiocParallel_1.34.2         genefilter_1.82.1          
+[13] mgcv_1.8-42                 nlme_3.1-162               
+[15] impute_1.74.1               CONSTANd_1.8.0             
+[17] limma_3.56.1                scater_1.28.0              
+[19] scuttle_1.10.1              reshape2_1.4.4             
+[21] dplyr_1.1.2                 magrittr_2.0.3             
+[23] ggplot2_3.4.2               SingleCellExperiment_1.22.0
+[25] scp_1.10.0                  QFeatures_1.10.0           
+[27] MultiAssayExperiment_1.26.0 SummarizedExperiment_1.30.1
+[29] Biobase_2.60.0              GenomicRanges_1.52.0       
+[31] GenomeInfoDb_1.36.0         IRanges_2.34.0             
+[33] S4Vectors_0.38.1            BiocGenerics_0.46.0        
+[35] MatrixGenerics_1.12.0       matrixStats_0.63.0         
+[37] spsComps_0.3.2.1            DT_0.28                    
+[39] shinydashboard_0.7.2        shinyWidgets_0.7.6         
+[41] shiny_1.7.4                
+\end{verbatim}

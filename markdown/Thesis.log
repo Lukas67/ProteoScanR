@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.8)  13 JUN 2023 07:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.8)  13 JUN 2023 15:44
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -437,12 +437,12 @@ Package hyperref Info: Link coloring OFF on input line 78.
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=104, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=136, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 90.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=105, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=137, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 91.
@@ -487,28 +487,32 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \tf@toc=\write4
 \openout4 = `Thesis.toc'.
 
-[3] [4]
+[3] [1]
 
-Package natbib Warning: Citation `Cobb' on page v undefined on input line 192.
+Package natbib Warning: Citation `Cobb' on page 2 undefined on input line 193.
 
 
-Package natbib Warning: Citation `2017' on page v undefined on input line 192.
+Package natbib Warning: Citation `2017' on page 2 undefined on input line 193.
 
-[5] [6] [7] [8] [9] [10] [11] [1] [2] [3{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
-<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=309, 1156.32pt x 1951.29pt>
+[2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
+<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=343, 1156.32pt x 1951.29pt>
 File: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf Graphic file (type pdf)
 <use Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 673.
+Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 706.
 (pdftex.def)             Requested size: 403.64178pt x 681.14551pt.
-[4] [5 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [6] [7] [8] [9{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [10{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [11] [12] [13] [14] [15] [16] [17] [18] [19] [20] [21] [22] [23] (./Thesis.bbl [24] [25] [26]) [27] [28] [29]
+[13] [14 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [15] [16] [17] [18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [19{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34] (./Thesis.bbl [35] [36] [37]) [38] [39]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1729.
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [40]
 
 Package natbib Warning: There were undefined citations.
 
-[30] 
+[41] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./Thesis.aux)
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 3DEA58A45B9AD3235702C5E7F9B10837;3818.
+(rerunfilecheck)             Checksum: 74BDC26E58E389EE7A963CC1A4390482;5067.
  )
 (\end occurred inside a group at level 2)
 
@@ -516,18 +520,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12475 strings out of 477940
- 195785 string characters out of 5838203
- 1862757 words of memory out of 5000000
- 32284 multiletter control sequences out of 15000+600000
- 548550 words of font info for 59 fonts, out of 8000000 for 9000
+ 12541 strings out of 477940
+ 196641 string characters out of 5838203
+ 1863757 words of memory out of 5000000
+ 32330 multiletter control sequences out of 15000+600000
+ 548869 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
  75i,9n,76p,634b,8879s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (42 pages, 358983 bytes).
+</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on Thesis.pdf (45 pages, 401927 bytes).
 PDF statistics:
- 726 PDF objects out of 1000 (max. 8388607)
- 637 compressed objects within 7 object streams
- 221 named destinations out of 1000 (max. 500000)
- 216 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 799 PDF objects out of 1000 (max. 8388607)
+ 704 compressed objects within 8 object streams
+ 237 named destinations out of 1000 (max. 500000)
+ 280 words of extra memory for PDF output out of 10000 (max. 10000000)
 

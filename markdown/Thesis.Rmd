@@ -117,12 +117,12 @@ no more than 250 words for the abstract
 
 ```{r acknowledgments, child='acknowledgments.Rmd'}
 ```
+\pagenumbering{arabic}
 
 \newpage
 
 ```{r intro, child = 'introduction.Rmd'}
 ```
-\pagenumbering{arabic}
 
 \newpage
 
