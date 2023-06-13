@@ -1,0 +1,317 @@
+% Options for packages loaded elsewhere
+\PassOptionsToPackage{unicode}{hyperref}
+\PassOptionsToPackage{hyphens}{url}
+%
+\documentclass[
+]{article}
+\usepackage{amsmath,amssymb}
+\usepackage{lmodern}
+\usepackage{iftex}
+\ifPDFTeX
+  \usepackage[T1]{fontenc}
+  \usepackage[utf8]{inputenc}
+  \usepackage{textcomp} % provide euro and other symbols
+\else % if luatex or xetex
+  \usepackage{unicode-math}
+  \defaultfontfeatures{Scale=MatchLowercase}
+  \defaultfontfeatures[\rmfamily]{Ligatures=TeX,Scale=1}
+\fi
+% Use upquote if available, for straight quotes in verbatim environments
+\IfFileExists{upquote.sty}{\usepackage{upquote}}{}
+\IfFileExists{microtype.sty}{% use microtype if available
+  \usepackage[]{microtype}
+  \UseMicrotypeSet[protrusion]{basicmath} % disable protrusion for tt fonts
+}{}
+\makeatletter
+\@ifundefined{KOMAClassName}{% if non-KOMA class
+  \IfFileExists{parskip.sty}{%
+    \usepackage{parskip}
+  }{% else
+    \setlength{\parindent}{0pt}
+    \setlength{\parskip}{6pt plus 2pt minus 1pt}}
+}{% if KOMA class
+  \KOMAoptions{parskip=half}}
+\makeatother
+\usepackage{xcolor}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\makeatletter
+\def\maxwidth{\ifdim\Gin@nat@width>\linewidth\linewidth\else\Gin@nat@width\fi}
+\def\maxheight{\ifdim\Gin@nat@height>\textheight\textheight\else\Gin@nat@height\fi}
+\makeatother
+% Scale images if necessary, so that they will not overflow the page
+% margins by default, and it is still possible to overwrite the defaults
+% using explicit options in \includegraphics[width, height, ...]{}
+\setkeys{Gin}{width=\maxwidth,height=\maxheight,keepaspectratio}
+% Set default figure placement to htbp
+\makeatletter
+\def\fps@figure{htbp}
+\makeatother
+\setlength{\emergencystretch}{3em} % prevent overfull lines
+\providecommand{\tightlist}{%
+  \setlength{\itemsep}{0pt}\setlength{\parskip}{0pt}}
+\setcounter{secnumdepth}{-\maxdimen} % remove section numbering
+\usepackage{float}
+\usepackage{sectsty}
+\ifLuaTeX
+  \usepackage{selnolig}  % disable illegal ligatures
+\fi
+\IfFileExists{bookmark.sty}{\usepackage{bookmark}}{\usepackage{hyperref}}
+\IfFileExists{xurl.sty}{\usepackage{xurl}}{} % add URL line breaks if available
+\urlstyle{same} % disable monospaced font for URLs
+\hypersetup{
+  hidelinks,
+  pdfcreator={LaTeX via pandoc}}
+
+\author{}
+\date{\vspace{-2.5em}}
+
+\begin{document}
+
+\hypertarget{introduction}{%
+\section{Introduction}\label{introduction}}
+
+\hypertarget{from-the-central-dogma-of-molecular-biology-to-omics-and-systems-biology}{%
+\subsection{From the Central Dogma of Molecular Biology to Omics and
+Systems
+Biology}\label{from-the-central-dogma-of-molecular-biology-to-omics-and-systems-biology}}
+
+Before understanding the underlying principle biological systems undergo
+and the initial exploration of molecular biology, the processes of live
+were roughly inferred and not well understood. The central dogma of
+molecular biology serves as the cornerstone of biological processes,
+providing a framework for understanding how genetic information is
+converted into functional proteins. This framework consists of two major
+processes, which involve transcription, converting DNA into RNA, and
+translation, converting RNA into functional proteins. In between those
+processes regulation takes base on a molecular level, by altering
+structure with chemical adaptations. The regulation is undertaken to
+provide biological organisms with an highly efficient output of their
+genetic products called proteins. Crick's formulation of the central
+dogma has guided research in molecular biology for over 60 years
+\citep{Cobb2017}. Over the past six decades, researchers have explored
+various aspects of this principle, collectively referred to as omics, to
+comprehensively analyze biomolecules in diverse contexts. Omics research
+has emerged as an approach for comprehensively studying biomolecules and
+their interactions within biological systems. Omics encompasses various
+fields, including genomics, transcriptomics, proteomics, metabolomics,
+and others, each focusing on a specific class of biomolecules. By
+analyzing multiple omics layers, researchers can gain a holistic view of
+biological processes, uncover regulatory mechanisms, and identify key
+players in complex biological networks with computational methods.
+Systems biology takes a quantitative approach to investigate the
+interactions, dynamics, and emergent properties of biomolecular
+networks. Imagining biological systems as complex, multi-layer networks,
+the ensemble of proteins, known as the proteome, plays a critical role
+in this interactive structure with many functions such as structural
+integrity, catalyzing chemical reaction and regulation of cellular
+funcitons.
+
+\hypertarget{proteomics}{%
+\subsection{Proteomics}\label{proteomics}}
+
+The central dogma of molecular biology offers insights not only at the
+level of individual terms but also provides a hierarchical understanding
+of biology. Hierarchical organization is the underlying principle in all
+topics of biology. Proteins exhibit hierarchical structures that
+contribute to their functionality. At the primary structure level,
+proteins are composed of smaller building blocks called amino acids.
+Combining them results in the protein secondary structure such as alpha
+helix and beta sheet. These secondary structures further assemble to
+create higher-order tertiary structures, which represent specific
+domains within the protein. Finally, the quaternary structure describes
+the functional state of the protein as a whole at a given time. By
+studying the proteome, which encompasses all the proteins present in a
+biological system at a specific moment, we can gain a comprehensive
+understanding of the hierarchical organization and functional dynamics
+of biological processes.
+
+\hypertarget{bulk-proteomics}{%
+\subsubsection{Bulk proteomics}\label{bulk-proteomics}}
+
+Higher organisms are composed of specialized cells organized into
+tissues, such as skin, muscle, and blood. Each tissue consists of cells
+with specific functions, resulting in variations in protein expression.
+Bulk proteomics is a technique used to analyze the protein composition
+of a tissue sample, which contains all types of cells present in that
+particular tissue. This approach finds valuable applications for
+instance in oncology, where it can provide insights into the protein
+profile of a tumor. By studying oncogenic biomarkers and expression
+patterns, this knowledge can contribute to the development of screening
+methods and the customization of treatments based on observed expression
+patterns. Additionally, bulk proteomics can aid in identifying the
+progression of tumor development \citep{Kwon2021}. Bulk analysis
+expression profiles provide scientists with an average protein abundance
+across all cells in a sample, offering a comprehensive view of protein
+expression. Additionally, compared to single-cell methods, bulk samples
+typically contain a greater number of proteins. In fact the expanded
+library can be used to validate the performance of single-cell type and
+single-cell proteomics methods and bioinformatics pipeline
+\citep{Schoof2021}. However, in this type of analysis, the precise
+properties of individual cell types can only be inferred and remain
+obscured.
+
+\hypertarget{single-cell-type}{%
+\subsubsection{Single-cell type}\label{single-cell-type}}
+
+Taking tissue samples can lead to an averaging effect across the entire
+cellular ensemble, making it difficult to discern specific cell types.
+To overcome this limitation, cell sorting techniques such as
+fluorescence-activated cell sorting (FACS), magnetic-activated cell
+sorting (MACS), and buoyancy-activated cell sorting (BACS) are employed
+\citep{Liou2015}. These techniques rely on the detection of surface
+proteins on cells and the specific binding of antibodies to these
+proteins. Antibodies, typically derived from the immune system of other
+species, bind to antigens in a lock-and-key manner. Antibodies are
+widely used in molecular biology and find applications in cell
+isolation. Depending on the desired application, the antibodies can be
+labeled with fluorescent markers (FACS), magnetic beads (MACS), or
+biotin (BACS). These methods have varying technical requirements, with
+flow cytometers being the most complex and costly. In MACS, magnetic
+beads are used to isolate cells from a solution by utilizing a magnet.
+However, mechanical forces involved in MACS can potentially damage the
+cells. BACS, a method developed in 2015, employs microbubbles to carry
+the antibodies for cellular isolation. The method showed improvements
+compared to MACS in regards of viability after sorting. It is important
+to note that FACS is considered the gold standard for validating the
+effectiveness of MACS and BACS due to its high purity and yield. FACS
+was used in the validation of these two methods
+\citep{Liou2015, Sutermaster2019}. Single-cell type proteomics reflects
+the protein ensemble of a specific cell type at a particular time,
+providing a focused perspective on the studied field compared to bulk
+methods \citep{Maes2020}.
+
+\hypertarget{single-cell-proteomics}{%
+\subsubsection{Single-cell proteomics}\label{single-cell-proteomics}}
+
+Cell sorting techniques primarily rely on extracellular proteins to
+identify and separate different cell types. However, the intracellular
+content of cells can still exhibit variability in experiments.
+Single-cell proteomics (SCP) addresses this limitation by providing a
+snapshot of the underlying processes within an individual cell,
+eliminating this variability and allowing for the elucidation of the
+underlying principles of cell type behavior, such as differentiation.
+The immune system, for instance, relies on specialized cells for
+specific functions, and the acquisition of these functions occurs
+through a process called differentiation. Studying differentiation in
+multiple cells can be challenging due to the inherent heterogeneity
+during the initiation of differentiation. By analyzing one cell at a
+time, stimulating and observing it throughout the differentiation
+process, researchers can capture the entire process at a single-cell
+level. However, sample preparation and computational analysis in SCP can
+be tedious, and statistical testing can be challenging due to low cell
+counts. In 2021, Specht et al.~developed the SCoPE2 sample preparation
+and analysis pipeline, focusing on macrophage-monocyte differentiation
+experiments \citep{Specht2021}. This pipeline, which reduced labor time,
+served as a reference model for subsequent projects. SCP provides
+insights qualitatively and quantitatively, enabling the study of drug
+responses, infectious diseases, and organism development. Over the past
+decade, single cell techniques became indispensable tools for global
+research communities \citep{Minakshi et al., 2019}.
+
+An early approach of qualitative analysis of the cellular proteome
+involved labeling with fluorescent antibodies and imaging. The major
+disadvantage of this technique was the limitation to only stain a few
+proteins per cell. For quantification procedures such as single-cell
+Western blots, immunoassays or CyTOF have been used. Other disadvantages
+are the ability to permeate cells, accessibility and binding of the
+epitope and the creation of specific antibodies for a given protein
+\citep{Budnik2018}.
+
+One of those techniques involved RNA-sequencing. Since RNA involves also
+non-coding RNA, the amount of RNA is often not proportional to the
+content of proteins in a cell. So the proteinaceous content of a cell
+was only predicted and quantitative analysis was not possible.
+
+\hypertarget{effectors-of-the-proteome}{%
+\subsection{Effectors of the proteome}\label{effectors-of-the-proteome}}
+
+\hypertarget{external-effectors}{%
+\subsubsection{External effectors}\label{external-effectors}}
+
+When pathogens interact with cells of an organism a cascade of
+biochemical reactions takes place. These reactions influence the outcome
+of the cellular proteome in regards of localization, abundance,
+post-translational modifications and more (Jean Beltran et al., 2017).
+
+\hypertarget{methods-for-quantifications}{%
+\subsection{Methods for
+Quantifications}\label{methods-for-quantifications}}
+
+A holistic approach to analyze the expression can be sequencing of RNA
+(RNAseq) or mass-spectrometry (MS). RNAseq refers to the task of
+examining the transcriptome of bulk tissue sample with deep-sequencing
+technologies. RNA in a sample includes mRNAs, non-coding RNAs, and small
+RNAs. One of the main disadvantages is, that the mapping relies on the
+knowledge of the DNA sequence of the observed organism (reference
+genome) (Wang et al., 2009). Another disadvantage is, that the amount of
+protein translated from the determined mRNA can only be estimated (Gygi
+et al., 1999). However, today these predictions can be done with
+computational methods such as LASSO and the accuracy of the estimate
+highly depends on selection and validation of this method (Magnusson et
+al., 2022).
+
+When observing the protein ensemble of a cellular environment with a
+top-down approach like DNAseq or RNAseq, the characteristics
+(e.g.~post-translational modifications or charge) and local
+concentration of the proteins remain hidden. The cause of this
+phenomenon is that only a fraction of the DNA is transcribed into mRNA
+and not all mRNA is further translated into protein. Furthermore
+multiple proteins can be derived from a single DNA-sequence with
+alternative splicing and different proteins coming from non related
+sequences acting like building blocks can form protein complexes and/or
+Protein-RNA complexes. Cells are highly efficient and do not waste
+energy by producing obsolete proteins, moreover the degradation of
+proteins is an important energy recovery mechanism. A bottom-up strategy
+can elucidate these properties of the protein ensemble at a given time
+leading to proteomics. Early methods in molecular biology were western
+blots with the disadvantage of having a-priori knowledge of the analyzed
+protein and quantitative protein assays like the UV-vis-, Bradford-
+and/or bicinchoninic-acid-assay measuring the entire protein
+concentration. When studying impact of an external signal or stressor to
+a cell the abundance and properties of a protein or protein-ensemble can
+enlighten the underlying pathway leading to a biological response. Since
+some proteins do not even function before post-translational
+modifications happen, a knowledge about these can be crucial for further
+studies.
+
+\hypertarget{mass-spectrometry}{%
+\subsubsection{Mass Spectrometry}\label{mass-spectrometry}}
+
+Mass spectrometry enables qualitative and quantitative analysis of the
+entire repertoire of a biological sample. The availability of gene
+sequences in databases and the ability to match proteins against those
+sequences with computational methods makes it possible to identify
+alterations of a sample on a protein level. These alterations can rely
+on the sequence level or could be to post-translational modifications
+(PTMs) such as phosphorylation, methylation or else
+\citep{Aebersold2003}.
+
+Mass spectrometers measure the mass to charge ratio (m/z) of a particle
+from a fragmented larger molecule. This is achieved by a physical
+procedure done with a device which is made of three major components:
+the ion source, an analyzer, and a detector. The ion sources charges
+molecules and accelerate them through a magnetic field. The analyzer
+separates particles according to their mass to charge ratio and the
+detector senses charged particles and amplifies their signal (Parker et
+al., 2010). MS provides great sensitivity for traces, hence getting an
+average concentration for all biomolecules in a sample. To identify
+protein abundance from a single type of cell, cell sorting techniques
+needed to be improved and applied to MS (Minakshi et al., 2019).
+Single-cell proteomics by mass spectrometry (SCoPE-MS) uses a isobaric
+labeling with a tandem mass tag (TMT) to enhance signal intensity of a
+protein species. Loading of a single-cell channel (SCC) with the right
+amount can be balanced to the protein concentration of a single cell,
+leading to single-cell proteomics (Ye et al., 2022).
+
+MS provides great sensitivity for traces, hence getting an average
+concentration for all biomolecules in a sample. To identify protein
+abundance from a single type of cell, cell sorting techniques needed to
+be improved and applied to MS (Minakshi et al., 2019). Single-cell
+proteomics by mass spectrometry (SCoPE-MS) uses a isobaric labeling with
+a tandem mass tag (TMT) to enhance signal intensity of a protein
+species. Loading of a single-cell channel (SCC) with the right amount
+can be balanced to the protein concentration of a single cell, leading
+to single-cell proteomics (Ye et al., 2022).
+
+\end{document}
