@@ -25,9 +25,30 @@ library("sva")
 library("tibble")
 
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/evidence.txt")
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/evidence.txt")
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Apr12/combined/txt/sampleAnnotation_tabdel.txt")
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/sampleAnnotation.txt")
+
+
+
+ 
+# # create sample annotation
+# Raw.files <- unique(mqScpData$Raw.file)
+# 
+# library(stringr)
+# Raw.files <- Raw.files[str_order(str_extract_all(Raw.files, "\\d+"), numeric = TRUE)]
+# sampleAnnotation <- data.frame(Raw.file=rep(Raw.files, each=12))
+# 
+# channels <- colnames(mqScpData[ , grepl( "Reporter.intensity.corrected" , names(mqScpData) ) ])
+# sampleAnnotation$Channel <- rep(channels, 12)
+# 
+# sampletypes <- c(rep("HC", 4), rep("HIV_MetS", 4), rep("HIV_noMetS", 4))
+# sampleAnnotation$SampleType <- rep(sampletypes, 12)
+# 
+# outfile <- "/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/sampleAnnotation.txt"
+# 
+# library("readr")
+# write_delim(sampleAnnotation, outfile, delim = "\t")
 
 
 # create QFeature object
@@ -630,16 +651,17 @@ plotReducedDim(scp[["proteins_dim_red"]],
                point_alpha = 1)
 
 
+channelstring <- gsub("[0-9]{1,2}$","", scp$Channel[1]) 
 
 
 ## Get the features
-subsetByFeature(scp, "Q92954") %>%
+subsetByFeature(scp, "E9PAV3") %>%
   ## Format the `QFeatures` to a long format table
   longFormat(colvars = c("Raw.file", "SampleType", "Channel")) %>%
   data.frame %>%
   ## This is used to preserve ordering of the samples and assays in ggplot2
   mutate(assay = factor(assay, levels = names(scp)),
-         Channel = sub("Reporter.intensity.", "", Channel),
+         Channel = sub(channelstring, "", Channel),
   ) %>%
   mutate(Channel = as.numeric(Channel)) %>%
   arrange(Channel) %>%
@@ -656,6 +678,8 @@ subsetByFeature(scp, "Q92954") %>%
   theme(axis.text.x = element_text(angle = 90),
         strip.text = element_text(hjust = 0),
         legend.position = "bottom")
+
+
 
 ## limma analysis 
 # differential expression between two groups

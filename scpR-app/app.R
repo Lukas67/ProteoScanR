@@ -407,6 +407,7 @@ server <- function(input, output, session) {
   meta_data <- eventReactive(input$update_button, {
     req(input$sample_annotation_file)
     meta_data_0 <- read.delim(input$sample_annotation_file$datapath)
+
     if (input$file_level == FALSE) {
       meta_data_0 <- meta_data_0[!(meta_data_0$SampleType %in%  input$selectedSampleType_to_exclude), ]
     } else {
@@ -1507,6 +1508,9 @@ server <- function(input, output, session) {
   output$feature_subset <- renderPlot({
     scp_0 <- scp()
     
+    
+    channelstring <- gsub("[0-9]{1,2}$","", scp_0$Channel[1]) 
+    
     if (input$file_level == FALSE) {
       subsetByFeature(scp_0, input$selectedProtein) %>%
         ## Format the `QFeatures` to a long format table
@@ -1514,7 +1518,7 @@ server <- function(input, output, session) {
         data.frame %>%
         ## This is used to preserve ordering of the samples and assays in ggplot2
         mutate(assay = factor(assay, levels = names(scp_0)),
-               Channel = sub("Reporter.intensity.", "", Channel)) %>%
+               Channel = sub(channelstring, "", Channel)) %>%
         mutate(Channel = as.numeric(Channel)) %>%
         arrange(Channel) %>%
         mutate(Channel = factor(Channel, levels = unique(Channel))) %>%
