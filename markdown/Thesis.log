@@ -1,14 +1,15 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.8)  13 JUN 2023 15:48
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.14)  14 JUN 2023 16:19
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **Thesis.tex
 (./Thesis.tex
-LaTeX2e <2022-11-01> patch level 1
-L3 programming layer <2023-06-05> (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
-Document Class: article 2022/07/02 v1.4n Standard LaTeX document class
+LaTeX2e <2023-06-01>
+L3 programming layer <2023-06-05>
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
+Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/size11.clo
-File: size11.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
+File: size11.clo 2023/05/17 v1.4n Standard LaTeX file (size option)
 )
 \c@part=\count185
 \c@section=\count186
@@ -22,14 +23,14 @@ File: size11.clo 2022/07/02 v1.4n Standard LaTeX file (size option)
 \belowcaptionskip=\skip49
 \bibindent=\dimen140
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsmath.sty
-Package: amsmath 2022/04/08 v2.17n AMS math features
+Package: amsmath 2023/05/13 v2.17o AMS math features
 \@mathmargin=\skip50
 For additional information on amsmath, use the `?' option.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsmath/amstext.sty
 Package: amstext 2021/08/26 v2.01 AMS text
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsgen.sty
 File: amsgen.sty 1999/11/30 v2.0 generic functions
-\@emptytoks=\toks16
+\@emptytoks=\toks17
 \ex@=\dimen141
 )) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsmath/amsbsy.sty
 Package: amsbsy 1999/11/29 v1.2d Bold Symbols
@@ -67,21 +68,21 @@ LaTeX Info: Redefining \Relbar on input line 971.
 \dotsspace@=\muskip16
 \c@parentequation=\count266
 \dspbrk@lvl=\count267
-\tag@help=\toks17
+\tag@help=\toks18
 \row@=\count268
 \column@=\count269
 \maxfields@=\count270
-\andhelp@=\toks18
+\andhelp@=\toks19
 \eqnshift@=\dimen144
 \alignsep@=\dimen145
 \tagshift@=\dimen146
 \tagwidth@=\dimen147
 \totwidth@=\dimen148
 \lineht@=\dimen149
-\@envbody=\toks19
+\@envbody=\toks20
 \multlinegap=\skip51
 \multlinetaggap=\skip52
-\mathdisplay@stack=\toks20
+\mathdisplay@stack=\toks21
 LaTeX Info: Redefining \[ on input line 2953.
 LaTeX Info: Redefining \] on input line 2954.
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/amssymb.sty
@@ -136,8 +137,8 @@ LaTeX Font Info:    Trying to load font information for T1+lmr on input line 112
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/inputenc.sty
 Package: inputenc 2021/02/14 v1.3d Input encoding file
-\inpenc@prehook=\toks21
-\inpenc@posthook=\toks22
+\inpenc@prehook=\toks22
+\inpenc@posthook=\toks23
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/textcomp.sty
 Package: textcomp 2020/02/02 v2.0n Standard LaTeX package
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/xcolor/xcolor.sty
@@ -162,7 +163,7 @@ Package xcolor Info: Model `wave' substituted by `hsb' on input line 1376.
 Package: geometry 2020/01/02 v5.9 Page Geometry
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/graphics/keyval.sty
 Package: keyval 2022/05/29 v1.15 key=value parser (DPC)
-\KV@toks@=\toks23
+\KV@toks@=\toks24
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/generic/iftex/ifvtex.sty
 Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 )
@@ -177,7 +178,7 @@ Package: ifvtex 2019/10/25 v1.7 ifvtex legacy package. Use iftex instead.
 \Gm@layoutheight=\dimen155
 \Gm@layouthoffset=\dimen156
 \Gm@layoutvoffset=\dimen157
-\Gm@dimlist=\toks24
+\Gm@dimlist=\toks25
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/graphics/graphicx.sty
 Package: graphicx 2021/09/16 v1.2d Enhanced LaTeX Graphics (DPC,SPQR)
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/graphics/graphics.sty
@@ -194,9 +195,9 @@ Package graphics Info: Driver file: pdftex.def on input line 107.
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/float/float.sty
 Package: float 2001/11/08 v1.3d Float enhancements (AL)
 \c@float@type=\count274
-\float@exts=\toks25
+\float@exts=\toks26
 \float@box=\box53
-\@float@everytoks=\toks26
+\@float@everytoks=\toks27
 \@floatcapt=\box54
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/sectsty/sectsty.sty
 Package: sectsty 2002/02/25 v2.0.2 Commands to change all sectional heading styles
@@ -214,7 +215,7 @@ Package: paralist 2017/01/22 v2.7 Extended list environments
 \plpartopsep=\skip54
 \plitemsep=\skip55
 \plparsep=\skip56
-\pl@lab=\toks27
+\pl@lab=\toks28
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/setspace/setspace.sty
 Package: setspace 2022/12/04 v6.7b set line spacing
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/fancyhdr/fancyhdr.sty
@@ -242,7 +243,7 @@ Package: array 2022/09/04 v2.5g Tabular extension package (FMi)
 \col@sep=\dimen160
 \ar@mcellbox=\box55
 \extrarowheight=\dimen161
-\NC@list=\toks28
+\NC@list=\toks29
 \extratabsurround=\skip66
 \backup@length=\skip67
 \ar@cellbox=\box56
@@ -493,13 +494,49 @@ File: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pd
 <use Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>
 Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 706.
 (pdftex.def)             Requested size: 403.64178pt x 681.14551pt.
-[13] [14 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [15] [16] [17] [18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [19{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32] [33] [34] (./Thesis.bbl [35] [36] [37]) [38] [39]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1729.
+[13] [14 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [15] [16] [17] [18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [19{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29]
+<screenshots/summary.png, id=576, 1832.8475pt x 983.675pt>
+File: screenshots/summary.png Graphic file (type png)
+<use screenshots/summary.png>
+Package pdftex.def Info: screenshots/summary.png  used on input line 1504.
+(pdftex.def)             Requested size: 486.26163pt x 260.97282pt.
+<screenshots/numbers_default.png, id=580, 1830.84pt x 996.72375pt>
+File: screenshots/numbers_default.png Graphic file (type png)
+<use screenshots/numbers_default.png>
+Package pdftex.def Info: screenshots/numbers_default.png  used on input line 1522.
+(pdftex.def)             Requested size: 486.25981pt x 264.72368pt.
+<screenshots/mutual_info_default.png, id=581, 1830.84pt x 996.72375pt>
+File: screenshots/mutual_info_default.png Graphic file (type png)
+<use screenshots/mutual_info_default.png>
+Package pdftex.def Info: screenshots/mutual_info_default.png  used on input line 1536.
+(pdftex.def)             Requested size: 486.25981pt x 264.72368pt.
+<screenshots/RI_channel_default.png, id=582, 1830.84pt x 996.72375pt>
+File: screenshots/RI_channel_default.png Graphic file (type png)
+<use screenshots/RI_channel_default.png>
+Package pdftex.def Info: screenshots/RI_channel_default.png  used on input line 1551.
+(pdftex.def)             Requested size: 486.25981pt x 264.72368pt.
+[30 <./screenshots/summary.png>] [31 <./screenshots/numbers_default.png> <./screenshots/mutual_info_default.png>]
+<screenshots/RI_file_default.png, id=598, 1830.84pt x 996.72375pt>
+File: screenshots/RI_file_default.png Graphic file (type png)
+<use screenshots/RI_file_default.png>
+Package pdftex.def Info: screenshots/RI_file_default.png  used on input line 1568.
+(pdftex.def)             Requested size: 486.25981pt x 264.72368pt.
+<screenshots/RI_st_default.png, id=601, 1830.84pt x 996.72375pt>
+File: screenshots/RI_st_default.png Graphic file (type png)
+<use screenshots/RI_st_default.png>
+Package pdftex.def Info: screenshots/RI_st_default.png  used on input line 1585.
+(pdftex.def)             Requested size: 486.25981pt x 264.72368pt.
+[32 <./screenshots/RI_channel_default.png>] [33 <./screenshots/RI_file_default.png> <./screenshots/RI_st_default.png>] [34] [35] [36] [37] (./Thesis.bbl [38] [39] [40]) [41] [42]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1810.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [40] [41] 
+) [43] [44] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./Thesis.aux)
+ ***********
+LaTeX2e <2023-06-01>
+L3 programming layer <2023-06-05>
+ ***********
 Package rerunfilecheck Info: File `Thesis.out' has not changed.
 (rerunfilecheck)             Checksum: 74BDC26E58E389EE7A963CC1A4390482;5067.
  )
@@ -509,18 +546,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12545 strings out of 477940
- 196702 string characters out of 5838203
- 1863757 words of memory out of 5000000
- 32333 multiletter control sequences out of 15000+600000
+ 12414 strings out of 477695
+ 191145 string characters out of 5831446
+ 1863759 words of memory out of 5000000
+ 32450 multiletter control sequences out of 15000+600000
  548869 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,9n,76p,634b,8881s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,634b,9023s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (45 pages, 401932 bytes).
+Output written on Thesis.pdf (48 pages, 1173093 bytes).
 PDF statistics:
- 802 PDF objects out of 1000 (max. 8388607)
- 707 compressed objects within 8 object streams
- 238 named destinations out of 1000 (max. 500000)
- 280 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 839 PDF objects out of 1000 (max. 8388607)
+ 729 compressed objects within 8 object streams
+ 247 named destinations out of 1000 (max. 500000)
+ 310 words of extra memory for PDF output out of 10000 (max. 10000000)
 

@@ -34,7 +34,9 @@ reactlog::reactlog_enable()
 ui <- fluidPage(
   # useShinyjs(),
   # Application title
-  titlePanel("Proteomics Workbench"),
+  titlePanel(fluidRow(width=15,
+                      column(h1("Proteomics Workbench"), h5("by Lukas Gamp"), offset = 0.5, width=5))
+    ),
   
   # Sidebar
   sidebarLayout(
@@ -83,9 +85,9 @@ ui <- fluidPage(
       tabsetPanel(id="outbut_tabset", type = "tabs",
                   tabPanel("Overview", id="overview_pane",
                            verbatimTextOutput("debug"),
-                           plotOutput("overview_plot")),
+                           plotOutput("overview_plot", width = "1500px", height = "1000px")),
                   tabPanel("Summary Barplot", id="summary_pane",
-                           plotOutput("summary_bar", width = "auto")),
+                           plotOutput("summary_bar", width = "1300px", height = "1000px")),
                   tabPanel("Normalization validation", id="normval_pane",
                            selectInput("selectedSampleType_normval", "Select SampleType to validate", ""),
                            plotOutput("norm_val_plot_intra_group"),
@@ -94,12 +96,24 @@ ui <- fluidPage(
                   ),
                   tabPanel("Reporter Ion Intensity", id="ri_pane",
                            selectInput("color_variable_ri", "select variable to indicate", ""),
-                           plotOutput("RI_intensity")),
+                           plotOutput("RI_intensity", width = "1300px", height = "800px")),
                   tabPanel("Covariance and correlation", id="cov_cor_pane",
-                           conditionalPanel(condition = "!input.file_level", id="razor_prot_pane",
-                                            selectInput("color_variable_cv", "select variable to indicate", ""),
-                                            plotOutput("CV_median")),
-                           plotOutput("corr_matrix")),
+                           fluidRow(width=10,
+                                    conditionalPanel(condition = "!input.file_level", id="razor_prot_pane",
+                                                     column(width = 5, conditionalPanel(condition = "input.cv_plot_switch",
+                                                                                        selectInput("color_variable_cv", "select variable to indicate", ""))
+                                                                             ),
+
+                                                     column(width = 5, switchInput("cv_plot_switch", label="switch between visualizations", onLabel="Cov boxlot", offLabel="Cor heatmap", onStatus="primary", offStatus = "info"))
+                                                     )
+                                    ),
+                           conditionalPanel(condition = "!input.cv_plot_switch",
+                                            plotOutput("corr_matrix", width = "1400px", height = "1000px")
+                                            ),
+                           conditionalPanel(condition = "input.cv_plot_switch",
+                                            plotOutput("CV_median", width = "1200px", height = "900px")
+                                            )
+                  ),
                   tabPanel("Dimensionality reduction", id="dimred_pane",
                            materialSwitch(inputId = "third_dim", value = F, label="3d", status = "danger"),
                            fluidRow(width=12,
@@ -114,13 +128,17 @@ ui <- fluidPage(
                            ),
                            conditionalPanel(condition = "!input.third_dim", id="dimred_2d_pane",
                                             fluidPage(
-                                              plotOutput("PCA"), 
+                                              h4("PCA-plot"),
+                                              plotOutput("PCA"),
+                                              h4("UMAP-plot"),
                                               plotOutput("UMAP")
                                             )
                            ),
                            conditionalPanel(condition = "input.third_dim", id="dimred_3d_pane",
                                             fluidPage(
+                                              h4("PCA-plot"),
                                               plotlyOutput("PCA_third_dim"),
+                                              h4("UMAP-plot"),
                                               plotlyOutput("UMAP_third_dim")
                                             )
                            )
@@ -130,7 +148,7 @@ ui <- fluidPage(
                            conditionalPanel(condition = "input.file_level", id="color_settings_pane",
                                             selectInput("color_variable_feature", "select variable to color", "")
                            ),
-                           plotOutput("feature_subset")),
+                           plotOutput("feature_subset", width = "1300px", height = "1000px")),
                   
                   tabPanel("Statistics", id="stats_pane",
                            actionButton("run_statistics", "Press to run statistics"),
