@@ -15,6 +15,7 @@ header-includes:
   - \usepackage{dcolumn}
   - \usepackage{natbib}\bibliographystyle{agsm}
   - \usepackage[nottoc, numbib]{tocbibind}
+
 bibliography: bibliography.bib
 ---
 

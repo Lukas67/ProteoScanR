@@ -4,7 +4,8 @@ output: pdf_document
 ---
 # Appendix
 
-## Cells sorting protocol
+## Wet lab
+### Cells sorting protocol
 \begin{enumerate}
 \item 96 single cells from each donor were sorted into a single plate. Each well contained a single cell. As such, 12 different plates containing single cells from 12 different donors were prepared. 
 \item Carrier plates were also prepared. In the carrier plates, 100 cells from one donor were sorted into each well. 24 such wells (3 columns) were prepared for each donor.
@@ -45,6 +46,7 @@ output: pdf_document
 \item Dissolve the dried samples in 7 $\mu$L of buffer A and transfer them to LC-MS/MS for further analysis.
 \end{enumerate}
 
+## Dry lab
 ### R-version info
 
 \begin{verbatim}

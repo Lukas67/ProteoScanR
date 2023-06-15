@@ -60,8 +60,8 @@ ui <- fluidPage(
                        # minimal observation of a peptide within their corresponding razor protein
                        numericInput("nObs_pep_razrpr", "Input minimal observation of a peptide within their corresponding razor peptide", 5, min = 1, max=100, step = 1),
                        
-                       # max covariance accepted
-                       numericInput("MedCV_thresh", "Input maximal Covariance accepted", 0.65 , min = 0, max=1, step = 0.01),
+                       # max median coefficient of variation (CV) accepted
+                       numericInput("MedCV_thresh", "Input maximal CV accepted", 0.65 , min = 0, max=1, step = 0.01),
                        
                        # remove peptides with missing data
                        numericInput("pNA", "Input missingness percentage threshold for peptide data", 0.99 , min = 0, max=1, step = 0.01)
@@ -97,7 +97,7 @@ ui <- fluidPage(
                   tabPanel("Reporter Ion Intensity", id="ri_pane",
                            selectInput("color_variable_ri", "select variable to indicate", ""),
                            plotOutput("RI_intensity", width = "1300px", height = "800px")),
-                  tabPanel("Covariance and correlation", id="cov_cor_pane",
+                  tabPanel("median coefficient of variation and correlation", id="cov_cor_pane",
                            fluidRow(width=10,
                                     conditionalPanel(condition = "!input.file_level", id="razor_prot_pane",
                                                      column(width = 5, conditionalPanel(condition = "input.cv_plot_switch",
@@ -379,8 +379,8 @@ server <- function(input, output, session) {
              visualization in RI plot. <br>
              <br>
              <br>
-             5.) Covariance across razor protein calculation and filtering according to n-observations (nobs) <br>
-             Adapt nobs and accepted covariance according to your preference of analysis in order to filter out noisy quantification. Visualization can be found in the CV plot. <br>
+             5.) median coefficient of variation (CV) across razor protein calculation and filtering according to n-observations (nobs) <br>
+             Adapt nobs and accepted median coefficient of variation (CV) according to your preference of analysis in order to filter out noisy quantification. Visualization can be found in the CV plot. <br>
              <br>
              <br>
              6.) Normalization of peptide data <br>
@@ -457,8 +457,8 @@ server <- function(input, output, session) {
   
   # result of analysis pipleline
   scp <- eventReactive(input$update_button, {
-    # tryCatch({
-    #   errMsg(NULL)
+    tryCatch({
+      errMsg(NULL)
       withProgress(message= "running analysis", value=0, {
         
         req(meta_data)
@@ -549,7 +549,7 @@ server <- function(input, output, session) {
           
           
           # Filter based on the median CV -> remove covariant peptides over multiple proteins
-          incProgress(9/17, detail=paste("calculate covariance per cell"))
+          incProgress(9/17, detail=paste("calculate median coefficient of variation (CV) per cell"))
           req(input$nObs_pep_razrpr)
           nObs_pep_razrpr<-input$nObs_pep_razrpr
           
@@ -571,7 +571,7 @@ server <- function(input, output, session) {
                                      colDataName = "MedianCV")
           }
           
-          incProgress(10/17, detail=paste("filtering according to covariance"))
+          incProgress(10/17, detail=paste("filtering according to median coefficient of variation (CV)"))
           req(input$MedCV_thresh)
           MedCV_thresh <- input$MedCV_thresh
           scp_0 <- scp_0[, !is.na(scp_0$MedianCV) & scp_0$MedianCV < MedCV_thresh, ]
@@ -1072,7 +1072,7 @@ server <- function(input, output, session) {
                                                  ntop = Inf,
                                                  scale = TRUE,
                                                  exprs_values = 1,
-                                                 n_neighbors = 3,
+                                                 n_neighbors = 15,
                                                  dimred = "PCA",
                                                  name = "UMAP")
         }
@@ -1083,11 +1083,11 @@ server <- function(input, output, session) {
       } else {
         return(evidence_data)
       }
-    # }, error = function(err) {
-    #   print("error handler")
-    #   errMsg("Whoops something went wrong")
-    # },
-    # finally = invalidateLater(1))
+    }, error = function(err) {
+      print("error handler")
+      errMsg("Whoops something went wrong")
+    },
+    finally = invalidateLater(1))
   })
   
   
@@ -1255,13 +1255,13 @@ server <- function(input, output, session) {
     }
   })
   
-  # Covariance visualisation
+  # median coefficient of variation (CV) visualisation
   #observer for color_variable
   observe({
     req(columns())
     updateSelectInput(session, "color_variable_cv", choices=columns())
   })  
-  # covariance across razor peptides fourth tab
+  # median coefficient of variation (CV) across razor peptides fourth tab
   output$CV_median <- renderPlot({
     req(scp())
     req(meta_data())
@@ -1280,7 +1280,7 @@ server <- function(input, output, session) {
           ggplot(aes(x = MedianCV,
                      fill = get(input$color_variable_cv))) +
           geom_boxplot()+
-          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "Covariance over razor proteins")  
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "median coefficient of variation (CV) over razor proteins")  
       } else {
         getWithColData(scp_0, peptide_file) %>%
           colData %>%
@@ -1288,7 +1288,7 @@ server <- function(input, output, session) {
           ggplot(aes(x = MedianCV,
                      fill = get(input$color_variable_cv))) +
           geom_boxplot()+
-          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "Covariance over razor proteins")
+          labs(fill=as.character(input$color_variable_cv), y=as.character(input$color_variable_cv), title = "median coefficient of variation (CV) over razor proteins")
       }
     }
   })
@@ -1426,6 +1426,7 @@ server <- function(input, output, session) {
       scp_0 <- scp()
       dimred_umap <- calculateUMAP(scp_0,
                                    ncomponents = 3,
+                                   n_neighbors = 15,
                                    ntop = Inf,
                                    scale = TRUE)
       
