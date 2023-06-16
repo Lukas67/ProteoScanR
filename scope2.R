@@ -60,11 +60,11 @@ scp <- readSCP(featureData = mqScpData,
 
 
 
-# skip pool sample
-if ("Pool" %in% sampleAnnotation$SampleType) {
-  scp <- scp[, scp$SampleType !=  "Pool"]
-}
-
+# # skip pool sample
+# if ("Pool" %in% sampleAnnotation$SampleType) {
+#   scp <- scp[, scp$SampleType !=  "Pool"]
+# }
+# 
 
 
 # plot runs (not needed - sample unfractionized)
@@ -534,6 +534,11 @@ longFormat(scp[, , "proteins_norm"]) %>%
   ggplot(aes(x = missingness)) +
   geom_histogram()
 
+missing_values <- data.frame(longFormat(scp[, , "proteins_norm"]) %>%
+  data.frame %>%
+  group_by(colname) %>%
+  summarize(missingness = mean(is.na(value))))
+
 
 # use knn to impute missing values
 library(impute)
@@ -569,31 +574,37 @@ if (length(peptide_file) > 1) {
   assay(scp[["proteins_imptd"]]) <- protein_matrix$data
   } 
 
+# show missing values again
+scp[["proteins_imptd"]] %>%
+  assay %>%
+  is.na %>%
+  mean
 
   
   sce <- getWithColData(scp, "proteins_imptd")
-  
-  batch <- colData(sce)$Raw.file
-  model <- model.matrix(~SampleType, data = colData(sce))
-  
-  Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
-    out <- tryCatch(
-      {
-        i_exp_matrix <- ComBat(dat = i_exp_matrix,
-                               batch = i_batch,
-                               mod = i_model)
-        print("batch corrected and optimized")
-      } ,
-      error = function(cond) {
-        i_exp_matrix <- ComBat(dat = i_exp_matrix,
-                               batch = i_batch)
-        print("confounder detected! just batch corrected")
-      }
-    )
-    return(i_exp_matrix)
-  }
-  
-  assay(sce) <- Combat_batchC(assay(sce), batch, model) 
+
+# Batch correction   
+  # batch <- colData(sce)$Raw.file
+  # model <- model.matrix(~SampleType, data = colData(sce))
+  # 
+  # Combat_batchC <- function(i_exp_matrix, i_batch, i_model) {
+  #   out <- tryCatch(
+  #     {
+  #       i_exp_matrix <- ComBat(dat = i_exp_matrix,
+  #                              batch = i_batch,
+  #                              mod = i_model)
+  #       print("batch corrected and optimized")
+  #     } ,
+  #     error = function(cond) {
+  #       i_exp_matrix <- ComBat(dat = i_exp_matrix,
+  #                              batch = i_batch)
+  #       print("confounder detected! just batch corrected")
+  #     }
+  #   )
+  #   return(i_exp_matrix)
+  # }
+  # 
+  # assay(sce) <- Combat_batchC(assay(sce), batch, model) 
   
   
   
@@ -605,17 +616,42 @@ if (length(peptide_file) > 1) {
                                 from = "proteins_imptd",
                                 to = "proteins_dim_red")
   
+  
+  
+# perform clustering before the rest
 
-# show missing values again
-scp[["proteins_imptd"]] %>%
-  assay %>%
-  is.na %>%
-  mean
+  protein_matrix <- assay(scp[["proteins_dim_red"]])
+  colnames(protein_matrix) <- scp$SampleType
+  
+  protein_matrix_t <- t(protein_matrix)
+  
+  library("factoextra")
+  library("cluster")
 
-# batch correction
-# upon multiple runs
-
-
+  clust <- agnes(protein_matrix_t, method = "ward")
+  pltree(clust, cex = 0.6, hang = -1, main = "Dendrogram") 
+  
+  protein_matrix_t_names <- protein_matrix_t 
+  rownames(protein_matrix_t_names) <- make.names(rownames(protein_matrix_t_names), unique = T)
+  
+  gap_stat <- clusGap(protein_matrix_t_names, FUN = hcut, nstart = 25, K.max = 10, B = 50)
+  fviz_gap_stat(gap_stat) 
+  
+  d <- dist(protein_matrix_t, method = "euclidean")
+  final_clust <- hclust(d, method = "ward.D2" )
+  groups <- cutree(final_clust, k=3)
+  
+  # unsupervised
+  plot <- fviz_nbclust(protein_matrix_t, kmeans, method='silhouette', k.max=100)
+  plot_data <- plot$data
+  
+  optimal_clusters <- as.numeric(plot_data[which(plot_data$y == max(plot_data$y)), "clusters"])
+  
+  km.final <- kmeans(protein_matrix_t, optimal_clusters)
+  
+  colData(scp)$cluster <- km.final$cluster
+  
+  
 # dimensionality reduction
 # changed from reference due no missing values
 
@@ -631,7 +667,7 @@ scp[["proteins_dim_red"]] <- runPCA(scp[["proteins_dim_red"]],
 
 plotReducedDim(scp[["proteins_dim_red"]],
                dimred = "PCA",
-               colour_by = "Channel",
+               colour_by = "SampleType",
                point_alpha = 1,
                )
 
@@ -849,10 +885,10 @@ exp_matrix_0 <- assay(scp_0[["proteins_dim_red"]])
 # design <- model.matrix(~0 + . , data=design_frame)
 
 # single factor analysis
-design <- model.matrix(~0 + scp_0$SampleType)
-colnames(design)<-unique(scp_0$SampleType)
+design <- model.matrix(~0 + scp_0$SampleType + scp_0$cluster)
+colnames(design)<-c(unique(scp_0$SampleType), "cluster")
 fit <- lmFit(exp_matrix_0, design)
-cont.matrix <- makeContrasts(contrasts = "S_48h-PreOp" , levels=design)
+cont.matrix <- makeContrasts(contrasts = "HIV_noMetS-HC" , levels=design)
 fit <- contrasts.fit(fit, cont.matrix)
 
 fit <- eBayes(fit)

@@ -1887,8 +1887,7 @@ server <- function(input, output, session) {
       scp_0 <- scp()
       exp_matrix_0 <- exp_matrix()
       meta_data_0 <- meta_data()
-      
-      
+
       incProgress(2/3, detail=paste("creating linear model"))
       req(input$model_design)
       # Create a design matrix
@@ -1915,6 +1914,7 @@ server <- function(input, output, session) {
           SampleType <- scp_0$SampleType
           design <- model.matrix(~0+SampleType)
           colnames(design) <- sub("SampleType", "", colnames(design))
+
           
           fit <- lmFit(exp_matrix_0, design)
           
@@ -1928,7 +1928,7 @@ server <- function(input, output, session) {
           Group <- meta_data_0$Group
           design <- model.matrix(~0+Group)
           colnames(design) <- sub("Group", "", colnames(design))
-          
+
           fit <- lmFit(exp_matrix_0, design)
           
           user_contrast <- paste(input$selectedComp_stat, collapse = "-")
@@ -1950,7 +1950,7 @@ server <- function(input, output, session) {
           
           design <- model.matrix(~0+ . , data=design_frame)
           colnames(design)[1:length(unique(design_frame$SampleType))] <- sub("SampleType", "", colnames(design)[1:length(unique(design_frame$SampleType))])
-          
+
           fit <- lmFit(exp_matrix_0, design)
           
           user_contrast <- paste(input$selectedComp_stat, collapse = "-")

@@ -32,6 +32,13 @@ After applying logarithmic transformation to the base 2 and performing column me
 When comparing the MI between the HC group and the sample type corresponding to individuals with both HIV and metabolic syndrome, the IQR is further reduced and shifted towards the lower end compared to the MI values observed in the raw data.
 
 \newpage
+```{r ui_constand_norm, echo=F, out.width="100%", fig.align='center', fig.cap="Popup showing the dependencies for the CONSTANd normalization"}
+knitr::include_graphics("screenshots/constand_norm_dependency.png")
+```
+
+
+
+\newpage
 ```{r ui_mutual_info_quant_norm, echo=F, out.width="100%", fig.align='center', fig.cap="Mutual information with quantile normalization"}
 knitr::include_graphics("screenshots/mutual_info_quant_norm.png")
 ```
@@ -133,17 +140,16 @@ After applying batch correction using ComBat \citep{Leek2012}, neither the 2D no
 knitr::include_graphics("screenshots/feature.png")
 ```
 
-The scatter plots indicate the detected values associated with the protein UniProt ID P61313 (= 60S ribosomal protein L15). Starting from the peptide spectrum level and progressing to peptides aggregated for individual raw files, these plots offer a comprehensive view of the protein's peptide abundance across various batches. After merging the batches, the peptide appears to be abundant in all channels. Consequently, the need for missing value imputation with K-nearest neighbors (KNN) in this dataset becomes less likely, as missing values for the protein are uncommon once the batches are combined on the protein level.
+The scatter plots indicate the detected values associated with the protein UniProt ID P61313 (= 60S ribosomal protein L15). Starting from the peptide spectrum level and progressing to peptides aggregated for individual raw files, these plots offer a comprehensive view of the protein's peptide abundance across various batches. As indicated 14 batches show no abundance of peptides derived from the protein P61313 at all. After merging the batches, the peptides appear to be abundant in all channels. 
 
 \newpage
 ```{r ui_stat_dependency, echo=F, out.width="100%", fig.align='center', fig.cap="Popup window for checking the dependency of the statistic module"}
 knitr::include_graphics("screenshots/stat_dependency.png")
 ```
 
-The t-statistics employed in limma are known for their robustness in handling non-normally distributed values. Nonetheless, it is recommended for users to assess the distribution of their data based on sample types before proceeding with statistical analysis. If the user is not satisfied with the results or identifies any distributional issues, they can consider revisiting the transformation or normalization steps to address any concerns or improve the data distribution prior to statistical analysis.
+The t-statistics employed in limma are known for their robustness in handling non-normally distributed values. Nonetheless, it is recommended for users to assess the distribution of their data based on sample types before proceeding with statistical analysis. If the user is not satisfied with the results or identifies any distributional issues, the user can consider revisiting the transformation or normalization steps to address any concerns or improve the data distribution prior to statistical analysis.
 
-In the example dataset, the expressi
-on values for all sample types exhibit a unimodal distribution. However, when examining the quantile-quantile (qq) plot, heavy tails can be observed for all three groups. This indicates deviations from a perfectly normal distribution, suggesting potential outliers in the data.
+The values for all sample types exhibit a unimodal distribution. However, when examining the quantile-quantile (qq) plot, heavy tails can be observed for all three groups. This indicates deviations from a perfectly normal distribution, suggesting potential outliers in the data.
 
 \newpage
 ```{r ui_stat_HC_HIV_noMets, echo=F, out.width="90%", fig.align='center', fig.cap="Statistic module"}
@@ -171,7 +177,13 @@ knitr::include_graphics("screenshots/path_enrich_bar.png")
 
 The barplot shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the detected proteins. When choosing the detected proteins as a background no protein could be considered as statistically significant. 
 
+\newpage
+```{r ui_go_enrich_bar, echo=F, out.width="90%", fig.align='center', fig.cap="Gene ontology enrichment against the complete human proteome. Snapshot dotplot indicating the interaction significance of found proteins"}
+knitr::include_graphics("screenshots/go_enrich_dot.png")
+```
 
+The position of the dot shows the number of matches for the particular gene set. Colors indicate 
+for the significance level. In this analysis the entire repetoire of detected proteins was used. Only the gene set collections with the most protein matches were used.
 
 
 
