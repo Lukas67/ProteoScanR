@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.14)  15 JUN 2023 14:11
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.14)  16 JUN 2023 07:20
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -489,88 +489,138 @@ File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 \openout4 = `Thesis.toc'.
 
 [3] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11] [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
-<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=401, 1156.32pt x 1951.29pt>
+<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=404, 1156.32pt x 1951.29pt>
 File: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf Graphic file (type pdf)
 <use Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 706.
+Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 705.
 (pdftex.def)             Requested size: 403.64178pt x 681.14551pt.
 [13] [14 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [15] [16] [17] [18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}] [19{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [20] [21] [22] [23] [24] [25] [26] [27] [28] [29]
-<screenshots/overview.png, id=631, 1831.84375pt x 981.6675pt>
+<screenshots/overview.png, id=633, 1831.84375pt x 981.6675pt>
 File: screenshots/overview.png Graphic file (type png)
 <use screenshots/overview.png>
-Package pdftex.def Info: screenshots/overview.png  used on input line 1505.
+Package pdftex.def Info: screenshots/overview.png  used on input line 1508.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [30 <./screenshots/overview.png>]
-<screenshots/numbers_default.png, id=642, 1831.84375pt x 981.6675pt>
+<screenshots/numbers_default.png, id=644, 1831.84375pt x 981.6675pt>
 File: screenshots/numbers_default.png Graphic file (type png)
 <use screenshots/numbers_default.png>
-Package pdftex.def Info: screenshots/numbers_default.png  used on input line 1525.
+Package pdftex.def Info: screenshots/numbers_default.png  used on input line 1528.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [31 <./screenshots/numbers_default.png>]
-<screenshots/mutual_info_default.png, id=649, 1831.84375pt x 981.6675pt>
+<screenshots/mutual_info_default.png, id=651, 1831.84375pt x 981.6675pt>
 File: screenshots/mutual_info_default.png Graphic file (type png)
 <use screenshots/mutual_info_default.png>
-Package pdftex.def Info: screenshots/mutual_info_default.png  used on input line 1541.
+Package pdftex.def Info: screenshots/mutual_info_default.png  used on input line 1544.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [32 <./screenshots/mutual_info_default.png>]
-<screenshots/mutual_info_quant_norm.png, id=656, 1834.855pt x 997.7275pt>
+<screenshots/mutual_info_quant_norm.png, id=658, 1834.855pt x 997.7275pt>
 File: screenshots/mutual_info_quant_norm.png Graphic file (type png)
 <use screenshots/mutual_info_quant_norm.png>
-Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 1561.
+Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 1564.
 (pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
 [33 <./screenshots/mutual_info_quant_norm.png>]
-<screenshots/RI_channel_default.png, id=664, 1831.84375pt x 981.6675pt>
+<screenshots/RI_channel_default.png, id=666, 1831.84375pt x 981.6675pt>
 File: screenshots/RI_channel_default.png Graphic file (type png)
 <use screenshots/RI_channel_default.png>
-Package pdftex.def Info: screenshots/RI_channel_default.png  used on input line 1583.
+Package pdftex.def Info: screenshots/RI_channel_default.png  used on input line 1586.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [34 <./screenshots/RI_channel_default.png>]
-<screenshots/RI_file_default.png, id=671, 1831.84375pt x 981.6675pt>
+<screenshots/RI_file_default.png, id=673, 1831.84375pt x 981.6675pt>
 File: screenshots/RI_file_default.png Graphic file (type png)
 <use screenshots/RI_file_default.png>
-Package pdftex.def Info: screenshots/RI_file_default.png  used on input line 1602.
+Package pdftex.def Info: screenshots/RI_file_default.png  used on input line 1605.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [35 <./screenshots/RI_file_default.png>]
-<screenshots/RI_st_default.png, id=680, 1831.84375pt x 981.6675pt>
+<screenshots/RI_st_default.png, id=682, 1831.84375pt x 981.6675pt>
 File: screenshots/RI_st_default.png Graphic file (type png)
 <use screenshots/RI_st_default.png>
-Package pdftex.def Info: screenshots/RI_st_default.png  used on input line 1626.
+Package pdftex.def Info: screenshots/RI_st_default.png  used on input line 1629.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [36 <./screenshots/RI_st_default.png>]
-<screenshots/cv_st_default.png, id=687, 1830.84pt x 971.63pt>
+<screenshots/cv_st_default.png, id=689, 1830.84pt x 971.63pt>
 File: screenshots/cv_st_default.png Graphic file (type png)
 <use screenshots/cv_st_default.png>
-Package pdftex.def Info: screenshots/cv_st_default.png  used on input line 1641.
+Package pdftex.def Info: screenshots/cv_st_default.png  used on input line 1644.
 (pdftex.def)             Requested size: 486.25981pt x 258.05893pt.
 [37 <./screenshots/cv_st_default.png>]
-<screenshots/cv_rawfile_default.png, id=696, 1831.84375pt x 981.6675pt>
+<screenshots/cv_rawfile_default.png, id=698, 1831.84375pt x 981.6675pt>
 File: screenshots/cv_rawfile_default.png Graphic file (type png)
 <use screenshots/cv_rawfile_default.png>
-Package pdftex.def Info: screenshots/cv_rawfile_default.png  used on input line 1663.
+Package pdftex.def Info: screenshots/cv_rawfile_default.png  used on input line 1666.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
 [38 <./screenshots/cv_rawfile_default.png>]
-<screenshots/cv_rawfile_nobs2.png, id=703, 1831.84375pt x 985.6825pt>
+<screenshots/cv_rawfile_nobs2.png, id=705, 1831.84375pt x 985.6825pt>
 File: screenshots/cv_rawfile_nobs2.png Graphic file (type png)
 <use screenshots/cv_rawfile_nobs2.png>
-Package pdftex.def Info: screenshots/cv_rawfile_nobs2.png  used on input line 1680.
+Package pdftex.def Info: screenshots/cv_rawfile_nobs2.png  used on input line 1683.
 (pdftex.def)             Requested size: 486.24689pt x 261.64078pt.
 [39 <./screenshots/cv_rawfile_nobs2.png>]
-<screenshots/cv_rawfile_nobs10.png, id=712, 1834.855pt x 997.7275pt>
+<screenshots/cv_rawfile_nobs10.png, id=714, 1834.855pt x 997.7275pt>
 File: screenshots/cv_rawfile_nobs10.png Graphic file (type png)
 <use screenshots/cv_rawfile_nobs10.png>
-Package pdftex.def Info: screenshots/cv_rawfile_nobs10.png  used on input line 1695.
+Package pdftex.def Info: screenshots/cv_rawfile_nobs10.png  used on input line 1698.
 (pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
 [40 <./screenshots/cv_rawfile_nobs10.png>]
-<screenshots/heatmap.png, id=719, 1834.855pt x 997.7275pt>
+<screenshots/heatmap.png, id=721, 1829.83624pt x 981.6675pt>
 File: screenshots/heatmap.png Graphic file (type png)
 <use screenshots/heatmap.png>
-Package pdftex.def Info: screenshots/heatmap.png  used on input line 1711.
+Package pdftex.def Info: screenshots/heatmap.png  used on input line 1714.
+(pdftex.def)             Requested size: 486.2445pt x 260.85963pt.
+[41 <./screenshots/heatmap.png>]
+<screenshots/dim_red_default.png, id=728, 1834.855pt x 997.7275pt>
+File: screenshots/dim_red_default.png Graphic file (type png)
+<use screenshots/dim_red_default.png>
+Package pdftex.def Info: screenshots/dim_red_default.png  used on input line 1732.
 (pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
-[41 <./screenshots/heatmap.png>] [42] [43] [44] [45] [46] (./Thesis.bbl [47] [48] [49]) [50] [51]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1984.
+[42 <./screenshots/dim_red_default.png>]
+<screenshots/dim_red_changed_k.png, id=735, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_changed_k.png Graphic file (type png)
+<use screenshots/dim_red_changed_k.png>
+Package pdftex.def Info: screenshots/dim_red_changed_k.png  used on input line 1750.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[43 <./screenshots/dim_red_changed_k.png>]
+<screenshots/dim_red_3d.png, id=742, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_3d.png Graphic file (type png)
+<use screenshots/dim_red_3d.png>
+Package pdftex.def Info: screenshots/dim_red_3d.png  used on input line 1771.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[44 <./screenshots/dim_red_3d.png>]
+<screenshots/dim_red_batchC.png, id=749, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_batchC.png Graphic file (type png)
+<use screenshots/dim_red_batchC.png>
+Package pdftex.def Info: screenshots/dim_red_batchC.png  used on input line 1788.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+<screenshots/dim_red_batchC_3d.png, id=750, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_batchC_3d.png Graphic file (type png)
+<use screenshots/dim_red_batchC_3d.png>
+Package pdftex.def Info: screenshots/dim_red_batchC_3d.png  used on input line 1796.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[45 <./screenshots/dim_red_batchC.png>] [46 <./screenshots/dim_red_batchC_3d.png>]
+<screenshots/feature.png, id=766, 1832.8475pt x 1002.74625pt>
+File: screenshots/feature.png Graphic file (type png)
+<use screenshots/feature.png>
+Package pdftex.def Info: screenshots/feature.png  used on input line 1814.
+(pdftex.def)             Requested size: 486.26163pt x 266.0325pt.
+[47 <./screenshots/feature.png>]
+<screenshots/stat_dependency.png, id=773, 1835.85875pt x 980.66376pt>
+File: screenshots/stat_dependency.png Graphic file (type png)
+<use screenshots/stat_dependency.png>
+Package pdftex.def Info: screenshots/stat_dependency.png  used on input line 1835.
+(pdftex.def)             Requested size: 486.24814pt x 259.73997pt.
+[48 <./screenshots/stat_dependency.png>]
+<screenshots/stat_HC_HIV_noMets.png, id=780, 923.45pt x 1613.02625pt>
+File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
+<use screenshots/stat_HC_HIV_noMets.png>
+Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 1860.
+(pdftex.def)             Requested size: 389.95996pt x 681.15833pt.
+
+LaTeX Warning: Float too large for page by 25.72849pt on input line 1865.
+
+[49] [50 <./screenshots/stat_HC_HIV_noMets.png>] [51] [52] [53] [54] [55] (./Thesis.bbl [56] [57] [58] [59]) [60] [61]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2164.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
 File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [52] [53] 
+) [62] [63] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./Thesis.aux)
  ***********
@@ -586,18 +636,18 @@ Package rerunfilecheck Info: File `Thesis.out' has not changed.
 ### semi simple group (level 1) entered at line 59 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12545 strings out of 477695
- 194588 string characters out of 5831446
- 1862759 words of memory out of 5000000
- 32544 multiletter control sequences out of 15000+600000
+ 12671 strings out of 477695
+ 198307 string characters out of 5831446
+ 1863759 words of memory out of 5000000
+ 32649 multiletter control sequences out of 15000+600000
  548869 words of font info for 60 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,9n,79p,634b,9023s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,9n,79p,634b,9045s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (57 pages, 2731770 bytes).
+Output written on Thesis.pdf (67 pages, 4263314 bytes).
 PDF statistics:
- 973 PDF objects out of 1000 (max. 8388607)
- 841 compressed objects within 9 object streams
- 284 named destinations out of 1000 (max. 500000)
- 428 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 1053 PDF objects out of 1200 (max. 8388607)
+ 895 compressed objects within 9 object streams
+ 305 named destinations out of 1000 (max. 500000)
+ 468 words of extra memory for PDF output out of 10000 (max. 10000000)
 
