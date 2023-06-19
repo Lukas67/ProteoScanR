@@ -29,7 +29,7 @@ knitr::include_graphics("screenshots/mutual_info_default.png")
 
 After applying logarithmic transformation to the base 2 and performing column median row mean normalization, the mutual information (MI) within the healthy control (HC) group's sample type exhibits a reduction towards the lower edge of the interquartile range (IQR).
 
-When comparing the MI between the HC group and the sample type corresponding to individuals with both HIV and metabolic syndrome, the IQR is further reduced and shifted towards the lower end compared to the MI values observed in the raw data.
+MI between the HC group and the sample type corresponding to individuals with both HIV and metabolic syndrome, the IQR is further reduced and shifted towards the lower end compared to the MI values observed in the raw data.
 
 \newpage
 ```{r ui_constand_norm, echo=F, out.width="100%", fig.align='center', fig.cap="Popup showing the dependencies for the CONSTANd normalization"}
@@ -45,7 +45,7 @@ knitr::include_graphics("screenshots/mutual_info_quant_norm.png")
 
 After performing a logarithmic transformation to the base 2 and quantile normalization, the mutual information (MI) within the healthy control (HC) group's sample type exhibits a minor reduction in the interquartile range (IQR). However, it should be noted that there is an increase in the number of outliers compared to the raw data.
 
-When comparing the MI IQR of the HC group with the sample type corresponding to individuals with both HIV and metabolic syndrome, the reduction in MI falls within the interquartile range of the raw data MI. Additionally, the median remains close to unaffected, indicating that the overall central tendency of the MI values is relatively preserved.
+Observing MI IQR of the HC group with the sample type corresponding to individuals with both HIV and metabolic syndrome, the reduction in MI falls within the interquartile range of the raw data MI. Additionally, the median remains close to unaffected, indicating that the overall central tendency of the MI values is relatively preserved.
 
 \newpage
 ```{r ui_RI_channel_default, echo=F, out.width="100%", fig.align='center', fig.cap="Reporter ion intensity with selection on channel. The selected factor will be highlighted and indicated in the legend."}
@@ -60,7 +60,7 @@ When comparing the median reporter ion intensities across channels, no systemati
 knitr::include_graphics("screenshots/RI_file_default.png")
 ```
 
-When comparing the median reporter ion intensities with a focus on the batch (=Raw.file), it becomes evident that there are significant changes in signal that need to be taken into account in further analysis. After applying quality control measures, several values have been lost due to cutoffs in parameters such as parental ion fraction (PIF), q-value, coefficient of variation, and missingness of peptide data.
+Comparing the median reporter ion intensities with a focus on the batch (=Raw.file), it becomes evident that there are significant changes in signal that need to be taken into account in further analysis. After applying quality control measures, several values have been lost due to cutoffs in parameters such as parental ion fraction (PIF), q-value, coefficient of variation, and missingness of peptide data.
 
 For dimensionality reduction, the user has the option to choose the batch correction method ComBat \citep{Leek2012} in the side panel. However, this option is not set as the default choice. Instead, the conservative approach is followed, where the batch factor is included in the statistical module to account for any potential batch effects that may influence the results.
 
@@ -125,7 +125,7 @@ The second figure of the Principal Component Analysis (PCA) plot and the Uniform
 knitr::include_graphics("screenshots/dim_red_3d.png")
 ```
 
-In the 3D visualization, a subtle clustering pattern can be observed for the first two batches. Upon switching to the indicator sample type in the 3D visualization, no clustering can be observed whatsoever. This suggests that the variance in the dataset is not attributed to sample type or batch, reinforcing the notion that other factors could contribute to the observed variability. 
+In the 3D visualization, a subtle clustering pattern can be observed for the first two batches. Upon switching to the indicator sample type in the 3D visualization, no clustering can be observed whatsoever. This suggests that the variance in the data set is not attributed to sample type or batch, reinforcing the notion that other factors could contribute to the observed variability. 
 
 \newpage
 ```{r ui_dim_red_batchC, echo=F, out.width="100%", fig.align='center', fig.cap="Batch corrected dimensionality reduction analysis showcasing sample types (represented by shape) and raw files (represented by color). upper top: Principal Component Analysis (PCA). upper bottom: Uniform Manifold Approximation and Projection (UMAP). lower top: 3D Principal Component Analysis (PCA). lower bottom: 3D Uniform Manifold Approximation and Projection (UMAP)"}
@@ -183,7 +183,7 @@ knitr::include_graphics("screenshots/go_enrich_dot.png")
 ```
 
 The position of the dot shows the number of matches for the particular gene set. Colors indicate 
-for the significance level. In this analysis the entire repetoire of detected proteins was used. Only the gene set collections with the most protein matches were used.
+for the significance level. In this analysis the entire repertoire of detected proteins was used. Only the gene set collections with the most protein matches were used.
 
 
 

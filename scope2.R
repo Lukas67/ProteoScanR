@@ -575,7 +575,7 @@ if (length(peptide_file) > 1) {
   } 
 
 # show missing values again
-scp[["proteins_imptd"]] %>%
+scp[["proteins_norm"]] %>%
   assay %>%
   is.na %>%
   mean
@@ -642,14 +642,16 @@ scp[["proteins_imptd"]] %>%
   groups <- cutree(final_clust, k=3)
   
   # unsupervised
-  plot <- fviz_nbclust(protein_matrix_t, kmeans, method='silhouette', k.max=100)
-  plot_data <- plot$data
+  sil_plot <- fviz_nbclust(protein_matrix_t, kmeans, method='silhouette', k.max=100)
+  plot_data <- sil_plot$data
   
-  optimal_clusters <- as.numeric(plot_data[which(plot_data$y == max(plot_data$y)), "clusters"])
+  optimal_clusters_sil <- as.numeric(plot_data[which(plot_data$y == max(plot_data$y)), "clusters"])
+
   
-  km.final <- kmeans(protein_matrix_t, optimal_clusters)
   
-  colData(scp)$cluster <- km.final$cluster
+  km.final <- kmeans(protein_matrix_t, optimal_clusters_sil)
+  
+  scp$cluster <- km.final$cluster
   
   
 # dimensionality reduction
@@ -667,7 +669,7 @@ scp[["proteins_dim_red"]] <- runPCA(scp[["proteins_dim_red"]],
 
 plotReducedDim(scp[["proteins_dim_red"]],
                dimred = "PCA",
-               colour_by = "SampleType",
+               colour_by = "MedianRI",
                point_alpha = 1,
                )
 

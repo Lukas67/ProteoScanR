@@ -7,48 +7,505 @@ output: pdf_document
 # Discussion
 
 ## Intro
-The developed application and the proteomics experiment pipeline demonstrated how interactive engagement with the data not only enhances the experience of biologists but also improves the comprehension of the underlying significance of a biological dataset. By utilizing an entropy-based visualization approach, the conservation of information can be validated, allowing users to select appropriate methods and adjust thresholds, cutoffs, and techniques accordingly. With the selection of factors to indicate over multiple plots, biases can be identified on various levels. Additionally, the analysis can be examined on an individual protein basis, enabling the identification of suspicious results. The statistics module provides users with a simple tool to assess and visualize the results, offering clarity to dense scatter plots through hover functions. Enrichment mapping links statistically significant proteins to either the KEGG pathway database or individual research datasets, depending on user selection. These final results place the data in a biological context, which can be explored interactively in graphical visualizations such as network.
-
-## Mutual Information
-Information theory and the concept of mutual information provide a framework for understanding the conservation of entropy in a dataset. Traditionally, the validation of data transformation and normalization methods has been limited to observing distributions through histograms or Quantile-Quantile plots. However, the developed approach goes beyond these conventional methods, providing a deeper context for the variation in the data. By allowing users to choose the method that preserves the maximum amount of information, the approach enables researchers to extract the most valuable insights from their experiments.
+The developed application and the proteomics experiment pipeline demonstrated how interactive engagement with the data not only enhances the experience of biologists but also improves the comprehension of the underlying significance of a biological dataset. By utilizing an entropy-based visualization approach, the conservation of information can be validated, allowing users to select appropriate methods and adjust thresholds, cutoffs, and techniques accordingly. With the selection of factors to indicate over multiple plots, biases can be identified on various levels. Additionally, the analysis can be examined on an individual protein basis, enabling the identification of suspicious results. The statistics module provides users with a simple tool to assess and visualize the results, offering clarity to dense scatter plots through hover functions. Enrichment mapping links statistically significant proteins to either the KEGG pathway database or individual research data sets, depending on user selection. These final results place the data in a biological context, which can be explored interactively in graphical visualizations.
 
 ## Interactive pipeline
 Linear programming scripts are widely utilized for data analysis, and R-shiny provides an efficient platform for implementing these scripts in applications. This approach not only benefits scientists who are not proficient in programming, but it is also convenient for programmers. The developed user interface offers a visually appealing design, and the interactive menus enhance the user experience by eliminating the need to search for specific lines of code on a black screen. Modifying parameters of functions becomes effortless, and data can be visualized without rerunning the entire script. R-shiny executes functions on demand, which means that graphics, variables, and data frames are not recalculated if their dependencies remain unchanged. This feature makes the application both cost-effective and time-efficient.
 The analysis pathway is visualized through multiple components, providing users with a comprehensive view of the data. The overview plot, generated using the Q-feature object-oriented programming in the scp R library \citep{Vanderaa2021}, serves as a visual representation of the analysis process. This plot allows users to track the progression of the analysis and identify any missing files or samples. 
 
+## Mutual Information
+Information theory and the concept of mutual information provide a framework for understanding the conservation of entropy in a dataset. Traditionally, the validation of data transformation and normalization methods has been limited to observing distributions through histograms or Quantile-Quantile plots. However, the developed approach goes beyond these conventional methods, providing a deeper context for the variation in the data. By allowing users to choose the method that preserves the maximum amount of information, the approach enables researchers to extract the most valuable insights from their experiments. 
+Normalization methods play a crucial role in single-cell data analysis, and their selection depends on the nature of the data and the specific analysis objectives. The mutual information analysis revealed that quantile normalization exhibited the smallest loss of entropy compared to other normalization methods
+
 ## Reporter ion intensity
-MS2 reporter ion intensities can be visualized as medians in form of a boxplot, allowing users to assess the distribution of intensities across different factors such as sample type, batch, or channel. This visualization helps identify potential biases or variations in the dataset.
+MS2 reporter ion intensities can be effectively visualized using a boxplot, where the medians represent the intensity distribution across various factors such as sample type, batch, or channel. This visualization aids users in assessing the variation and potential biases in the dataset.
+During the example analysis, the reporter ion intensity plot revealed inconsistencies in the dataset based on signal intensities associated with different batches. It was observed that certain runs exhibited a wide spread of signal intensities, which could indicate technical issues or batch-related variations. These inconsistencies were partly filtered out during the quality control process to ensure the reliability and accuracy of the data. 
 
-## median coefficient of variation
-The reference values of the SCoPE2 publication \citep{Specht2021} could be tested and confirmed. 5 as the number of observation for leading razor peptides was suitable to identify the cutoff of 0.65 by observing whiskers of the boxplots in order to reduce noisy peptides in the dataset.
+## Median coefficient of variation
+The median coefficient of variation (CV) was calculated for a razor protein in relation to its ambiguous peptides. This statistical parameter measures the variability of the razor protein's abundance across different peptide measurements. The results were then visualized using a boxplot, allowing users to assess the distribution of CV values based on a selected factor.
+During testing and fine-tuning, the number of observations for ambiguously matched peptides was adjusted to evaluate its impact on the CV. By varying the number of observations, researchers could determine the optimal parameter that yielded meaningful CV values. In this context, the reference values from the SCoPE2 publication \citep{Specht2021} were employed as benchmarks and subjected to validation.
+The results showed that using a number of observations of 5 for leading razor peptides was suitable for identifying a cutoff value of 0.65. This cutoff value was determined by observing the whiskers of the boxplots. By setting this threshold, noisy peptides in the dataset could be effectively reduced, enhancing the quality and reliability of the data.
 
-## Feature wise plot
-The feature-wise output further enhances the analysis pathway by enabling users to select individual proteins and explore their associated peptide spectrum, peptide and protein values over the course of the analysis. This feature provides a detailed view of the analysis results, allowing users to detect any missing or erroneous data points, particularly in channels with low or high abundance. By examining these individual protein profiles, users can evaluate the quality of the wet lab work and identify any possible errors or inconsistencies.
+## Feature-wise plot
+The feature-wise output plays a crucial role in enhancing the analysis pathway by offering users the ability to select specific proteins and explore their associated peptide spectra, peptide values, and protein values throughout the analysis. This feature provides a detailed and comprehensive view of the analysis results, enabling users to identify any missing or erroneous data points, particularly in channels with low or high abundance. By examining these individual protein profiles, users can assess the quality of the wet lab work and detect any potential errors or inconsistencies.
+In the case of observing the abundance of the protein P61313 (60S ribosomal protein L15) over the entire course of the experiment, it becomes apparent that there are missing values within certain runs and channels. Specifically, 14 runs exhibit no signal for this protein. This observation underscores the significance of aggregating data at the peptide and protein levels and combining individual runs to construct the final protein expression set.
+The scattering of dots in the plot indicates the inflation of small values and the deflation of large values after transformation. The scatter plot of quantile normalized values demonstrates the processing steps taken while preserving outliers and maintaining the biological relevance of the data.  This processing steps aid in achieving a more balanced distribution of data and avoids the distortion of biological meaning.
 
 ## Statistics module
-The statistics module within the application provides users with a user-friendly interface for hypothesis testing, even without prior expertise in statistics. By leveraging the powerful R-package limma \citep{Ritchie2015}, the module offers robust statistical analysis methods, empowering users to perform tests and obtain results to validate their hypotheses.One key feature of the statistics module is its ability to handle multiple factors and therefore correct for batch effects. Users can extend the statistical analysis across various factors, allowing them to quantify the impact of different variables and identify differentially expressed proteins. To enhance the user experience, the visualization of statistical results has been improved, resulting in visually appealing and interactive displays. These visualizations enable users to explore and interpret the results effortlessly, aiding in the comprehension of the statistical findings. By providing intuitive and engaging visual representations, the module facilitates the understanding and communication of complex statistical analyses.
-
-All-Round Manipulation of the Actin Cytoskeleton by HIV \citep{Turville2018} example for the most differentially expressed gene. --> elaborate biological meaning.
-P68133 (Actin, alpha skeletal muscle)
-
-SAMHD1-Deficient CD14+ Cells from Individuals with Aicardi-Goutières Syndrome Are Highly Susceptible to HIV-1 Infection \citep{Berger2011} example for the most differentially expressed gene. --> elaborate biological meaning.
-P31153 (S-adenosylmethionine synthase isoform type-2)
-
+The statistics module within the application provides users with a user-friendly interface for hypothesis testing, even without prior expertise in statistics. By leveraging the powerful R-package limma \citep{Ritchie2015}, the module offers robust statistical analysis methods, empowering users to perform tests and obtain results to validate their hypotheses. One key feature of the statistics module is its ability to handle multiple factors and therefore correct for batch effects. Users can extend the statistical analysis across various factors, allowing them to quantify the impact of different variables and identify differentially expressed proteins. To enhance the user experience, the visualization of statistical results has been improved, resulting in visually appealing and interactive displays. These visualizations enable users to explore and interpret the results effortlessly, aiding in the comprehension of the statistical findings. By providing intuitive and engaging visual representations, the module facilitates the understanding and communication of complex statistical analyses.
+When comparing the group HIV without metabolic syndrome and the healthy control 6 proteins could be found as differentially expressed after correcting the p-values by false discovery rate (FDR \citep{Benjamini1995}). 
+For example, the protein P68133 (Actin, alpha skeletal muscle) exhibits a log fold change (logFC) of -0.25, indicating a significant decrease in actin levels within the HIV group. This finding aligns with previous publications suggesting that HIV exploits cellular skeleton proteins and alters their expression levels \citep{Turville2018}. By inducing orchestrated structural changes in compartments composed of actin filaments, the virus facilitates its spread and infects other lymphocytes \citep{Rodrigues2022}.
+Another protein of interest, P47914 (60S ribosomal protein L29), demonstrates the impact of viral infection on protein synthesis. Differential expression of this protein further highlights the perturbations in cellular processes caused by the virus.
 
 ## Enrichment 
-The enrichment analysis module within the application addresses the challenge of selecting protein sets for mapping by incorporating a database-fetching functionality. This feature streamlines the enrichment analysis process and eliminates the need for users to manually select sets to map proteins against. The first variant of the enrichment analysis module utilizes the KEGG database, which offers a comprehensive collection of pathways and their interactions. By accessing this database, users can gain valuable insights into the underlying pathways and their relationships. This automated mapping against the KEGG database provides a convenient and efficient way to perform enrichment analysis. The second variant of the module caters to sophisticated users who may have specific protein sets in mind based on their research question. This flexibility allows users to select and incorporate their own protein sets into the analysis, enabling research in multiple contexts and providing a comprehensive insight into the dataset. Both variants of the enrichment analysis module present the results in interactive plots, offering users a dynamic and immersive experience with the data. Users can explore the enriched pathways and interact with the visualizations, gaining a deeper understanding of the relationships and connections within the dataset. Additionally, if desired, users can generate static plots and download them for use in presentations or other offline contexts.
+The enrichment analysis module within the application addresses the challenge of selecting protein sets for mapping by incorporating a database-fetching functionality. This feature streamlines the enrichment analysis process and eliminates the need for users to manually select sets to map proteins against. The first variant of the enrichment analysis module utilizes the KEGG database, which offers a comprehensive collection of pathways and their interactions. By accessing this database, users can gain valuable insights into the underlying pathways and their relationships. This automated mapping against the KEGG database provides a convenient and efficient way to perform enrichment analysis. 
+The second variant of the module caters to sophisticated users who may have specific protein sets in mind based on their research question. This flexibility allows users to select and incorporate their own protein sets into the analysis, enabling research in multiple contexts and providing a comprehensive insight into the dataset. Both variants of the enrichment analysis module present the results in interactive plots, offering users a dynamic and immersive experience with the data. Users can explore the enriched pathways and interact with the visualizations, gaining a deeper understanding of the relationships and connections within the dataset. Additionally, if desired, users can generate static plots and download them for use in presentations or other offline contexts.
+As indicated by the statistical findings, the KEGG enrichment analysis identified proteins associated with the ribosome and COVID-19. Both protein sets were connected to two ribosomal proteins, namely P47914 (60S ribosomal protein L29) and P46777 (60S ribosomal protein L5). These findings align with the fact that HIV and COVID-19, like all known viruses, depend entirely on the host cell's translation machinery for protein synthesis. This includes utilizing the host's ribosomes, tRNAs, amino acids, and all necessary factors for protein synthesis initiation, elongation, and termination \citep{Ohlmann2014}. Consequently, it is not surprising that these ribosomal proteins were found to be abundant in HIV-infected individuals.
+
+
+
 
 ## Limitations 
-658 nrows number of proteins in dataset
-some samples (=single cells=channels) -> mean missing values 53% 
-level of detection very bad --> choice of carrier proteome?
+
+```{r missingness, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="Missingness over channels. Y-axis: Height of the histogram bars show number of channels. X-axis: fraction of missing values. Red line: Mean of number of missing values over all runs"}
+
+library("scp")
+library("SingleCellExperiment")
+library("ggplot2")
+library("magrittr")
+library("dplyr")
+library("reshape2")
+library("scater")
+library("limma")
+library("CONSTANd")
+library("stats")
+library("impute")
+library("sva")
+library("tibble")
+
+# read in MS result table
+mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/evidence.txt")
+
+sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/sampleAnnotation.txt")
 
 
+
+# create QFeature object
+scp <- readSCP(featureData = mqScpData,
+               colData = sampleAnnotation,
+               channelCol = "Channel",
+               batchCol = "Raw.file",
+               removeEmptyCols = TRUE)
+
+
+
+# clean missing data
+scp <- zeroIsNA(scp, i=1:length(rowDataNames(scp)))
+
+# filter PSM
+# filter out potential contaminants
+# filter out matches to decoy database
+# keep PSMs with high PIF (parental ion fraction)
+scp <- filterFeatures(scp,
+                      ~ Reverse != "+" &
+                        Potential.contaminant != "+" &
+                        !is.na(PIF) & PIF > 0.10)
+
+
+nPSMs <- dims(scp)[1, ]
+
+# filter runs with too few features
+# however only one run is done --> changes nothing
+keepAssay <- dims(scp)[1, ] > 150
+scp <- scp[, , keepAssay]
+
+
+scp <- pep2qvalue(scp,
+                  i = names(scp),
+                  PEP = "PEP", # by reference the dart_PEP value is used
+                  rowDataName = "qvalue_PSMs")
+
+scp <- pep2qvalue(scp,
+                  i = names(scp),
+                  PEP = "PEP",
+                  groupBy = "Leading.razor.protein",
+                  rowDataName = "qvalue_proteins")
+
+
+scp <- filterFeatures(scp, ~ qvalue_proteins < 0.01)
+
+
+# matrixStats::colMedians, na.rm = TRUE aggregate over median 
+scp <- aggregateFeaturesOverAssays(scp,
+                                  i = names(scp),
+                                  fcol = "Modified.sequence",
+                                  name = paste0("peptides_", names(scp)),
+                                  fun = matrixStats::colMedians, na.rm = TRUE)
+
+
+# join assays to one
+if (length(names(scp)) > 1) {
+  scp <- joinAssays(scp,
+                    i = ((length(names(scp))/2)+1):length(names(scp)),
+                    name = "peptides")
+}
+  
+
+# filter by median intensity
+file_name <- unique(sampleAnnotation$Raw.file)
+peptide_file <- paste("peptides_", as.character(file_name), sep = "")
+
+if (length(peptide_file) > 1) {
+  medians <- c()
+  for (assay_name in peptide_file) {
+    new_medians <- colMedians(assay(scp[[assay_name]]), na.rm = TRUE)
+    medians <- c(medians, new_medians)
+  }
+} else {
+  medians <- colMedians(assay(scp[[peptide_file]]), na.rm = TRUE)
+}
+scp$MedianRI <- medians
+
+
+# calculate median CV (coefficient of variation)
+if (length(peptide_file) > 1) {
+  scp <- medianCVperCell(scp,
+                         i = "peptides",
+                         groupBy = "Leading.razor.protein",
+                         nobs = 5, 
+                         norm = "div.median",
+                         na.rm = TRUE,
+                         colDataName = "MedianCV")
+} else {
+  scp <- medianCVperCell(scp,
+                         i = peptide_file,
+                         groupBy = "Leading.razor.protein",
+                         nobs = 5, 
+                         norm = "div.median",
+                         na.rm = TRUE,
+                         colDataName = "MedianCV")
+}
+
+
+scp <- scp[, !is.na(scp$MedianCV) & scp$MedianCV < 0.65, ]
+
+
+if (length(peptide_file) > 1) {
+  scp <- filterNA(scp,
+                  i = "peptides",
+                  pNA = 0.99)
+} else {
+  scp <- filterNA(scp,
+                  i = peptide_file,
+                  pNA = 0.99)
+}
+
+
+# aggregate peptide to protein
+if (length(peptide_file) > 1) {
+  scp <- aggregateFeatures(scp,
+                           i = "peptides",
+                           name = "proteins",
+                           fcol = "Leading.razor.protein",
+                           fun = matrixStats::colMedians, na.rm = TRUE)
+  
+} else {
+  scp <- aggregateFeatures(scp,
+                           i = peptide_file,
+                           name = "proteins",
+                           fcol = "Leading.razor.protein",
+                           fun = matrixStats::colMedians, na.rm = TRUE)
+}
+
+
+
+# box cox transf
+boxcox_1 <- function(object, ...) UseMethod("boxcox_1")
+
+boxcox_1.formula <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- object$model
+    m <- length(lambda)
+    object <- stats::lm(object, y = TRUE, qr = TRUE)
+    result <- NextMethod()
+    result
+  }
+
+boxcox_1.lm <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- object$model
+    m <- length(lambda)
+    if(is.null(object$y) || is.null(object$qr))
+      object <- update(object, y = TRUE, qr = TRUE)
+    result <- NextMethod()
+    result
+  }
+
+boxcox_1.default <-
+  function(object, lambda = seq(-2, 2, 1/10), eps=1/50)
+  {
+    object$y <- as.matrix(object$model)
+    if(is.null(y <- object$y) || is.null(xqr <- object$qr))
+      stop(gettextf("%s does not have both 'qr' and 'y' components",
+                    sQuote(deparse(substitute(object)))), domain = NA)
+    if(any(y <= 0))
+      stop("response variable must be positive")
+    n <- length(y)
+    ## scale y[]  {for accuracy in  y^la - 1 }:
+    y <- y / exp(mean(log(y)))
+    logy <- log(y) # now  ydot = exp(mean(log(y))) == 1
+    xl <- loglik <- as.vector(lambda)
+    m <- length(xl)
+    for(i in 1L:m) {
+      if(abs(la <- xl[i]) > eps)
+        yt <- (y^la - 1)/la
+      else yt <- logy * (1 + (la * logy)/2 *
+                           (1 + (la * logy)/3 * (1 + (la * logy)/4)))
+      loglik[i] <- - n/2 * log(sum(qr.resid(xqr, yt)^2))
+    }
+    list(x = xl, y = loglik)
+  }
+
+
+protein_matrix <- assay(scp[["proteins"]])
+
+prot_lm <- lm(protein_matrix ~ 1)
+
+b <- boxcox_1(prot_lm)
+
+
+
+
+
+
+# Exact lambda
+lambda <- b$x[which.max(b$y)]
+
+if (round(lambda, digits = 0) == -2 || lambda < -1.5) {
+  protein_matrix <- 1/protein_matrix**2
+  ##print("1/protein_matrix**2")
+}
+if (round(lambda, digits = 0) == -1 || lambda < -0.75 && lambda > -1.5) {
+  protein_matrix <- 1/protein_matrix
+  ##print("1/protein_matrix")
+}
+if (round(lambda, digits = 1) == -0.5 || lambda < -0.25 && lambda > -0.75) {
+  protein_matrix <- 1/(protein_matrix**1/2)
+  ##print("1/(protein_matrix**1/2)")
+}
+if (round(lambda, digits = 0) == 0 || lambda < 0.25 && lambda > - 0.25 ) {
+  protein_matrix <- log10(protein_matrix)
+  ##print("log10(protein_matrix)")
+}
+if (round(lambda, digits = 1) == 0.5 || lambda > 0.25 && lambda < 0.75) {
+  protein_matrix <- protein_matrix**1/2
+  ##print("protein_matrix**1/2")
+}
+if (round(lambda, digits = 0) == 1 || lambda > 0.75 && lamdba < 1.5) {
+  protein_matrix <- protein_matrix
+  ##print("protein_matrix")
+}
+if (round(lambda, digits = 0) == 2 || lambda > 1.5) {
+  protein_matrix <- protein_matrix**2
+  ##print("protein_matrix**2")
+}
+
+
+sce <- getWithColData(scp, "proteins")
+
+scp <- addAssay(scp,
+                y = sce,
+                name = "proteins_transf")
+
+scp <- addAssayLinkOneToOne(scp,
+                            from = "proteins",
+                            to = "proteins_transf")
+
+assay(scp[["proteins_transf"]]) <- protein_matrix
+
+protein_matrix <- assay(scp[["proteins_transf"]])
+
+sce <- getWithColData(scp, "proteins_transf")
+
+scp <- addAssay(scp,
+                  y = sce,
+                  name = "proteins_norm")
+
+scp <- addAssayLinkOneToOne(scp,
+                              from = "proteins_transf",
+                              to = "proteins_norm")
+
+protein_matrix <- normalizeQuantiles(protein_matrix)
+
+assay(scp[["proteins_norm"]]) <- protein_matrix
+
+
+
+# missing value imputation
+# show missing values
+mean_missingness <- scp[["proteins_norm"]] %>%
+  assay %>%
+  is.na %>%
+  mean
+
+nrows_dataset <- nrow(assay(scp[["proteins_norm"]]))
+
+longFormat(scp[, , "proteins_norm"]) %>%
+  data.frame %>%
+  group_by(colname) %>%
+  summarize(missingness = mean(is.na(value))) %>%
+  ggplot(aes(x = missingness)) +
+  geom_histogram() +
+  stat_bin(bins=ncol(assay(scp[["proteins_norm"]]))) +
+  geom_vline(aes(xintercept=mean_missingness, col="red"))+
+  geom_text(aes(label=round(mean_missingness, 2), y=0, x=mean_missingness),
+            vjust=-1, col="red", size=3.5) +
+  guides(fill="none", colour="none") +
+  labs(y="n channels")
+
+```
+
+Unfortunately, a substantial number of individual proteins in the dataset (totaling r nrows_dataset) have missing values. On average, this amounts to approximately r round(mean_missingness, 2)*100% of the proteins across all runs and channels. 
+This situation leads to the need for missing value imputation using techniques such as k-means, which can result in averaged results. Additionally, it is important to note that this imputation process can introduce potential loss of power in subsequent statistical analysis.
+To improve future experiments, it is recommended to increase the number of proteins in the carrier proteome. By expanding the repertoire of proteins included in the carrier proteome, it can enhance the coverage and depth of analysis, providing a more comprehensive understanding of the biological system under investigation. This can potentially lead to more robust and accurate results in downstream analyses.
 
 ## Future perspectives
 
-Clustering for stratification of cells. 
+### Clustering for stratification of cells. 
+
+The advantage of performing single-cell analysis lies in its ability to provide a fine resolution of cellular differences. Unfortunately variation causing effects such as cellular differentiation stages, are mainly unknown when starting single-cell experiments.
+The next steps in the development of the program aim to enable the stratification of single-cell data sets. The analysis typically begins by finding clusters within the datasets, identifying differentially expressed proteins, and annotating cell types based on their expression profiles. Subsequently, the analysis aims to distinguish sample types based on their expression profiles.
+
+Here I will explain how the analysis could start and elaborate the limitations and challenges for this approach. Additional processing steps will be included after the existing pipeline, so the developed program provides a starting point for further analysis.
+
+```{r cluster_analysis_dendrogram, echo=FALSE, message=FALSE, warning=FALSE, out.width="100%", fig.align='center', fig.cap="Dendrogram showing the similarity over sample types. Tree was created using Ward`s minimum variance method."}
 
 
-One future research question could utilize artificial intelligence by predicting cellular behaviour, cell types, or even diseases. Running the application on a server or high-performance cluster would be advantageous to address this question and employ simple machine learning tools such as decision trees, random forests, or support vector machines. The application of artificial intelligence on biological data could reduce the hands-on time by identifying unclear results caused by experimental design, unclean preparation, or incorrect computation.
-Another aspect, not limited to research topics, would be to focus on enhancing usability. While a development time of 6 months for a pipeline and user interface is sufficient to meet the analytical needs, there is still room for improvement in terms of user-friendliness. It is crucial to make the application more intuitive and robust to prevent crashes or errors caused by user mistakes. Ensuring a user-friendly experience is particularly important for commercial software, as robustness and ease of use are essential factors for success. However, since all software should be open source and developers should have the freedom to satisfy their curiosity, we can overlook this fact.
+# use knn to impute missing values
+library(impute)
+library(sva)
+
+if (length(peptide_file) > 1) {
+  protein_matrix <- assay(scp[["proteins_norm"]])
+  
+  sce <- getWithColData(scp, "proteins_norm")
+  
+  scp <- addAssay(scp,
+                  y = sce,
+                  name = "proteins_imptd")
+  
+  scp <- addAssayLinkOneToOne(scp,
+                              from = "proteins_norm",
+                              to = "proteins_imptd")
+  
+  protein_matrix <- impute.knn(protein_matrix, 
+                               k=3, 
+                               rowmax = 1, 
+                               colmax = 1, 
+                               maxp = Inf, 
+                               rng.seed = as.numeric(gsub('[^0-9]', '', Sys.Date())))
+  
+  
+  assay(scp[["proteins_imptd"]]) <- protein_matrix$data
+  } 
+
+
+
+  
+  sce <- getWithColData(scp, "proteins_imptd")
+
+
+  
+  
+  scp <- addAssay(scp,
+                    y = sce,
+                    name = "proteins_dim_red")
+  
+  scp <- addAssayLinkOneToOne(scp,
+                                from = "proteins_imptd",
+                                to = "proteins_dim_red")
+  
+  
+  
+# perform clustering before the rest
+
+  protein_matrix <- assay(scp[["proteins_dim_red"]])
+  colnames(protein_matrix) <- scp$SampleType
+  
+  protein_matrix_t <- t(protein_matrix)
+  
+  library("factoextra")
+  library("cluster")
+
+  clust <- agnes(protein_matrix_t, method = "ward")
+  pltree(clust, cex = 0.6, hang = -1, main = "Dendrogram") 
+```
+
+As observed in the dendrogram, it is evident that sample type alone does not account for the variation observed in the data. The branching patterns in the dendrogram suggest that other factors might be significant for contributing to the averaging of protein expression levels. This can potentially lead to a decrease in the statistical power of tests aimed at detecting differential expression between sample types. 
+Ideally, clustering approaches should result in individual clusters that capture distinct sample types, enabling the testing of differential expression within each cluster. This stratification of samples within clusters allows for the identification of unique expression patterns associated with specific biological variations. The dendrogram, as demonstrated above, is an example of hierarchical clustering, which provides a visual representation of the clustering results. In this context, users should have the flexibility to select the desired number of clusters that best explain the underlying biological variation in their dataset. This allows for a more targeted and precise analysis of differential expression within each cluster, facilitating the identification of biologically meaningful patterns and insights.
+To begin with the k-means clustering approach, it is crucial to determine the optimal number of clusters before conducting the analysis. This can be achieved using various approaches, one of which is the gap statistic method \citep{Tibshirani2001}.
+
+
+```{r cluster_analysis_gap_stat, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal numbers of clusters calculated with gap statistics method"}
+
+  protein_matrix_t_names <- protein_matrix_t 
+  rownames(protein_matrix_t_names) <- make.names(rownames(protein_matrix_t_names), unique = T)
+  
+  gap_stat <- clusGap(protein_matrix_t_names, FUN = hcut, nstart = 25, K.max = 15, B = 50)
+  gap_stat_plot <-fviz_gap_stat(gap_stat) 
+  
+  plot_data <- gap_stat_plot$data
+  
+    gap <- gap_stat$Tab[, "gap"]
+    se <- gap_stat$Tab[, "SE.sim"]
+optimal_clusters_gap <- maxSE(gap, se, method = "firstSEmax", SE.factor = 1)
+    
+  gap_stat_plot
+```
+
+The gap statistic compares the total intracluster variation across various values of k (number of clusters) to the expected variation under a null reference distribution. The null reference distribution represents a scenario where no clear clustering patterns exist in the data. However as seen in the gap statistic a high number of clusters will be difficult to distinguish from each other and explore the biological meaning such as differentiation in the example macrophage dataset.
+Another approach used to determine the optimal number of clusters is the silhouette method. 
+
+```{r cluster_analysis_silh, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal number of clusters calculated with silhoutte method."}
+
+  # unsupervised
+  sil_plot <- fviz_nbclust(protein_matrix_t, kmeans, method='silhouette', k.max=15)
+  plot_data <- sil_plot$data
+  
+  optimal_clusters_sil <- as.numeric(plot_data[which(plot_data$y == max(plot_data$y)), "clusters"])
+  
+  sil_plot
+  
+```
+
+The silhouette method calculates silhouette coefficients for each data point, which quantify how closely the point resembles its own cluster compared to other clusters. 
+If the overall distances between clusters are small, indicating overlapping or unclear separation, we take the minimum k. This suggests that the data points may not be well-separated into distinct clusters. As suggested by the silhouette method in this case a lower number of clusters to differentiate cell types is recommended. 
+
+```{r cluster_analysis_dim_red, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="PCA plot with cluster indication. Shape of the datapoints indicate sample types. Clusters are encircled and color coded."}
+  
+if (optimal_clusters_sil > optimal_clusters_gap) {
+  optimal_clusters <- optimal_clusters_gap
+} else {
+  optimal_clusters <- optimal_clusters_sil
+}
+
+
+km.final <- kmeans(protein_matrix_t, optimal_clusters)
+
+scp$cluster <- data.frame(km.final$cluster)
+
+library(scater)
+
+
+dimred_pca <- data.frame(calculatePCA(assay(scp[["proteins_dim_red"]]),
+                           ncomponents = 5,
+                           ntop = Inf,
+                           scale = TRUE))
+
+
+dimred_pca$cluster <- scp$cluster$km.final.cluster 
+
+ggplot(dimred_pca, aes(x=PC1, 
+                       y=PC2,
+                       shape = scp$SampleType)) +
+  geom_point() +
+  guides(color="none", shape="none") +
+  stat_ellipse(data=dimred_pca, aes(fill=factor(cluster)),
+               geom="polygon", alpha=0.2, level=0.9, type="t", linetype=2, show.legend = F) +
+  coord_fixed()
+
+```
+
+As seen in the principal components analysis, clusters are densely packed, and the plot shows no clear differentiation between the `r optimal_clusters` suggested clusters. The dense packing and poor resolution indicates that other factors may be influencing the lack of distinct separation. One of the other factors involves the large number of imputed values due the high rate of missing values in the protein expression set. K-NN is not able to impute biological differences and therefore averages the particular missing value by its k neighbors. 
+
+This suggests the utilization of a different data set for developing the clustering module of the future program. By employing a data set with a lower rate of missing values in the protein expression set, the accuracy and reliability of the clustering analysis can be enhanced. Having a data set with less missing data will allow for a more precise identification of clusters and differentiation between cell types.
+
+
+
+### Machine learning
+One potential target for future research could involve leveraging artificial intelligence techniques to predict cellular behavior, cell types, or even diseases. By running the application on a server and creating a database, it would be possible to harness the power of AI algorithms such as decision trees, random forests, or support vector machines. Applying artificial intelligence to biological data has the potential to enhance the classification of cell types, similar to the earlier discussed clustering approach. However, it is important to note that training and validating these algorithms typically requires supervision and can be a time-consuming task.
+
+Another area of focus, not limited to research topics, could be to enhance the usability of the application. While a development time of 5 months for the pipeline and user interface is sufficient to meet the analytical needs, there is always room for improvement in terms of user-friendliness. It is essential to consider the needs of all users, including the least experienced or "dumbest assumable user" (DAU). To prevent program crashes and errors, it may be necessary to implement try-catch around code blocks, as well as validate-need statements for the validation of user input. Additionally, creating a user-friendly environment involves establishing effective channels of communication between users and developers, such as utilizing platforms like GitHub for collaboration and feedback.
+
