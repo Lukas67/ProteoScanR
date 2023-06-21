@@ -5,6 +5,6 @@ output: pdf_document
 
 \section*{Acknowledgements}
 
-Thank you for following this tutorial! 
+In addition to my faithful feline companion, Apollo, who took care of my place in Austria while I was working on this project in Stockholm, I am deeply grateful to all the members of Ujjwal Neogi's research group. 
 
-I hope you'll find it useful to write a very professional dissertation. 
+Their unwavering guidance and support throughout this project have been truly invaluable, and I am profoundly thankful for their expertise and assistance.
