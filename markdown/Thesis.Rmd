@@ -94,15 +94,11 @@ mm yy
 
 \spacing{1.5}
 
-(the spacing is set to 1.5)
-
-no more than 250 words for the abstract
-
-- a description of the research question/knowledge gap – what we know and what we don’t know
-- how your research has attempted to fill this gap
-- a brief description of the methods
-- brief results
-- key conclusions that put the research into a larger context
+With the growing prominence of single-cell techniques across various omics fields, there is a pressing need to develop a standardized pipeline for proteomics data in the realm of systems biology. Unlike DNA sequencing and RNA sequencing, proteomics analysis via mass spectrometry incurs high costs in terms of labor and equipment. Additionally, commercially available software solutions often come with hefty price tags and limited transparency regarding the underlying methods employed. However, MaxQuant \citep{Cox2008} presents a promising alternative, complemented by the flexibility of post-processing using the R programming language. 
+Guided by publications such as SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development process of the proteomics data analysis pipeline was thoroughly tested and validated using both bulk and single-cell mass spectrometry datasets. The pipeline implementation leverages the power of an interactive environment built in R Shiny, empowering users to discover the gold standard for their specific dataset. 
+Within the interactive environment, users have the flexibility to customize cutoffs and thresholds for quality control, as well as employ various approaches for data transformation, normalization, missing value imputation, and batch correction. 
+The developed application served as a valuable tool in guiding the identification of significantly differentially expressed proteins in HIV cells. Moreover, it facilitated the mapping of these proteins to relevant pathways and provided additional biological contexts for a comprehensive understanding of their functional implications.
+The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application.
 
 \pagenumbering{roman}
 

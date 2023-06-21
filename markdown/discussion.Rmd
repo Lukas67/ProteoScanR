@@ -461,7 +461,7 @@ Another approach used to determine the optimal number of clusters is the silhoue
 ```
 
 The silhouette method calculates silhouette coefficients for each data point, which quantify how closely the point resembles its own cluster compared to other clusters. 
-If the overall distances between clusters are small, indicating overlapping or unclear separation, we take the minimum k. This suggests that the data points may not be well-separated into distinct clusters. As suggested by the silhouette method in this case a lower number of clusters to differentiate cell types is recommended. 
+If the overall distances between clusters are small, indicating overlapping or unclear separation, it is suggested to take the minimum k. This suggests that the data points may not be well-separated into distinct clusters. As suggested by the silhouette method in this case a lower number of clusters to differentiate cell types is recommended. 
 
 ```{r cluster_analysis_dim_red, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="PCA plot with cluster indication. Shape of the datapoints indicate sample types. Clusters are encircled and color coded."}
   
