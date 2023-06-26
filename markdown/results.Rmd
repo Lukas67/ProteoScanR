@@ -11,7 +11,7 @@ To begin using the application, the first step is to upload the tab-delimited ev
 knitr::include_graphics("screenshots/overview.png")
 ```
 
-On the left side of the user interface, users can find the analysis pipeline settings that can be adjusted. Once the desired changes are made, they can be applied by clicking the update button. This allows users to observe the direct impact of the applied changes on the dataset.
+After a runtime of 2 minutes on the 4 core laptop the data is ready to visualize. On the left side of the user interface, users can find the analysis pipeline settings that can be adjusted. Once the desired changes are made, they can be applied by clicking the update button. This allows users to observe the direct impact of the applied changes on the dataset.
 In the summary visualization, it may appear cluttered due to the processing of 36 files. In smaller datasets, the nodes of the network graph can be more easily distinguished and understood.
 When running the application with SCoPE2 \citep{Specht2021} reference cutoffs, the following results were visualized.
 
@@ -184,9 +184,4 @@ The barplot shows the significance of the two nodes. The count indicates how man
 knitr::include_graphics("screenshots/go_enrich_dot.png")
 ```
 
-The position of the dot shows the number of matches for the particular protein set. Colors indicate 
-for the significance level. In this analysis the entire repertoire of detected proteins was used. Only the protein set collections with the most protein matches were used.
-
-
-
-
+The position of the dot shows the number of matches for the particular protein set. Colors indicate for the significance level. In this analysis the entire repertoire of detected proteins was used and fetched against the bundle containing all Human gene sets in the Human Molecular Signatures Database (MSigDB). After a runtime of 3 minutes 672 of 24667 gene sets were found significantly over represented. Only the protein set collections with the most protein matches were used (snipping tool Plotly).

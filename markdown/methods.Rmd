@@ -34,6 +34,12 @@ For the reference data used for developing the pipeline an Orbitrap™ Fusion™
 
 
 ## Drylab - Computational methods
+
+### Hardware
+Lenovo Laptop X360 with:
+Intel(R) Core(TM) i5-6200U CPU @ 2.30GHz
+8 GB RAM
+
 ```{r Dataflow, eval=FALSE, include=FALSE}
 # library(DiagrammeR)
 # library(webshot)

@@ -66,7 +66,7 @@ knitr::include_graphics("KI_logo.png")
 \Large
 \doublespacing
 {\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
-presenting ProteoScanR & Proteomics Workbench
+presenting ProteoScanR \& Proteomics Workbench
 
 \vspace{1 cm}
 
@@ -119,6 +119,7 @@ Guided by SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development
 Within the interactive environment, users have the flexibility to customize cutoffs and thresholds for quality control, as well as employ various approaches for data transformation, normalization, missing value imputation, and batch correction. 
 ProteoScanR and the Proteomics Workbench served as a valuable tool in guiding the identification of significantly expressed proteins in cells under study. Subsequently, the pathway enrichment analysis provided additional biological contexts for a comprehensive understanding of their functional implications.
 The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application.
+https://github.com/Lukas67/ProteoScanR
 
 \pagenumbering{roman}
 

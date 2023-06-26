@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.21)  21 JUN 2023 14:58
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.6.21)  26 JUN 2023 11:39
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -438,270 +438,26 @@ Package hyperref Info: Link coloring OFF on input line 81.
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=261, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=4, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 93.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=262, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=5, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 94.
 (pdftex.def)             Requested size: 97.2517pt x 123.6416pt.
-[1
-
-{/home/lukas/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc} <./FHCW_logo.png> <./KI_logo.png>] [1] (./Thesis.toc
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
-File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
-File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
-File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
-File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-)
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 2.
-LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 2.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
-File: umsa.fd 2013/01/14 v3.01 AMS symbols A
-)
-LaTeX Font Info:    Trying to load font information for U+msb on input line 2.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
-File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [2] [3])
-\tf@toc=\write4
-\openout4 = `Thesis.toc'.
-
-[4] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11]
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 688.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
-File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}]
-<Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf, id=541, 1228.59pt x 1951.29pt>
-File: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf  used on input line 723.
-(pdftex.def)             Requested size: 428.86938pt x 681.14551pt.
-[13] [14 <./Thesis_files/figure-latex/data_processing_pipeline_flowchart_vertical-1.pdf>] [15] [16{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}] [17] [18] [19] [20{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [21] [22] [23] [24] [25] [26] [27] [28] [29] [30]
-<screenshots/overview.png, id=762, 1831.84375pt x 981.6675pt>
-File: screenshots/overview.png Graphic file (type png)
-<use screenshots/overview.png>
-Package pdftex.def Info: screenshots/overview.png  used on input line 1513.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[31 <./screenshots/overview.png>]
-<screenshots/numbers_default.png, id=773, 1831.84375pt x 981.6675pt>
-File: screenshots/numbers_default.png Graphic file (type png)
-<use screenshots/numbers_default.png>
-Package pdftex.def Info: screenshots/numbers_default.png  used on input line 1533.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[32 <./screenshots/numbers_default.png>]
-<screenshots/mutual_info_default.png, id=781, 1831.84375pt x 981.6675pt>
-File: screenshots/mutual_info_default.png Graphic file (type png)
-<use screenshots/mutual_info_default.png>
-Package pdftex.def Info: screenshots/mutual_info_default.png  used on input line 1549.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[33 <./screenshots/mutual_info_default.png>]
-<screenshots/constand_norm_dependency.png, id=788, 1827.82875pt x 997.7275pt>
-File: screenshots/constand_norm_dependency.png Graphic file (type png)
-<use screenshots/constand_norm_dependency.png>
-Package pdftex.def Info: screenshots/constand_norm_dependency.png  used on input line 1569.
-(pdftex.def)             Requested size: 486.24097pt x 265.41653pt.
-[34 <./screenshots/constand_norm_dependency.png>]
-<screenshots/mutual_info_quant_norm.png, id=795, 1834.855pt x 997.7275pt>
-File: screenshots/mutual_info_quant_norm.png Graphic file (type png)
-<use screenshots/mutual_info_quant_norm.png>
-Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 1579.
-(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
-[35 <./screenshots/mutual_info_quant_norm.png>]
-<screenshots/RI_channel_default.png, id=802, 1831.84375pt x 981.6675pt>
-File: screenshots/RI_channel_default.png Graphic file (type png)
-<use screenshots/RI_channel_default.png>
-Package pdftex.def Info: screenshots/RI_channel_default.png  used on input line 1601.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[36 <./screenshots/RI_channel_default.png>]
-<screenshots/RI_file_default.png, id=809, 1831.84375pt x 981.6675pt>
-File: screenshots/RI_file_default.png Graphic file (type png)
-<use screenshots/RI_file_default.png>
-Package pdftex.def Info: screenshots/RI_file_default.png  used on input line 1620.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[37 <./screenshots/RI_file_default.png>]
-<screenshots/RI_st_default.png, id=818, 1831.84375pt x 981.6675pt>
-File: screenshots/RI_st_default.png Graphic file (type png)
-<use screenshots/RI_st_default.png>
-Package pdftex.def Info: screenshots/RI_st_default.png  used on input line 1644.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[38 <./screenshots/RI_st_default.png>]
-<screenshots/cv_st_default.png, id=826, 1830.84pt x 971.63pt>
-File: screenshots/cv_st_default.png Graphic file (type png)
-<use screenshots/cv_st_default.png>
-Package pdftex.def Info: screenshots/cv_st_default.png  used on input line 1659.
-(pdftex.def)             Requested size: 486.25981pt x 258.05893pt.
-[39 <./screenshots/cv_st_default.png>]
-<screenshots/cv_rawfile_default.png, id=835, 1831.84375pt x 981.6675pt>
-File: screenshots/cv_rawfile_default.png Graphic file (type png)
-<use screenshots/cv_rawfile_default.png>
-Package pdftex.def Info: screenshots/cv_rawfile_default.png  used on input line 1681.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[40 <./screenshots/cv_rawfile_default.png>]
-<screenshots/cv_rawfile_nobs2.png, id=842, 1831.84375pt x 985.6825pt>
-File: screenshots/cv_rawfile_nobs2.png Graphic file (type png)
-<use screenshots/cv_rawfile_nobs2.png>
-Package pdftex.def Info: screenshots/cv_rawfile_nobs2.png  used on input line 1698.
-(pdftex.def)             Requested size: 486.24689pt x 261.64078pt.
-[41 <./screenshots/cv_rawfile_nobs2.png>]
-<screenshots/cv_rawfile_nobs10.png, id=849, 1834.855pt x 997.7275pt>
-File: screenshots/cv_rawfile_nobs10.png Graphic file (type png)
-<use screenshots/cv_rawfile_nobs10.png>
-Package pdftex.def Info: screenshots/cv_rawfile_nobs10.png  used on input line 1713.
-(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
-[42 <./screenshots/cv_rawfile_nobs10.png>]
-<screenshots/heatmap.png, id=857, 1829.83624pt x 981.6675pt>
-File: screenshots/heatmap.png Graphic file (type png)
-<use screenshots/heatmap.png>
-Package pdftex.def Info: screenshots/heatmap.png  used on input line 1729.
-(pdftex.def)             Requested size: 486.2445pt x 260.85963pt.
-[43 <./screenshots/heatmap.png>]
-<screenshots/dim_red_default.png, id=864, 1834.855pt x 997.7275pt>
-File: screenshots/dim_red_default.png Graphic file (type png)
-<use screenshots/dim_red_default.png>
-Package pdftex.def Info: screenshots/dim_red_default.png  used on input line 1747.
-(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
-[44 <./screenshots/dim_red_default.png>]
-<screenshots/dim_red_changed_k.png, id=872, 1831.84375pt x 997.7275pt>
-File: screenshots/dim_red_changed_k.png Graphic file (type png)
-<use screenshots/dim_red_changed_k.png>
-Package pdftex.def Info: screenshots/dim_red_changed_k.png  used on input line 1765.
-(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
-[45 <./screenshots/dim_red_changed_k.png>]
-<screenshots/dim_red_3d.png, id=879, 1831.84375pt x 997.7275pt>
-File: screenshots/dim_red_3d.png Graphic file (type png)
-<use screenshots/dim_red_3d.png>
-Package pdftex.def Info: screenshots/dim_red_3d.png  used on input line 1786.
-(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
-[46 <./screenshots/dim_red_3d.png>]
-<screenshots/dim_red_batchC.png, id=886, 1831.84375pt x 997.7275pt>
-File: screenshots/dim_red_batchC.png Graphic file (type png)
-<use screenshots/dim_red_batchC.png>
-Package pdftex.def Info: screenshots/dim_red_batchC.png  used on input line 1803.
-(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
-<screenshots/dim_red_batchC_3d.png, id=887, 1831.84375pt x 997.7275pt>
-File: screenshots/dim_red_batchC_3d.png Graphic file (type png)
-<use screenshots/dim_red_batchC_3d.png>
-Package pdftex.def Info: screenshots/dim_red_batchC_3d.png  used on input line 1811.
-(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
-[47 <./screenshots/dim_red_batchC.png>] [48 <./screenshots/dim_red_batchC_3d.png>]
-<screenshots/feature.png, id=902, 1832.8475pt x 1002.74625pt>
-File: screenshots/feature.png Graphic file (type png)
-<use screenshots/feature.png>
-Package pdftex.def Info: screenshots/feature.png  used on input line 1829.
-(pdftex.def)             Requested size: 486.26163pt x 266.0325pt.
-[49 <./screenshots/feature.png>]
-<screenshots/stat_dependency.png, id=909, 1835.85875pt x 980.66376pt>
-File: screenshots/stat_dependency.png Graphic file (type png)
-<use screenshots/stat_dependency.png>
-Package pdftex.def Info: screenshots/stat_dependency.png  used on input line 1848.
-(pdftex.def)             Requested size: 486.24814pt x 259.73997pt.
-[50 <./screenshots/stat_dependency.png>]
-<screenshots/stat_HC_HIV_noMets.png, id=917, 923.45pt x 1613.02625pt>
-File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
-<use screenshots/stat_HC_HIV_noMets.png>
-Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 1873.
-(pdftex.def)             Requested size: 340.3748pt x 594.546pt.
-[51 <./screenshots/stat_HC_HIV_noMets.png>] [52]
-<screenshots/path_enrich_nw.png, id=928, 1831.84375pt x 995.72pt>
-File: screenshots/path_enrich_nw.png Graphic file (type png)
-<use screenshots/path_enrich_nw.png>
-Package pdftex.def Info: screenshots/path_enrich_nw.png  used on input line 1911.
-(pdftex.def)             Requested size: 437.61101pt x 237.86856pt.
-[53 <./screenshots/path_enrich_nw.png>]
-<screenshots/path_enrich_bar.png, id=937, 1834.855pt x 1002.74625pt>
-File: screenshots/path_enrich_bar.png Graphic file (type png)
-<use screenshots/path_enrich_bar.png>
-Package pdftex.def Info: screenshots/path_enrich_bar.png  used on input line 1926.
-(pdftex.def)             Requested size: 437.63043pt x 239.16455pt.
-[54 <./screenshots/path_enrich_bar.png>]
-<screenshots/go_enrich_dot.png, id=944, 1830.84pt x 1002.74625pt>
-File: screenshots/go_enrich_dot.png Graphic file (type png)
-<use screenshots/go_enrich_dot.png>
-Package pdftex.def Info: screenshots/go_enrich_dot.png  used on input line 1944.
-(pdftex.def)             Requested size: 437.62265pt x 239.68477pt.
-[55 <./screenshots/go_enrich_dot.png>] [56] [57] [58] [59]
-<Thesis_files/figure-latex/missingness-1.pdf, id=992, 469.755pt x 325.215pt>
-File: Thesis_files/figure-latex/missingness-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/missingness-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/missingness-1.pdf  used on input line 2158.
-(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
-[60 <./Thesis_files/figure-latex/missingness-1.pdf>]
-<Thesis_files/figure-latex/cluster_analysis_dendrogram-1.pdf, id=1007, 469.755pt x 325.215pt>
-File: Thesis_files/figure-latex/cluster_analysis_dendrogram-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/cluster_analysis_dendrogram-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/cluster_analysis_dendrogram-1.pdf  used on input line 2205.
-(pdftex.def)             Requested size: 469.78969pt x 325.23901pt.
-[61 <./Thesis_files/figure-latex/cluster_analysis_dendrogram-1.pdf>]
-<Thesis_files/figure-latex/cluster_analysis_gap_stat-1.pdf, id=1022, 469.755pt x 325.215pt>
-File: Thesis_files/figure-latex/cluster_analysis_gap_stat-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/cluster_analysis_gap_stat-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/cluster_analysis_gap_stat-1.pdf  used on input line 2237.
-(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
-[62 <./Thesis_files/figure-latex/cluster_analysis_gap_stat-1.pdf>]
-<Thesis_files/figure-latex/cluster_analysis_silh-1.pdf, id=1035, 469.755pt x 325.215pt>
-File: Thesis_files/figure-latex/cluster_analysis_silh-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/cluster_analysis_silh-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/cluster_analysis_silh-1.pdf  used on input line 2256.
-(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
-<Thesis_files/figure-latex/cluster_analysis_dim_red-1.pdf, id=1036, 469.755pt x 325.215pt>
-File: Thesis_files/figure-latex/cluster_analysis_dim_red-1.pdf Graphic file (type pdf)
-<use Thesis_files/figure-latex/cluster_analysis_dim_red-1.pdf>
-Package pdftex.def Info: Thesis_files/figure-latex/cluster_analysis_dim_red-1.pdf  used on input line 2274.
-(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
-[63 <./Thesis_files/figure-latex/cluster_analysis_silh-1.pdf>] [64 <./Thesis_files/figure-latex/cluster_analysis_dim_red-1.pdf>] [65] [66] [67] (./Thesis.bbl [68] [69] [70] [71] [72]) [73] [74]
-LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 2468.
-(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
-File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [75] [76] (./Thesis.lof [77])
-\tf@lof=\write5
-\openout5 = `Thesis.lof'.
-
-[78] 
-enddocument/afterlastpage: lastpage setting LastPage.
-(./Thesis.aux)
- ***********
-LaTeX2e <2023-06-01> patch level 1
-L3 programming layer <2023-06-16>
- ***********
-Package rerunfilecheck Info: File `Thesis.out' has not changed.
-(rerunfilecheck)             Checksum: 31601A87F4A9B1C8D6445D361996AAC1;11469.
- )
-(\end occurred inside a group at level 2)
-
-### semi simple group (level 2) entered at line 134 (\begingroup)
-### semi simple group (level 1) entered at line 62 (\begingroup)
-### bottom level 
+! Misplaced alignment tab character &.
+l.101 presenting ProteoScanR &
+                               Proteomics Workbench 
 Here is how much of TeX's memory you used:
- 12874 strings out of 477683
- 204611 string characters out of 5831042
- 1863769 words of memory out of 5000000
- 32823 multiletter control sequences out of 15000+600000
- 548869 words of font info for 60 fonts, out of 8000000 for 9000
+ 11615 strings out of 477683
+ 174491 string characters out of 5831042
+ 1851769 words of memory out of 5000000
+ 31967 multiletter control sequences out of 15000+600000
+ 522674 words of font info for 38 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,9n,79p,634b,9063s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
-Output written on Thesis.pdf (83 pages, 4944895 bytes).
-PDF statistics:
- 1371 PDF objects out of 1440 (max. 8388607)
- 1176 compressed objects within 12 object streams
- 343 named destinations out of 1000 (max. 500000)
- 673 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 75i,4n,79p,311b,8435s stack positions out of 10000i,1000n,20000p,200000b,200000s
 
+!  ==> Fatal error occurred, no output PDF file produced!
