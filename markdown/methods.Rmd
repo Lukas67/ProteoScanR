@@ -76,7 +76,7 @@ For the data-acquisition Thermo Fisher acquisition software was used.
 Raw-file analysis of the data was done with  MaxQuantCmd 2.2.0.0 \citep{Cox2008}.
 The default settings were used. TMTpro labels were corrected according to the isotopical distribution of the Lot-number provided by Thermo Fisher.
 
-```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=17, fig.align='center', fig.cap="Flowchart presenting the processing by ProteoScanR"}
+```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="90%", fig.align='center', fig.cap="Flowchart presenting the processing by ProteoScanR"}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)

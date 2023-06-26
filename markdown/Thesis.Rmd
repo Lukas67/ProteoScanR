@@ -66,38 +66,34 @@ knitr::include_graphics("KI_logo.png")
 \Large
 \doublespacing
 {\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
-presenting ProteoScanR \& Proteomics Workbench
+\\ presenting ProteoScanR \& Proteomics Workbench
 
 \vspace{1 cm}
 
 \normalsize
 \singlespacing
-By
 
 \vspace{0.5 cm}
 
 \Large
 
 {\bf Lukas Gamp}
-01630003
+\\ 01630003
 
 \vspace{1.5 cm}
 
-in partial fulfillment of the requirement \\for the degree of MSc \\in Bioinformatics
+In partial fulfillment of the requirement \\for the degree of MSc \\in Bioinformatics
 
 \vspace{1.5 cm}
 
 \normalsize
 July 2023
 
-Main Supervisor: 
-Dr. DI(FH) Gerhard Duernberger
-
-External Supervison:
-Assoc. Prof. Ujjwal Neogi, M.Sc. PhD
-
-Second examiner:
-FH-Prof. Dr. Alexandra Graf
+\doublespacing
+\doublespacing
+Main Supervisor: Dr. DI(FH) Gerhard Duernberger \\
+External Supervison: Assoc. Prof. Ujjwal Neogi, M.Sc. PhD \\
+Second examiner: FH-Prof. Dr. Alexandra Graf \\
 
 \end{centering}
 

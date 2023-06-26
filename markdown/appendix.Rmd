@@ -49,30 +49,37 @@ output: pdf_document
 ## Dry lab
 ### R-version info
 
-\begin{verbatim}
-R version 4.3.0 (2023-04-21)
-Platform: x86_64-pc-linux-gnu (64-bit)
-Running under: Ubuntu 22.04.2 LTS
 
- [1] visNetwork_2.1.2            snowfall_1.84-6.2          
- [3] snow_0.4-4                  piano_2.16.0               
- [5] org.Hs.eg.db_3.17.0         AnnotationDbi_1.62.1       
- [7] infotheo_1.2.0.1            clusterProfiler_4.8.1      
- [9] plotly_4.10.1               sva_3.48.0                 
-[11] BiocParallel_1.34.2         genefilter_1.82.1          
-[13] mgcv_1.8-42                 nlme_3.1-162               
-[15] impute_1.74.1               CONSTANd_1.8.0             
-[17] limma_3.56.1                scater_1.28.0              
-[19] scuttle_1.10.1              reshape2_1.4.4             
-[21] dplyr_1.1.2                 magrittr_2.0.3             
-[23] ggplot2_3.4.2               SingleCellExperiment_1.22.0
-[25] scp_1.10.0                  QFeatures_1.10.0           
-[27] MultiAssayExperiment_1.26.0 SummarizedExperiment_1.30.1
-[29] Biobase_2.60.0              GenomicRanges_1.52.0       
-[31] GenomeInfoDb_1.36.0         IRanges_2.34.0             
-[33] S4Vectors_0.38.1            BiocGenerics_0.46.0        
-[35] MatrixGenerics_1.12.0       matrixStats_0.63.0         
-[37] spsComps_0.3.2.1            DT_0.28                    
-[39] shinydashboard_0.7.2        shinyWidgets_0.7.6         
-[41] shiny_1.7.4                
-\end{verbatim}
+```{r load_libraries, message=FALSE, warning=FALSE, include=FALSE}
+library("shiny")
+library("shinyWidgets")
+library("shinydashboard")
+library("DT")
+library("spsComps")
+
+library("scp")
+library("SingleCellExperiment")
+library("ggplot2")
+library("magrittr")
+library("dplyr")
+library("reshape2")
+library("scater")
+library("limma")
+library("CONSTANd")
+library("stats")
+library("impute")
+library("sva")
+library("plotly")
+library("clusterProfiler")
+library("infotheo")
+library("org.Hs.eg.db")
+library("AnnotationDbi")
+library("piano")
+library("snowfall")
+library("parallel")
+library("visNetwork")
+```
+
+```{r session_info, echo=FALSE}
+sessionInfo()
+```
