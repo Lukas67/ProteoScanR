@@ -353,7 +353,7 @@ To improve future experiments, it is recommended to increase the number of prote
 The advantage of performing single-cell analysis lies in its ability to provide a fine resolution of cellular differences. Unfortunately variation causing effects such as cellular differentiation stages, are mainly unknown when starting single-cell experiments.
 The next steps in the development of the program aim to enable the stratification of single-cell data sets. The analysis typically begins by finding clusters within the datasets, identifying differentially expressed proteins, and annotating cell types based on their expression profiles. Subsequently, the analysis aims to distinguish sample types based on their expression profiles.
 
-Here I will explain how the analysis could start and elaborate the limitations and challenges for this approach. Additional processing steps will be included after the existing pipeline, so ProteoScanR provides a starting point for further analysis.
+Here I will explain how the analysis could start and elaborate the limitations and challenges for this approach. Additional processing steps will be included after the existing pipeline, so the ProteoScanR provides a starting point for further analysis.
 
 ```{r cluster_analysis_dendrogram, echo=FALSE, message=FALSE, warning=FALSE, out.width="100%", fig.align='center', fig.cap="Dendrogram showing the similarity over sample types. Tree was created using Ward`s minimum variance method."}
 
@@ -467,7 +467,7 @@ if (optimal_clusters_sil > optimal_clusters_gap) {
 }
 
 
-km.final <- kmeans(protein_matrix_t, optimal_clusters)
+km.final <- kmeans(protein_matrix_t, 2)
 
 scp$cluster <- data.frame(km.final$cluster)
 
@@ -489,7 +489,8 @@ ggplot(dimred_pca, aes(x=PC1,
   guides(color="none", shape="none") +
   stat_ellipse(data=dimred_pca, aes(fill=factor(cluster)),
                geom="polygon", alpha=0.2, level=0.9, type="t", linetype=2, show.legend = F) +
-  coord_fixed()
+  coord_fixed() +
+  labs(title=paste("Principle Components with", 2, "clusters"))
 
 ```
 

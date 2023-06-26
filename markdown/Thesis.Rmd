@@ -92,7 +92,7 @@ July 2023
 \doublespacing
 \doublespacing
 Main Supervisor: Dr. DI(FH) Gerhard Duernberger \\
-External Supervison: Assoc. Prof. Ujjwal Neogi, M.Sc. PhD \\
+External Supervisor: Assoc. Prof. Ujjwal Neogi, M.Sc. PhD \\
 Second examiner: FH-Prof. Dr. Alexandra Graf \\
 
 \end{centering}

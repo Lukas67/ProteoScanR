@@ -76,7 +76,7 @@ For the data-acquisition Thermo Fisher acquisition software was used.
 Raw-file analysis of the data was done with  MaxQuantCmd 2.2.0.0 \citep{Cox2008}.
 The default settings were used. TMTpro labels were corrected according to the isotopical distribution of the Lot-number provided by Thermo Fisher.
 
-```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="90%", fig.align='center', fig.cap="Flowchart presenting the processing by ProteoScanR"}
+```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="80%", fig.align='center', fig.cap="Flowchart presenting the processing by ProteoScanR"}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -283,20 +283,20 @@ output
 # dim_red_actions
 ```
 
-```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=9, fig.width=32, include=FALSE}
+```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=14, fig.width=45, include=FALSE}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
 library(grid)
 library(magrittr)
 
-default_txt_setting <- gpar(cex=1.5)
+default_txt_setting <- gpar(cex=1.9)
 default_box_setting <- gpar(fill="white")
 
 data_box_setting <- gpar(fill="#56B4E9")
 
 opts_box_setting <- gpar(fill="lightyellow", col="darkblue")
-opts_txt_setting <- gpar(col="darkblue", cex=1)
+opts_txt_setting <- gpar(col="darkblue", cex=1.5)
 refinement_arrow_setting <- arrow(angle=30, ends="both", type = "closed")
 
 plot_box_setting <- gpar(fill="#DDCC77")
@@ -366,11 +366,11 @@ missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nrepl
                               txt_gp = opts_txt_setting,
                               just="center")
 
-batch_correction <- boxGrob("batch correction",
+batch_correction <- boxGrob("batch correction &\n dimensionality reduction",
                             box_gp=plot_box_setting,
                             txt_gp = default_txt_setting)
 
-batch_correction_opts <- boxGrob("options:\nComBat",
+batch_correction_opts <- boxGrob("ComBat\nPCA\nUMAP",
                                  box_gp = opts_box_setting,
                                  txt_gp = opts_txt_setting,
                                  just="center")
@@ -385,12 +385,11 @@ dim_red_actions <- boxGrob("procedures:\nPCA\nUMAP",
                        just="center"
                        )
 
-stat_module <- boxGrob(glue("statistics module",.sep = "\n"),
+stat_module <- boxGrob(glue("differential expression\npathway enrichment\nontology enrichment",.sep = "\n"),
                        box_gp = default_box_setting,
                        txt_gp = default_txt_setting)
 
 grid.newpage()
-
 vert <- {spreadHorizontal(files = evidence_file,
                        read_data = read_data,
                        quality_control_1 = quality_control_1,
@@ -400,58 +399,65 @@ vert <- {spreadHorizontal(files = evidence_file,
                        transform_data = transform_data,
                        normalize_data = normalize_data,
                        missing_value_handling = missing_value_handling,
-                       batch_correction = batch_correction,
-                       dim_red = dim_red,
-                       stat_module
+#                       batch_correction = batch_correction,
+#                       dim_red = dim_red,
+                       out = stat_module
 )}
-
 input <- alignHorizontal(reference = vert$files,
                       evidence_file, sample_annotation_file) %>%
   spreadVertical()
 vert$files <- NULL
 
-
-# connect and move the boxes
-for (i in 1:(length(vert) - 1)) {
-    connectGrob(vert[[i]], vert[[i + 1]], type = "horizontal") %>%
-    print}
+output <- alignHorizontal(reference = vert$out,
+                      stat_module, batch_correction) %>%
+  spreadVertical()
+vert$out <- NULL
 
 
 # right side
 qc1_content <- moveBox(qc1_content,
-                    x = coords(vert$quality_control_1)$x,
-                    y = 0.8)
+                    y = .8,
+                    x = coords(vert$quality_control_1)$x)
 
 transform_opts <- moveBox(transform_opts,
                     y = .9,
                     x = coords(vert$transform_data)$x)
 
-missing_value_opts <- moveBox(missing_value_opts,
-                    y = .7,
+
+# dim_red <- moveBox(dim_red,
+#                    x = coords(output[[2]])$x,
+#                    y = 0)
+
+batch_correction_opts <- moveBox(batch_correction_opts,
+                    y = coords(output[[2]])$y,
                     x = coords(vert$missing_value_handling)$x)
 
-dim_red_actions <- moveBox(dim_red_actions,
-                    y = .9,
-                    x = coords(vert$dim_red)$x)
+# dim_red_actions <- moveBox(dim_red_actions,
+#                     x = (coords(dim_red)$x -.5),
+#                     y = coords(dim_red)$x)
 
 # left side
 qc2_content <- moveBox(qc2_content,
-                    y = .2,
+                    y = .17,
                     x = coords(vert$quality_control_2)$x)
 
 normalize_opts <- moveBox(normalize_opts,
                     y = .2,
                     x = coords(vert$normalize_data)$x)
 
-batch_correction_opts <- moveBox(batch_correction_opts,
+missing_value_opts <- moveBox(missing_value_opts,
                     y = .2,
-                    x = coords(vert$batch_correction)$x)
+                    x = coords(vert$missing_value_handling)$x)
 
 
+for (i in 1:(length(vert) - 1)) {
+  connectGrob(vert[[i]], vert[[i + 1]], type = "horizontal") %>%
+    print
+}
 
 # connect boxes
-connectGrob(input[[1]], vert$read_data, type = "vertical")
-connectGrob(input[[2]], vert$read_data, type = "vertical")
+connectGrob(input[[1]], vert$read_data, type = "N")
+connectGrob(input[[2]], vert$read_data, type = "N")
 
 connectGrob(vert$quality_control_1, qc1_content, type = "vertical", arrow_obj = arrow(angle=0))
 
@@ -463,9 +469,12 @@ connectGrob(vert$normalize_data, normalize_opts, type = "vertical", arrow_obj = 
 
 connectGrob(vert$missing_value_handling, missing_value_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
 
-connectGrob(vert$batch_correction, batch_correction_opts, type = "vertical", arrow_obj = refinement_arrow_setting)
+connectGrob(vert$missing_value_handling, output[[1]], type = "vertical", subelmnt = "right")
+connectGrob(vert$missing_value_handling, output[[2]], type = "vertical", subelmnt = "right")
 
-connectGrob(vert$dim_red, dim_red_actions, type = "vertical", arrow_obj = arrow(angle=0))
+connectGrob(output[[2]], batch_correction_opts, type = "horizontal", arrow_obj = arrow(angle=0), subelmnt = "l")
+
+# connectGrob(vert$dim_red, dim_red_actions, type = "horizontal", arrow_obj = arrow(angle=0))
 
 # Print boxes
 input
@@ -476,7 +485,9 @@ transform_opts
 normalize_opts
 missing_value_opts
 batch_correction_opts
-dim_red_actions
+output
+# dim_red
+# dim_red_actions
 ```
 
 ### Processing the data
@@ -661,7 +672,7 @@ Limma outputs a table with all proteins, their respective logfold change, p-valu
 The third and most conservative option is the Holm method \citep{Holm1979} which controls the error sequentally in a family wise manner, which is considered as traditional in regards to the above mentioned experimental wise error rates. The above mentioned correction methods are ordered in the way from the most liberal to the most conservative one. The selection is supposed to give the user the possibility questioning results on multiple levels. 
 
 ### Protein set enrichment analysis
-After differential expression the upcoming question could be, in which context the up or down regulated proteins are. Enriched pathways can be understood as an over-representation (ORA = over-representation analysis) of proteins within a specific set. This set can be a pathway or a selection of common denominators in biological contexts, such as cell types or oncological factors. The statistical testing to identify the overabundant proteins of a specific set is similar to a $\chi^2$ test developed by Karl Pearson \citep{Pearson1900} or the exact Fisher test \citep{Sprent2011} for tables with 4 fields in small sample sizes. Within the list are all truly differentially expressed genes, an annotation is the identification of a protein in the desired biological context. 
+After differential expression the upcoming question could be, in which context the up or down regulated proteins are. Enriched pathways can be understood as an over-representation (ORA = over-representation analysis) of proteins within a specific set. This set, also known as ontology can be a pathway or a selection of common denominators in biological contexts, such as cell types or oncological factors. The statistical testing to identify the overabundant proteins of a specific set is similar to a $\chi^2$ test developed by Karl Pearson \citep{Pearson1900} or the exact Fisher test \citep{Sprent2011} for tables with 4 fields in small sample sizes. Within the list are all truly differential expressed genes, an annotation is the identification of a protein in the desired biological context. 
 The table is expected to be populated by the values as follows:
 
 \begin{center}
@@ -683,14 +694,11 @@ This leads to the test statistics, the observed values (=$O$) in the table are s
 $p=1-\sum_{i=0}^{A-1}\frac{\binom{B}{i}\binom{D-B}{A+C-i}}{\binom{D}{A+C}}$
 Here D denotes either for the background distribution which can be the total number of proteins obtained in the experiment, all proteins with annotation or a custom selected background. The background indicates all proteins which could be positive tested for in the observed sample. The above mentioned three options are implemented in the user interface.
 After obtaining the p-values for each protein set, the subsequent critical step involves the correction for multiple testing, considering the inherent risk of false positive results. Multiple testing correction methods adjust the significance thresholds to account for the increased probability of detecting false positives when performing multiple statistical tests. In this protein set enrichment analysis, the user is provided with a selection of established correction methods, akin to those commonly utilized in the field of differential expression analysis, ensuring robust and reliable interpretation of the results. 
-Once the enriched protein pathways are determined, they can be visually represented using bar or dotplots, and a network of the found pathways. In the network ontologies are depicted as nodes, whereas edges show the strength of the interaction by thickness corresponding to the number of associated proteins. 
+Once the enriched protein pathways are determined, they can be visually represented using bar or dotplots, and a network of the found pathways. 
 
 #### Pathway enrichment analysis
 The pathway enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the entire “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. 
 
 #### Custom ontology based protein enrichment analysis
-For custom ontologies the protein enrichment analysis is done using the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which can be either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties.
-For statistical testing the above explained Fisher exact test is used.
-
-
-
+For custom ontologies the protein enrichment analysis is done using the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which can be either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties. The online database offers pre-built gene set collections for previous research questions in multiple fields of human biology.
+For statistical testing the above explained Fisher exact test is used. The output of the Fisher test does not show any directionality in regards of protein expression. If the user wants to include directionality in the network diagram, the default option of piano can be included in future versions of the program.
