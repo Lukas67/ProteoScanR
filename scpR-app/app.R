@@ -2108,9 +2108,9 @@ server <- function(input, output, session) {
     
     req(input$p_value_correction)
     if (input$p_value_correction == "none") {
-      p_val_correct <- "p-value"
+      p_val_correct <- "-log10(p-value)"
     } else {
-      p_val_correct <- "adj.p.value"
+      p_val_correct <- "-log10(adj.p.value)"
     }
     
     p <- ggplot(toptable, aes(x = logFC, y = -log10(adj.P.Val), text=protein)) +

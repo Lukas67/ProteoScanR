@@ -7,6 +7,13 @@ geometry: "left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm"
 fontsize: 11pt
 header-includes:
   - \usepackage{float}
+  - \let\origfigure\figure
+  - \let\endorigfigure\endfigure
+  - \renewenvironment{figure}[1][2] {
+      \expandafter\origfigure\expandafter[H]
+    } {
+    \endorigfigure
+    }
   - \usepackage{sectsty}
   - \usepackage{paralist}
   - \usepackage{setspace}\spacing{1.5}
@@ -59,6 +66,7 @@ knitr::include_graphics("KI_logo.png")
 \Large
 \doublespacing
 {\bf Design and implementation of analysis pipeline for single cell type proteomics data} 
+presenting ProteoScanR & Proteomics Workbench
 
 \vspace{1 cm}
 
@@ -71,15 +79,26 @@ By
 \Large
 
 {\bf Lukas Gamp}
+01630003
 
 \vspace{1.5 cm}
 
-in partial fullfilment of the requirement \\for the degree of MSc \\in Bioinformatics
+in partial fulfillment of the requirement \\for the degree of MSc \\in Bioinformatics
 
 \vspace{1.5 cm}
 
 \normalsize
-mm yy
+July 2023
+
+Main Supervisor: 
+Dr. DI(FH) Gerhard Duernberger
+
+External Supervison:
+Assoc. Prof. Ujjwal Neogi, M.Sc. PhD
+
+Second examiner:
+FH-Prof. Dr. Alexandra Graf
+
 \end{centering}
 
 \newpage
@@ -94,10 +113,11 @@ mm yy
 
 \spacing{1.5}
 
-With the growing prominence of single-cell techniques across various omics fields, there is a pressing need to develop a standardized pipeline for proteomics data in the realm of systems biology. Unlike DNA sequencing and RNA sequencing, proteomics analysis via mass spectrometry incurs high costs in terms of labor and equipment. Additionally, commercially available software solutions often come with hefty price tags and limited transparency regarding the underlying methods employed. However, MaxQuant \citep{Cox2008} presents a promising alternative, complemented by the flexibility of post-processing using the R programming language. 
-Guided by publications such as SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development process of the proteomics data analysis pipeline was thoroughly tested and validated using both bulk and single-cell mass spectrometry datasets. The pipeline implementation leverages the power of an interactive environment built in R Shiny, empowering users to discover the gold standard for their specific dataset. 
+With the growing prominence of single-cell techniques across various omics fields, there is a pressing need to develop a standardized pipeline for proteomics data in the realm of systems biology. Unlike DNA sequencing and RNA sequencing, proteomics analysis via mass spectrometry incurs high costs in terms of labor and equipment. Additionally, commercially available software solutions often come with hefty price tags and limited transparency regarding the underlying methods employed. However, MaxQuant \citep{Cox2008} presents a promising alternative, complemented by the flexibility using the R programming language. 
+Introducing ProteoScanR, a state-of-the-art proteomics pipeline integrated into the user-friendly Proteomics Workbench interface. 
+Guided by SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development process of ProteoScanR was thoroughly tested and validated using both bulk and single-cell mass spectrometry data sets. The pipeline implementation in the Proteomics Workbench leverages the power of an interactive environment built in R Shiny, empowering users to discover valuable insights for their specific data set. 
 Within the interactive environment, users have the flexibility to customize cutoffs and thresholds for quality control, as well as employ various approaches for data transformation, normalization, missing value imputation, and batch correction. 
-The developed application served as a valuable tool in guiding the identification of significantly differentially expressed proteins in HIV cells. Moreover, it facilitated the mapping of these proteins to relevant pathways and provided additional biological contexts for a comprehensive understanding of their functional implications.
+ProteoScanR and the Proteomics Workbench served as a valuable tool in guiding the identification of significantly expressed proteins in cells under study. Subsequently, the pathway enrichment analysis provided additional biological contexts for a comprehensive understanding of their functional implications.
 The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application.
 
 \pagenumbering{roman}
@@ -151,3 +171,5 @@ The master thesis project serves as a foundation for future advancements in the 
 ```{r appendix, child = 'appendix.Rmd'}
 ```
 
+\newpage
+\listoffigures

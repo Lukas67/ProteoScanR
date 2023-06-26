@@ -152,11 +152,13 @@ The t-statistics employed in limma are known for their robustness in handling no
 The values for all sample types exhibit a unimodal distribution. However, when examining the quantile-quantile (qq) plot, heavy tails can be observed for all three groups. This indicates deviations from a perfectly normal distribution, suggesting potential outliers in the data.
 
 \newpage
-```{r ui_stat_HC_HIV_noMets, echo=F, out.width="90%", fig.align='center', fig.cap="Statistic module"}
+```{r ui_stat_HC_HIV_noMets, echo=F, out.width="70%", fig.align='center', fig.cap="Statistic module"}
 knitr::include_graphics("screenshots/stat_HC_HIV_noMets.png")
 ```
 
-By comparing the log10-transformed and quantile-normalized expression values between the HIV group without metabolic syndrome and the healthy control (HC) group, six differentially expressed proteins were identified. The Venndiagram indicates significantly up/downregulated proteins. The Volcano represents log10(adjusted p values) against log10 fold changes (logFC).
+\newpage
+
+By comparing the log10-transformed and quantile-normalized expression values between the HIV group without metabolic syndrome and the healthy control (HC) group, six differentially expressed proteins were identified. The Venndiagram indicates significantly up/downregulated proteins. The Volcano represents -log10(adjusted p values) against log2 fold changes (logFC).
 These proteins include P68133 (Actin, alpha skeletal muscle), P47914 (60S ribosomal protein L29), P25311 (Zinc-alpha-2-glycoprotein), O60506 (Heterogeneous nuclear ribonucleoprotein Q), P31153 (S-adenosylmethionine synthase isoform type-2), and P46777 (60S ribosomal protein L5). A total of 652 proteins have been identified as not significantly upregulated or downregulated in the comparison analysis. These proteins did not exhibit statistically significant differences in expression between the compared groups or conditions.
 
 The direction of the contrast model determines the change in log-fold change (logFC) values. For instance, in the depicted figure, P68133 (Actin, alpha skeletal muscle) shows an increased expression of 0.25 (25%) in HIV_noMetS macrophages compared to HC macrophages. It's important to note that the logFC value changes by multiplication with -1 when the direction of the contrast model is reversed.
@@ -164,7 +166,7 @@ The direction of the contrast model determines the change in log-fold change (lo
 To account for potential batch effects, the batch factor was included as a cofactor in the model, ensuring that any observed differential expression is not confounded by batch variation.
 
 \newpage
-```{r ui_path_enrich_nw, echo=F, out.width="90%", fig.align='center', fig.cap="Pathway enrichment. Networkplot indicating the interaction of differentially expressed proteins"}
+```{r ui_path_enrich_nw, echo=F, out.width="90%", fig.align='center', fig.cap="Pathway enrichment. Networkplot indicating the association of differentially expressed proteins with pathways"}
 knitr::include_graphics("screenshots/path_enrich_nw.png")
 ```
 
@@ -175,7 +177,7 @@ The pathway enrichment mapped and tested with the exact Fisher test \citep{Spren
 knitr::include_graphics("screenshots/path_enrich_bar.png")
 ```
 
-The barplot shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the detected proteins. When choosing the detected proteins as a background no protein could be considered as statistically significant. 
+The barplot shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the detected proteins. When choosing the detected proteins as a background no pathway could be considered as statistically significant. 
 
 \newpage
 ```{r ui_go_enrich_bar, echo=F, out.width="90%", fig.align='center', fig.cap="Gene ontology enrichment against the complete human proteome. Snapshot dotplot indicating the interaction significance of found proteins"}
