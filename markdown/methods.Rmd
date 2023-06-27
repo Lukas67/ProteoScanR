@@ -304,7 +304,7 @@ plot_box_setting <- gpar(fill="#DDCC77")
 evidence_file <- boxGrob("evidence file",
                          box_gp = data_box_setting,
                          txt_gp = default_txt_setting)
-sample_annotation_file <- boxGrob("sample annotation",
+sample_annotation_file <- boxGrob("sample \nannotation",
                                   box_gp = data_box_setting,
                                   txt_gp = default_txt_setting)
 

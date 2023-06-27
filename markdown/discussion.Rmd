@@ -466,7 +466,7 @@ if (optimal_clusters_sil > optimal_clusters_gap) {
   optimal_clusters <- optimal_clusters_sil
 }
 
-#optimal_clusters <- 4
+#optimal_clusters <- 2
 
 km.final <- kmeans(protein_matrix_t, optimal_clusters)
 
@@ -488,25 +488,18 @@ ggplot(dimred_pca, aes(x=PC1,
                        shape = SampleType,
                        color=cluster)) +
   geom_point() +
-  guides(color="none", shape="none") +
+#  guides(color="none", shape="none") +
   labs(title=paste("Principle Components with", optimal_clusters, "clusters")) +
-  stat_ellipse(data = dimred_pca, 
-               aes(fill = cluster),
-               geom = "polygon", 
-               alpha = 0.2, 
-               level = 0.9, 
-               type = "norm", 
-               linetype = 2, 
-               show.legend = F,
-               na.rm = T) +
+  # stat_ellipse(data = dimred_pca, 
+  #              aes(fill = cluster),
+  #              geom = "polygon", 
+  #              alpha = 0.2, 
+  #              level = 0.9, 
+  #              type = "norm", 
+  #              linetype = 2, 
+  #              show.legend = F,
+  #              na.rm = T) +
   coord_fixed()
-
-# ggplot(dimred_pca, aes(x=PC1, 
-#                        y=PC2,
-#                        shape = SampleType
-#                        )) +
-#   geom_mark_ellipse(aes(fill=cluster, color=cluster)) +
-#   geom_point()
 ```
 
 As seen in the principal components analysis, clusters are densely packed, and the plot shows no clear differentiation between the `r optimal_clusters` suggested clusters. The dense packing and poor resolution indicates that other factors may be influencing the lack of distinct separation. One of the other factors involves the large number of imputed values due the high rate of missing values in the protein expression set. K-NN is not able to impute biological differences and therefore averages the particular missing value by its k neighbors. 
