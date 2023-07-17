@@ -58,11 +58,12 @@ library("impute")
 library("sva")
 library("tibble")
 
+folder <- "/media/lukas/DAB0041DB003FEAF/MS-Data"
+
 # read in MS result table
-mqScpData <- read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/evidence.txt")
+mqScpData <- read.delim("/media/lukas/DAB0041DB003FEAF/MS-Data/Lukas/Jun13/combined/txt/evidence.txt")
 
-sampleAnnotation = read.delim("/home/lukas/Desktop/MS-Data/Lukas/Jun13/combined/txt/sampleAnnotation.txt")
-
+sampleAnnotation = read.delim("/media/lukas/DAB0041DB003FEAF/MS-Data/Lukas/Jun13/combined/txt/sampleAnnotation.txt")
 
 
 # create QFeature object
