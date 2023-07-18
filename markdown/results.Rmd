@@ -7,7 +7,9 @@ output: pdf_document
 
 To begin using the application, the first step is to upload the tab-delimited evidence file and the sample annotation file. Once these files are uploaded, the application is ready to run with default values. The default settings are preconfigured for an initial analysis, and any further adjustments or fine-tuning can be made in subsequent steps of the analysis process.
 
-```{r ui_summary, echo=F, out.width="100%", fig.align='center', fig.cap="Summary showing the process of the analysis pipeline"}
+## Pre-processing and quality control
+
+```{r ui_summary, echo=F, out.width="100%", fig.align='center', fig.cap="Summary showing the processing steps of the analysis pipeline"}
 knitr::include_graphics("screenshots/overview.png")
 ```
 
@@ -100,6 +102,8 @@ knitr::include_graphics("screenshots/cv_rawfile_nobs10.png")
 
 When the minimum number of observations for ambiguous peptides is set to 10, the distribution of medians across channels shows a decrease in density. This can be attributed to the rare occurrence of 10 unique peptides matching to the same protein, which is not commonly observed in the dataset. 
 
+## Downstream analysis
+
 \newpage
 ```{r ui_heatmap, echo=F, out.width="100%", fig.align='center', fig.cap="Correlation heatmap"}
 knitr::include_graphics("screenshots/heatmap.png")
@@ -141,6 +145,8 @@ knitr::include_graphics("screenshots/feature.png")
 ```
 
 The scatter plots indicate the detected values associated with the protein UniProt ID P61313 (= 60S ribosomal protein L15). Starting from the peptide spectrum level and progressing to peptides aggregated for individual raw files, these plots offer a comprehensive view of the protein's peptide abundance across various batches. As indicated 14 batches show no abundance of peptides derived from the protein P61313 at all. After merging the batches, the peptides appear to be abundant in all channels. 
+
+## Statistics
 
 \newpage
 ```{r ui_stat_dependency, echo=F, out.width="100%", fig.align='center', fig.cap="Popup window for checking the dependency of the statistic module"}

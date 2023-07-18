@@ -4,51 +4,8 @@ output: pdf_document
 ---
 # Appendix
 
-## Wet lab
-### Cells sorting protocol
-\begin{enumerate}
-\item 96 single cells from each donor were sorted into a single plate. Each well contained a single cell. As such, 12 different plates containing single cells from 12 different donors were prepared. 
-\item Carrier plates were also prepared. In the carrier plates, 100 cells from one donor were sorted into each well. 24 such wells (3 columns) were prepared for each donor.
-\end{enumerate}
-
-
-### Digestion protocol
-\begin{enumerate}
-\item Prepare 25 ng/ $\mu$L trypsin in 100 mmol/L Triethylammonium bicarbonate buffer (TEAB).
-\item Add 25 ng/$\mu$L trypsin: 2 $\mu$L to the carrier samples, 1 $\mu$L to the single cell samples.
-\item Seal the plates.
-\item Centrifuge (2 min at 120 G).
-\item Incubate overnight at 37 °C.
-\end{enumerate}
-
-### Labeling protocol
-\begin{enumerate}
-\item Let the TMTpro labels come to room temperature so that all the condensation on the tube is gone. Dissolve the TMTpro reagents in anhydrous acetonitril (ACN) to obtain a concentration of 10 $\mu$g/$\mu$L.
-\item Add 1 $\mu$L of TMTpro reagents according to the tables. For one set of plates, you will need 16 $\mu$L of each label. It is recommended to aliquot a slightly larger volume, around 20 $\mu$L.
-\item Seal the plates.
-\item Centrifuge for 2 minutes at 120 G.
-\item Incubate for 1 hour at room temperature.
-\item Prepare a 5% hydroxylamine solution in water.
-\item Add 1 $\mu$L of the 5% hydroxylamine solution to each well.
-\item Seal the plates.
-\item Centrifuge for 2 minutes at 120 G.
-\item Incubate for 1 hour at room temperature.
-\item Cover the plates with cap strips.
-\end{enumerate}
-
-### Pooling protocol
-\begin{enumerate}
-\item Wash a 10 $\mu$L glass microsyringe five times with ACN.
-\item Use the microsyringe to combine TMTpro-labeled samples into 36 LC autosampler vials with built-in glass inserts.
-\item Combine six carrier wells from each sample and add the carrier proteome to the 36 TMTpro sets.
-\item Combine the first set by taking well A1 from the first single-cell plate, well A2 from the second plate, well A3 from the third plate, and so on. For the next set, take well A1 from the second plate, well A2 from the third plate, and so on. Combine 12 sets following this scheme. Combine the next 24 sets by following the same scheme for rows B and C.
-\item Vacuum centrifuge the combined sets to dryness.
-\item Dissolve the dried samples in 7 $\mu$L of buffer A and transfer them to LC-MS/MS for further analysis.
-\end{enumerate}
-
 ## Dry lab
 ### R-version info
-
 
 ```{r load_libraries, message=FALSE, warning=FALSE, include=FALSE}
 library("shiny")
