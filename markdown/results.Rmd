@@ -15,14 +15,14 @@ knitr::include_graphics("screenshots/overview.png")
 ```
 
 After a runtime of 2 minutes on the 4 core laptop the data is ready to visualize. On the left side of the user interface (see figure \@ref(fig:ui-summary)), users can find the analysis pipeline settings that can be adjusted. Once the desired changes are made, they can be applied by clicking the update button. This allows users to observe the direct impact of the applied changes on the dataset.
-In the summary visualization, it may appear cluttered due to the processing of 36 files. In smaller datasets, the nodes of the network graph can be more easily distinguished and understood.
+In the summary visualization, it may appear cluttered due to the processing of 36 files. In smaller data sets, the nodes of the network graph can be more easily distinguished and understood.
 When running the application with SCoPE2 \citep{Specht2021} reference cutoffs, the following results were visualized.
 
 \newpage
 ```{r ui-numbers-default, echo=F, out.width="100%", fig.align='center', fig.cap="Barchart showing the number of peptide spectrum matches, peptides and proteins"}
 knitr::include_graphics("screenshots/numbers_default.png")
 ```
-In order to get an idea of the magnitude of the data set, the barplot provides an overview (see figure \@ref(fig:ui-numbers-default))
+In order to get an idea of the magnitude of the data set, the barplot provides an overview (see figure \@ref(fig:ui-numbers-default)).
 The default settings of the analysis pipeline resulted in a total number of unique proteins below approximately 1,000, which were aggregated from around 3,000 peptides. Before these peptides were aggregated over approximately 32,000 peptide spectrum matches. The aggregation for both steps was performed by the column median.
 
 \newpage
@@ -41,6 +41,7 @@ Therefore, it is advisable to experiment with various normalization techniques.
 ```{r ui-constand-norm, echo=F, out.width="100%", fig.align='center', fig.cap="Popup showing the dependencies for the CONSTANd normalization"}
 knitr::include_graphics("screenshots/constand_norm_dependency.png")
 ```
+Choosing the CONSTANd option for normalization a popup window appears to test for assumptions on the dataset. 
 
 As seen in the dependency popup (see figure \@ref(fig:ui-constand-norm)) for the CONSTANd normalization \citep{VanHoutven2021}, requirements are not fulfilled. The MA-plot shows a strong heteroskedasticity indicated by the red trendline. 
 
@@ -76,7 +77,7 @@ For dimensionality reduction, the user has the option to choose the batch correc
 ```{r ui-RI-st-default, echo=F, out.width="100%", fig.align='center', fig.cap="Reporter ion intensity with selection on sampletype"}
 knitr::include_graphics("screenshots/RI_st_default.png")
 ```
-Comparing sample types in regards of reporter ion intensity is recommended to observe any experimental bias such as batch/channel confounding effects which would influence the statistical model afterwards.
+Comparing sample types in regards of reporter ion intensity is recommended to observe any experimental bias such as batch/channel confounding effects which would negatively impact the statistical model afterwards.
 
 The sample type does not appear to have an impact on the median reporter ion intensities, as suggested by the overlapping interquartile ranges (IQRs). Nevertheless, the HIV group with metabolic syndrome displays a broader range of values spanning tenfold in arbitrary units (see figure \@ref(fig:ui-RI-st-default)).
 
@@ -84,7 +85,7 @@ The sample type does not appear to have an impact on the median reporter ion int
 ```{r ui-cv-st-default, echo=F, out.width="100%", fig.align='center', fig.cap="Median covariance of razor proteins with selection on sampletype"}
 knitr::include_graphics("screenshots/cv_st_default.png")
 ```
-The distribution of median coefficient of variation (CV) shows the uniqueness in peptides for their respective razor peptides. This metric represents the presence or absence of noisy matches in the data set.
+The distribution of median coefficient of variation (CV) shows the uniqueness in peptides for their respective razor protein. This metric represents the presence or absence of noisy matches in the data set.
 
 A cutoff value of 0.65 for the coefficient of variation (CV) of razor proteins as shown in the SCoPE2 publication \citep{Specht2021} demonstrates a satisfactory fit to the data. The minimum number of observations determines the threshold for considering a razor protein ambiguous, based on the number of matching peptides. In this case, the recommended minimum number of observation of 5 (by \citep{Specht2021}) was used. 
 
@@ -94,7 +95,7 @@ The interquartile ranges (IQRs) remained unchanged by this cutoff (see figure \@
 ```{r ui-cv-rawfile-default, echo=F, out.width="100%", fig.align='center', fig.cap="Median coefficient of variation (CV) of leading razor proteins per cell with selection on Raw.file"}
 knitr::include_graphics("screenshots/cv_rawfile_default.png")
 ```
-Razor peptide ambiguity over multiple batches can indicate experimental failures during sample prep or during acquisition. 
+Razor peptide ambiguity over multiple batches can indicate experimental failures during sample prep (especially digestion) or during acquisition. 
 
 The plot (see figure \ref@(fig:ui-cv-rawfile-default)) illustrates that certain batches (=raw files) exhibit a higher number of distinct matches compared to others, as indicated by a thin line depicting low density. Most interquartile ranges (IQRs) overlap, suggesting similarity among the majority of batches. However, specific batches display a lower IQR in median CV across razor protein peptides, indicating distinct matches.    
 
