@@ -1,8 +1,9 @@
 ---
 title: " "
-output: 
-  pdf_document:
-    number_sections: TRUE
+output:
+  bookdown::pdf_document2:
+    toc: false
+#    number_sections: TRUE
 geometry: "left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm"
 fontsize: 11pt
 header-includes:

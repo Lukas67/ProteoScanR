@@ -354,7 +354,7 @@ The next steps in the development of the program aim to enable the stratificatio
 
 Here I will explain how the analysis could start and elaborate the limitations and challenges for this approach. Additional processing steps will be included after the existing pipeline, so the ProteoScanR provides a starting point for further analysis.
 
-```{r cluster_analysis_dendrogram, echo=FALSE, message=FALSE, warning=FALSE, out.width="100%", fig.align='center', fig.cap="Dendrogram showing the similarity over sample types. Tree was created using Ward`s minimum variance method."}
+```{r cluster-analysis-dendrogram, echo=FALSE, message=FALSE, warning=FALSE, out.width="100%", fig.align='center', fig.cap="Dendrogram showing the similarity over sample types. Tree was created using Ward`s minimum variance method."}
 
 
 # use knn to impute missing values
@@ -422,7 +422,7 @@ Ideally, clustering approaches should result in individual clusters that capture
 To begin with the k-means clustering approach, it is crucial to determine the optimal number of clusters before conducting the analysis. This can be achieved using various approaches, one of which is the gap statistic method \citep{Tibshirani2001}.
 
 
-```{r cluster_analysis_gap_stat, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal numbers of clusters calculated with gap statistics method"}
+```{r cluster-analysis-gap-stat, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal numbers of clusters calculated with gap statistics method"}
 
   protein_matrix_t_names <- protein_matrix_t 
   rownames(protein_matrix_t_names) <- make.names(rownames(protein_matrix_t_names), unique = T)
@@ -442,7 +442,7 @@ optimal_clusters_gap <- maxSE(gap, se, method = "firstSEmax", SE.factor = 1)
 The gap statistic compares the total intracluster variation across various values of k (number of clusters) to the expected variation under a null reference distribution. The null reference distribution represents a scenario where no clear clustering patterns exist in the data. However as seen in the gap statistic a high number of clusters will be difficult to distinguish from each other and explore the biological meaning such as differentiation in the example macrophage dataset.
 Another approach used to determine the optimal number of clusters is the silhouette method. 
 
-```{r cluster_analysis_silh, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal number of clusters calculated with silhoutte method."}
+```{r cluster-analysis-silh, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal number of clusters calculated with silhoutte method."}
 
   # unsupervised
   sil_plot <- fviz_nbclust(protein_matrix_t, kmeans, method='silhouette', k.max=15)
@@ -457,7 +457,7 @@ Another approach used to determine the optimal number of clusters is the silhoue
 The silhouette method calculates silhouette coefficients for each data point, which quantify how closely the point resembles its own cluster compared to other clusters. 
 If the overall distances between clusters are small, indicating overlapping or unclear separation, it is suggested to take the minimum k. This suggests that the data points may not be well-separated into distinct clusters. As suggested by the silhouette method in this case a lower number of clusters to differentiate cell types is recommended. 
 
-```{r cluster_analysis_dim_red, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="PCA plot with cluster indication. Shape of the datapoints indicate sample types. Clusters are encircled and color coded."}
+```{r cluster-analysis-dim-red, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="PCA plot with cluster indication. Shape of the datapoints indicate sample types. Clusters are encircled and color coded."}
   
 if (optimal_clusters_sil > optimal_clusters_gap) {
   optimal_clusters <- optimal_clusters_gap
