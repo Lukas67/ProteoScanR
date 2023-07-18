@@ -97,7 +97,7 @@ knitr::include_graphics("screenshots/cv_rawfile_default.png")
 ```
 Razor peptide ambiguity over multiple batches can indicate experimental failures during sample prep (especially digestion) or during acquisition. 
 
-The plot (see figure \ref@(fig:ui-cv-rawfile-default)) illustrates that certain batches (=raw files) exhibit a higher number of distinct matches compared to others, as indicated by a thin line depicting low density. Most interquartile ranges (IQRs) overlap, suggesting similarity among the majority of batches. However, specific batches display a lower IQR in median CV across razor protein peptides, indicating distinct matches.    
+The plot (see figure \@ref(fig:ui-cv-rawfile-default)) illustrates that certain batches (=raw files) exhibit a higher number of distinct matches compared to others, as indicated by a thin line depicting low density. Most interquartile ranges (IQRs) overlap, suggesting similarity among the majority of batches. However, specific batches display a lower IQR in median CV across razor protein peptides, indicating distinct matches.    
 
 \newpage
 ```{r ui-cv-rawfile-nobs2, echo=F, out.width="100%", fig.align='center', fig.cap="Median coefficient of variation (CV) of leading razor proteins calculated for 2  observations per cell, grouped by Raw.file"}
@@ -105,7 +105,7 @@ knitr::include_graphics("screenshots/cv_rawfile_nobs2.png")
 ```
 Experimenting with a lower minimum number of observations for the calculation of the median coefficient of variation, includes also less ambigous peptides. 
 
-By setting the number of observations to 2, the distributions become more equalized (see figure \ref@(fig:ui-cv-rawfile-nobs2)). Additionally, batches that initially exhibited a decreased coefficient of variation (CV) tend to inflate towards the threshold.
+By setting the number of observations to 2, the distributions become more equalized (see figure \@ref(fig:ui-cv-rawfile-nobs2)). Additionally, batches that initially exhibited a decreased coefficient of variation (CV) tend to inflate towards the threshold.
 
 \newpage
 ```{r ui-cv-rawfile-nobs10, echo=F, out.width="100%", fig.align='center', fig.cap="Median coefficient of variation (CV) of leading razor proteins calculated for 10 observations per cell, with selection on Raw.file"}
@@ -113,7 +113,7 @@ knitr::include_graphics("screenshots/cv_rawfile_nobs10.png")
 ```
 In opposite increasing the minimum number of observation takes only highly ambiguous peptides into account and the coefficent of variation shows the interaction of these razor proteins. 
 
-When the minimum number of observations for ambiguous peptides is set to 10, the distribution of medians across channels shows a decrease in density (see figure \ref@(fig:ui-cv-rawfile-nobs10)). This can be attributed to the rare occurrence of 10 unique peptides matching to the same protein, which is rarely observed in the dataset. 
+When the minimum number of observations for ambiguous peptides is set to 10, the distribution of medians across channels shows a decrease in density (see figure \@ref(fig:ui-cv-rawfile-nobs10)). This can be attributed to the rare occurrence of 10 unique peptides matching to the same protein, which is rarely observed in the dataset. 
 
 \newpage
 ## Downstream analysis
@@ -122,28 +122,28 @@ The subsequent analysis reveals the initial biological effects, serving as an in
 ```{r ui-heatmap, echo=F, out.width="100%", fig.align='center', fig.cap="Correlation heatmap"}
 knitr::include_graphics("screenshots/heatmap.png")
 ```
-The heatmap (see figure \ref@(fig:ui-heatmap)) reveals the Pearson pairwise correlation coefficients between all proteins. The dendrogram indicates that there are two main protein clusters, with one of the clusters showing further sub-clustering, indicating a strong relationship among the proteins in the sub groups. However, the other cluster, consisting of individual proteins, shows weaker correlations, leading to a more intricate branching pattern in the dendrogram.
+The heatmap (see figure \@ref(fig:ui-heatmap)) reveals the Pearson pairwise correlation coefficients between all proteins. The dendrogram indicates that there are two main protein clusters, with one of the clusters showing further sub-clustering, indicating a strong relationship among the proteins in the sub groups. However, the other cluster, consisting of individual proteins, shows weaker correlations, leading to a more intricate branching pattern in the dendrogram.
 
 \newpage
 ```{r ui-dim-red-default, echo=F, out.width="100%", fig.align='center', fig.cap="Dimensionality reduction analysis depicting sample types (indicated by shape) and raw files (indicated by color). Top: principle component analysis (PCA). Lower: Uniform Manifold Approximation and Projection (UMAP)"}
 knitr::include_graphics("screenshots/dim_red_default.png")
 ```
 
-In both the Principal Component Analysis (PCA) plot and the Uniform Manifold Approximation and Projection (UMAP) plot (see figure \ref@(fig:ui-dim-red-default)), the second component is plotted against the first component. Surprisingly, neither visualization reveals any discernible clustering patterns based on sample type or batch. For the k-nearest neighbor descent algorithm (NN-descent) employed in the UMAP, first a default value of k=3 was selected.
+In both the Principal Component Analysis (PCA) plot and the Uniform Manifold Approximation and Projection (UMAP) plot (see figure \@ref(fig:ui-dim-red-default)), the second component is plotted against the first component. Surprisingly, neither visualization reveals any discernible clustering patterns based on sample type or batch. For the k-nearest neighbor descent algorithm (NN-descent) employed in the UMAP, first a default value of k=3 was selected.
 
 \newpage
 ```{r ui-dim-red-changed-k, echo=F, out.width="100%", fig.align='center', fig.cap="Dimensionality reduction analysis showcasing sample types (represented by shape) and raw files (represented by color). Top: Principal Component Analysis (PCA). Bottom: Uniform Manifold Approximation and Projection (UMAP). For the UMAP visualization, the k value for the NN-descent algorithm was modified to 15."}
 knitr::include_graphics("screenshots/dim_red_changed_k.png")
 ```
 
-The second figure (\ref@(fig:ui-dim-red-changed-k) of the Principal Component Analysis (PCA) plot and the Uniform Manifold Approximation and Projection (UMAP), both displaying the second component against the first. Surprisingly, neither visualization reveals any discernible clustering patterns based on sample type or batch information. To enhance the resolution and capture more intricate patterns, the k-nearest neighbor descent algorithm (NN-descent) was adjusted, with a value of K set to 15. While the resulting plot exhibits improved detail, the underlying biological context or background remains elusive and does not emerge in the visual representation.
+The second figure (\@ref(fig:ui-dim-red-changed-k) of the Principal Component Analysis (PCA) plot and the Uniform Manifold Approximation and Projection (UMAP), both displaying the second component against the first. Surprisingly, neither visualization reveals any discernible clustering patterns based on sample type or batch information. To enhance the resolution and capture more intricate patterns, the k-nearest neighbor descent algorithm (NN-descent) was adjusted, with a value of K set to 15. While the resulting plot exhibits improved detail, the underlying biological context or background remains elusive and does not emerge in the visual representation.
 
 \newpage
 ```{r ui-dim-red-c3d, echo=F, out.width="100%", fig.align='center', fig.cap="3D visualization of dimensionality reduction analysis showcasing sample types (represented by shape) and raw files (represented by color). Top: Principal Component Analysis (PCA). Bottom: Uniform Manifold Approximation and Projection (UMAP)"}
 knitr::include_graphics("screenshots/dim_red_3d.png")
 ```
 
-In the 3D visualization (see figure \ref@(fig:ui-dim-red-c3d)), a subtle clustering pattern can be observed for the first two batches. Upon switching to the indicator sample type in the 3D visualization, no clustering can be observed whatsoever. This suggests that the variance in the data set is not attributed to sample type or batch, reinforcing the notion that other factors could contribute to the observed variability. 
+In the 3D visualization (see figure \@ref(fig:ui-dim-red-c3d)), a subtle clustering pattern can be observed for the first two batches. Upon switching to the indicator sample type in the 3D visualization, no clustering can be observed whatsoever. This suggests that the variance in the data set is not attributed to sample type or batch, reinforcing the notion that other factors could contribute to the observed variability. 
 
 \newpage
 ```{r ui-dim-red-batchC, echo=F, out.width="100%", fig.align='center', fig.cap="Batch corrected dimensionality reduction analysis showcasing sample types (represented by shape) and raw files (represented by color)."}
@@ -154,7 +154,7 @@ knitr::include_graphics("screenshots/dim_red_batchC.png")
 knitr::include_graphics("screenshots/dim_red_batchC_3d.png")
 ```
 
-After applying batch correction using ComBat \citep{Leek2012}, neither the 2D (figure \ref@(fig:ui-dim-red-batchC)) nor the 3D (figure \ref@(fig:ui-dim-red-batchC-3d)) visualization demonstrates any noticeable effects related to batches or sample types. The previously observed subtle clustering of the first two batches is now eliminated, indicating successful batch correction. However, it's important to note that the default pipeline was executed without batch correction for correct statistical testing. 
+After applying batch correction using ComBat \citep{Leek2012}, neither the 2D (figure \@ref(fig:ui-dim-red-batchC)) nor the 3D (figure \@ref(fig:ui-dim-red-batchC-3d)) visualization demonstrates any noticeable effects related to batches or sample types. The previously observed subtle clustering of the first two batches is now eliminated, indicating successful batch correction. However, it's important to note that the default pipeline was executed without batch correction for correct statistical testing. 
 
 \newpage
 ```{r ui-feature, echo=F, out.width="100%", fig.align='center', fig.cap="Feature wise output for the protein P61313 (=60S ribosomal protein L15) over the course of the pipeline."}
@@ -162,7 +162,7 @@ knitr::include_graphics("screenshots/feature.png")
 ```
 The feature-wise output allows for the observation of abundance in raw files or batches, providing a useful tool to assess the effectiveness of pre-processing and/or the work conducted in the wet lab. 
 
-The scatter plots (see figure \ref@(fig:ui-feature)) indicate the detected values associated with the protein UniProt ID P61313 (= 60S ribosomal protein L15). Starting from the peptide spectrum level and progressing to peptides aggregated for individual raw files, these plots offer a comprehensive view of the protein's peptide abundance across various batches. As indicated 14 batches show no abundance of peptides derived from the protein P61313 at all. After merging the batches, the peptides appear to be abundant in all channels. 
+The scatter plots (see figure \@ref(fig:ui-feature)) indicate the detected values associated with the protein UniProt ID P61313 (= 60S ribosomal protein L15). Starting from the peptide spectrum level and progressing to peptides aggregated for individual raw files, these plots offer a comprehensive view of the protein's peptide abundance across various batches. As indicated 14 batches show no abundance of peptides derived from the protein P61313 at all. After merging the batches, the peptides appear to be abundant in all channels. 
 
 \newpage
 ## Statistics
@@ -173,7 +173,7 @@ knitr::include_graphics("screenshots/stat_dependency.png")
 
 The t-statistics employed in limma are known for their robustness in handling non-normally distributed values. Nonetheless, it is recommended for users to assess the distribution of their data based on sample types before proceeding with statistical analysis. If the user is not satisfied with the results or identifies any distributional issues, the user can consider revisiting the transformation or normalization steps to address any concerns or improve the data distribution prior to statistical analysis.
 
-The values for all sample types exhibit a unimodal distribution (see figure \ref@(fig:ui-stat-dependency)). However, when examining the quantile-quantile (qq) plot, heavy tails can be observed for all three groups. This indicates deviations from a perfectly normal distribution, suggesting potential outliers in the data.
+The values for all sample types exhibit a unimodal distribution (see figure \@ref(fig:ui-stat-dependency)). However, when examining the quantile-quantile (qq) plot, heavy tails can be observed for all three groups. This indicates deviations from a perfectly normal distribution, suggesting potential outliers in the data.
 
 \newpage
 ```{r ui-stat-HC-HIV-noMets, echo=F, out.width="70%", fig.align='center', fig.cap="Statistics module"}
@@ -182,7 +182,7 @@ knitr::include_graphics("screenshots/stat_HC_HIV_noMets.png")
 
 \newpage
 
-By comparing the log10-transformed and quantile-normalized expression values between the HIV group without metabolic syndrome and the healthy control (HC) group (see figure \ref@(fig:ui-stat-HC-HIV-noMets)), six differentially expressed proteins were identified. The Venn diagram indicates significantly up/down regulated proteins. The Volcano represents -log10(adjusted p values) against log2 fold changes (logFC).
+By comparing the log10-transformed and quantile-normalized expression values between the HIV group without metabolic syndrome and the healthy control (HC) group (see figure \@ref(fig:ui-stat-HC-HIV-noMets)), six differentially expressed proteins were identified. The Venn diagram indicates significantly up/down regulated proteins. The Volcano represents -log10(adjusted p values) against log2 fold changes (logFC).
 These proteins include P68133 (Actin, alpha skeletal muscle), P47914 (60S ribosomal protein L29), P25311 (Zinc-alpha-2-glycoprotein), O60506 (Heterogeneous nuclear ribonucleoprotein Q), P31153 (S-adenosylmethionine synthase isoform type-2), and P46777 (60S ribosomal protein L5). The remaining 652 proteins have been identified as not significantly up/down regulated in the comparison analysis. These proteins did not exhibit statistically significant differences in expression between the compared groups or conditions.
 
 The direction of the contrast model determines the change in log-fold change (logFC) values. For instance, in the depicted figure, P68133 (Actin, alpha skeletal muscle) shows an increased expression of 0.25 (25%) in HIV_noMetS macrophages compared to HC macrophages. It's important to note that the logFC value changes by multiplication with -1 when the direction of the contrast model is reversed.
@@ -195,14 +195,14 @@ knitr::include_graphics("screenshots/path_enrich_nw.png")
 ```
 The enrichment represents overabundant proteins for specific pathways. Results can be shown as a network or barplot. 
 
-The pathway enrichment mapped and tested with the exact Fisher test \citep{Sprent2011} the differentially expressed proteins P46777 (60S ribosomal protein L5) and P47914 (60S ribosomal protein L29) to the ribosome and coronavirus disease (COVID-19) nodes (see figure \ref@(fig:ui-path-enrich-nw)). 
+The pathway enrichment mapped and tested with the exact Fisher test \citep{Sprent2011} the differentially expressed proteins P46777 (60S ribosomal protein L5) and P47914 (60S ribosomal protein L29) to the ribosome and coronavirus disease (COVID-19) nodes (see figure \@ref(fig:ui-path-enrich-nw)). 
 
 \newpage
 ```{r ui-path-enrich-bar, echo=F, out.width="90%", fig.align='center', fig.cap="Pathway enrichment. Barplot indicating the number of differentially expressed proteins to a particular pathwaz. The color highlights the significance of the mapping, with exact p-values from the Fisher test after false discovery rate correction."}
 knitr::include_graphics("screenshots/path_enrich_bar.png")
 ```
 
-The barplot (see figure \ref@(fig:ui-path-enrich-bar)) shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the set of detected proteins. When choosing the detected proteins as a background no pathway could be considered as statistically significant. 
+The barplot (see figure \@ref(fig:ui-path-enrich-bar)) shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the set of detected proteins. When choosing the detected proteins as a background no pathway could be considered as statistically significant. 
 
 \newpage
 ```{r ui-go-enrich-bar, echo=F, out.width="90%", fig.align='center', fig.cap="Gene ontology enrichment against the complete human proteome. Snapshot dotplot indicating the interaction significance of found proteins"}
@@ -210,4 +210,4 @@ knitr::include_graphics("screenshots/go_enrich_dot.png")
 ```
 Ontology enrichment offers a more comprehensive mapping, providing a broader understanding of the data. By allowing users to select a custom protein set collection, they can either narrow down the potential results for a targeted approach or expand their scope for an untargeted analysis.
 
-The position of the dot (see figure \ref@(fig:ui-go-enrich-bar)) shows the number of matches for the particular protein set. Colors indicate for the significance level. In this analysis the entire repertoire of detected proteins was used and fetched against the bundle containing all Human gene sets in the Human Molecular Signatures Database (MSigDB). After a runtime of 3 minutes 672 of 24667 gene sets were found significantly over represented. Only the protein set collections with the most protein matches were used (snipping tool Plotly).
+The position of the dot (see figure \@ref(fig:ui-go-enrich-bar)) shows the number of matches for the particular protein set. Colors indicate for the significance level. In this analysis the entire repertoire of detected proteins was used and fetched against the bundle containing all Human gene sets in the Human Molecular Signatures Database (MSigDB). After a runtime of 3 minutes 672 of 24667 gene sets were found significantly over represented. Only the protein set collections with the most protein matches were used (snipping tool Plotly).

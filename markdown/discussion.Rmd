@@ -343,7 +343,7 @@ longFormat(scp[, , "proteins_norm"]) %>%
 
 ```
 
-Unfortunately, a substantial number of individual proteins in the data set (totaling `r n_missingness`) have missing values. On average, this amounts to approximately `r round(mean_missingness, 2)*100`% of the proteins across all runs and channels (see figure \ref@(fig:missingness)). 
+Unfortunately, a substantial number of individual proteins in the data set (totaling `r n_missingness`) have missing values. On average, this amounts to approximately `r round(mean_missingness, 2)*100`% of the proteins across all runs and channels (see figure \@ref(fig:missingness)). 
 This situation leads to the need for missing value imputation using techniques such as k-nearest neighbor (K-NN), which can sometimes lead to artificially evenly distributed values. Additionally, it is important to note that this imputation process can introduce potential loss of power in subsequent statistical analysis.
 To improve future experiments, it is recommended to increase the number of proteins in the carrier proteome. By expanding the repertoire of proteins included in the carrier proteome, it can enhance the coverage and depth of analysis, providing a more comprehensive understanding of the biological system under investigation. This can potentially lead to more robust and accurate results in downstream analyses.
 
@@ -419,7 +419,7 @@ if (length(peptide_file) > 1) {
   pltree(clust, cex = 0.6, hang = -1, main = "Dendrogram") 
 ```
 
-As observed in the dendrogram (see figure \ref@(fig:cluster-analysis-dendrogram)), it is evident that sample type alone does not account for the variation observed in the data. The branching patterns in the dendrogram suggest that other factors might be significant for contributing to the averaging of protein expression levels. This can potentially lead to a decrease in the statistical power of tests aimed at detecting differential expression between sample types. 
+As observed in the dendrogram (see figure \@ref(fig:cluster-analysis-dendrogram)), it is evident that sample type alone does not account for the variation observed in the data. The branching patterns in the dendrogram suggest that other factors might be significant for contributing to the averaging of protein expression levels. This can potentially lead to a decrease in the statistical power of tests aimed at detecting differential expression between sample types. 
 Ideally, clustering approaches should result in individual clusters that capture distinct sample types, enabling the testing of differential expression within each cluster. This stratification of samples within clusters allows for the identification of unique expression patterns associated with specific biological variations. The dendrogram, as demonstrated above, is an example of hierarchical clustering, which provides a visual representation of the clustering results. In this context, users should have the flexibility to select the desired number of clusters that best explain the underlying biological variation in their dataset. This allows for a more targeted and precise analysis of differential expression within each cluster, facilitating the identification of biologically meaningful patterns and insights.
 To begin with the k-means clustering approach, it is crucial to determine the optimal number of clusters before conducting the analysis. This can be achieved using various approaches, one of which is the gap statistic method \citep{Tibshirani2001}.
 
@@ -441,7 +441,7 @@ optimal_clusters_gap <- maxSE(gap, se, method = "firstSEmax", SE.factor = 1)
   gap_stat_plot
 ```
 
-The gap statistic (see figure \ref@(fig:cluster-analysis-gap-stat)) compares the total intracluster variation across various values of k (number of clusters) to the expected variation under a null reference distribution. The null reference distribution represents a scenario where no clear clustering patterns exist in the data. However as seen in the gap statistic a high number of clusters will be difficult to distinguish from each other and explore the biological meaning such as differentiation in the example macrophage dataset.
+The gap statistic (see figure \@ref(fig:cluster-analysis-gap-stat)) compares the total intracluster variation across various values of k (number of clusters) to the expected variation under a null reference distribution. The null reference distribution represents a scenario where no clear clustering patterns exist in the data. However as seen in the gap statistic a high number of clusters will be difficult to distinguish from each other and explore the biological meaning such as differentiation in the example macrophage dataset.
 Another approach used to determine the optimal number of clusters is the silhouette method. 
 
 ```{r cluster-analysis-silh, echo=FALSE, message=FALSE, warning=FALSE, out.width="90%", fig.align='center', fig.cap="Optimal number of clusters calculated with silhoutte method."}
@@ -456,7 +456,7 @@ Another approach used to determine the optimal number of clusters is the silhoue
   
 ```
 
-The silhouette method (see figure \ref@(fig:cluster-analysis-silh)) calculates silhouette coefficients for each data point, which quantify how closely the point resembles its own cluster compared to other clusters. 
+The silhouette method (see figure \@ref(fig:cluster-analysis-silh)) calculates silhouette coefficients for each data point, which quantify how closely the point resembles its own cluster compared to other clusters. 
 If the overall distances between clusters are small, indicating overlapping or unclear separation, it is suggested to take the minimum k. This suggests that the data points may not be well-separated into distinct clusters. As suggested by the silhouette method in this case a lower number of clusters to differentiate cell types is recommended. 
 
 ```{r cluster-analysis-dim-red, echo=FALSE, message=FALSE, warning=FALSE,  out.width="90%", fig.align='center', fig.cap="PCA plot with cluster indication. Shape of the datapoints indicate sample types. Clusters are encircled and color coded."}
@@ -503,7 +503,7 @@ ggplot(dimred_pca, aes(x=PC1,
   coord_fixed()
 ```
 
-As seen in the principal components analysis (see figure \ref@(fig:cluster-analysis-dim-red)), clusters are densely packed, and the plot shows no clear differentiation between the `r optimal_clusters` suggested clusters. The dense packing and poor resolution indicates that other factors may be influencing the lack of distinct separation. One of the other factors involves the large number of imputed values due the high rate of missing values in the protein expression set. K-NN is not able to impute biological differences and therefore averages the particular missing value by its k neighbors. 
+As seen in the principal components analysis (see figure \@ref(fig:cluster-analysis-dim-red)), clusters are densely packed, and the plot shows no clear differentiation between the `r optimal_clusters` suggested clusters. The dense packing and poor resolution indicates that other factors may be influencing the lack of distinct separation. One of the other factors involves the large number of imputed values due the high rate of missing values in the protein expression set. K-NN is not able to impute biological differences and therefore averages the particular missing value by its k neighbors. 
 
 This suggests the utilization of a different data set for developing the clustering module of the future program. By employing a data set with a lower rate of missing values in the protein expression set, the accuracy and reliability of the clustering analysis can be enhanced. Having a data set with less missing data will allow for a more precise identification of clusters and differentiation between cell types.
 

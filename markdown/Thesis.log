@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  18 JUL 2023 14:27
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  18 JUL 2023 14:41
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -426,8 +426,7 @@ File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 File: l3backend-pdftex.def 2023-04-19 L3 backend support: PDF output (pdfTeX)
 \l__color_backend_stack_int=\count300
 \l__pdf_internal_box=\box63
-)
-No file Thesis.aux.
+) (./Thesis.aux)
 \openout1 = `Thesis.aux'.
 
 LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
@@ -489,15 +488,16 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
 Package hyperref Info: Link coloring OFF on input line 93.
+(./Thesis.out) (./Thesis.out)
 \@outlinefile=\write3
 \openout3 = `Thesis.out'.
 
-<FHCW_logo.png, id=4, 261.97874pt x 193.72375pt>
+<FHCW_logo.png, id=257, 261.97874pt x 193.72375pt>
 File: FHCW_logo.png Graphic file (type png)
 <use FHCW_logo.png>
 Package pdftex.def Info: FHCW_logo.png  used on input line 105.
 (pdftex.def)             Requested size: 97.25041pt x 71.91313pt.
-<KI_logo.png, id=5, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=258, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
 Package pdftex.def Info: KI_logo.png  used on input line 106.
@@ -505,18 +505,6 @@ Package pdftex.def Info: KI_logo.png  used on input line 106.
 [1
 
 {/home/lukas/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc} <./FHCW_logo.png> <./KI_logo.png>]
-
-Package natbib Warning: Citation `Cox2008' on page  undefined on input line 156.
-
-
-Package natbib Warning: Citation `Specht2021' on page  undefined on input line 158.
-
-
-Package natbib Warning: Citation `Petelski2021' on page  undefined on input line 158.
-
-
-Package natbib Warning: Citation `Vanderaa2021' on page  undefined on input line 158.
-
 LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 162.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
@@ -546,277 +534,233 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 162.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1]
-No file Thesis.toc.
+) [1] (./Thesis.toc [2] [3])
 \tf@toc=\write4
 \openout4 = `Thesis.toc'.
 
-[2] [1]
-
-Package natbib Warning: Citation `Cobb2017' on page 2 undefined on input line 190.
-
-
-Package natbib Warning: Citation `Karahalil2016' on page 2 undefined on input line 192.
-
-
-Package natbib Warning: Citation `Beltran2017' on page 2 undefined on input line 198.
-
-[2]
-
-Package natbib Warning: Citation `Kwon2021' on page 3 undefined on input line 204.
-
-
-Package natbib Warning: Citation `Schoof2021' on page 3 undefined on input line 204.
-
-
-Package natbib Warning: Citation `Liou2015' on page 3 undefined on input line 209.
-
-
-Package natbib Warning: Citation `Philpott2017' on page 3 undefined on input line 209.
-
-
-Package natbib Warning: Citation `Liou2015' on page 3 undefined on input line 210.
-
-
-Package natbib Warning: Citation `Sutermaster2019' on page 3 undefined on input line 210.
-
-
-Package natbib Warning: Citation `Maes2020' on page 3 undefined on input line 210.
-
-[3]
-
-Package natbib Warning: Citation `Fang2018' on page 4 undefined on input line 216.
-
-
-Package natbib Warning: Citation `Specht2021' on page 4 undefined on input line 217.
-
-
-Package natbib Warning: Citation `Minakshi2019' on page 4 undefined on input line 217.
-
-[4]
-
-Package natbib Warning: Citation `Budnik2018' on page 5 undefined on input line 222.
-
-
-Package natbib Warning: Citation `Wang2009' on page 5 undefined on input line 224.
-
-
-Package natbib Warning: Citation `Gygi1999' on page 5 undefined on input line 224.
-
-
-Package natbib Warning: Citation `Magnusson2022' on page 5 undefined on input line 224.
-
-
-Package natbib Warning: Citation `TANAKA2009' on page 5 undefined on input line 225.
-
-[5]
-
-Package natbib Warning: Citation `Parker2010' on page 6 undefined on input line 232.
-
-
-Package natbib Warning: Citation `Wang2008' on page 6 undefined on input line 233.
-
-
-Package natbib Warning: Citation `Brownridge2011' on page 6 undefined on input line 233.
-
-
-Package natbib Warning: Citation `Laskay2013' on page 6 undefined on input line 233.
-
-
-Package natbib Warning: Citation `Karen2012' on page 6 undefined on input line 236.
-
-
-Package natbib Warning: Citation `Marx2019' on page 6 undefined on input line 237.
-
-
-Package natbib Warning: Citation `Budnik2018' on page 6 undefined on input line 237.
-
-
-Package natbib Warning: Citation `Ye2022' on page 6 undefined on input line 237.
-
-[6]
-
-Package natbib Warning: Citation `Pitt2009' on page 7 undefined on input line 239.
-
-
-Package natbib Warning: Citation `Iribarne1976' on page 7 undefined on input line 242.
-
-
-Package natbib Warning: Citation `Wilm2011' on page 7 undefined on input line 242.
-
-[7]
-
-Package natbib Warning: Citation `Cox2008' on page 8 undefined on input line 251.
-
-
-Package natbib Warning: Citation `Senko1995' on page 8 undefined on input line 255.
-
-[8]
-
-Package natbib Warning: Citation `Wilschefski2019' on page 9 undefined on input line 259.
-
-
-Package natbib Warning: Citation `Aebersold2003' on page 9 undefined on input line 261.
-
-[9]
-
-Package natbib Warning: Citation `Nygaard2016' on page 10 undefined on input line 276.
-
-[10] [11]
+[4] [1] [2] [3] [4] [5] [6] [7] [8] [9] [10] [11]
 LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 314.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
-) [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}] [13]
-
-Package natbib Warning: Citation `Cox2008' on page 14 undefined on input line 391.
-
-[14]
-<Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=166, 1228.59pt x 1951.29pt>
+) [12{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathit.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc}] [13] [14]
+<Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=585, 1228.59pt x 1951.29pt>
 File: Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf Graphic file (type pdf)
 <use Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>
 Package pdftex.def Info: Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf  used on input line 396.
 (pdftex.def)             Requested size: 389.0138pt x 617.84546pt.
-[15] [16 <./Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>]
-
-Package natbib Warning: Citation `Vanderaa2021' on page 17 undefined on input line 435.
-
-[17]
-
-Package natbib Warning: Citation `Tannous2020' on page 18 undefined on input line 450.
-
-
-Package natbib Warning: Citation `Specht2021' on page 18 undefined on input line 450.
-
-
-Package natbib Warning: Citation `Cox2011' on page 18 undefined on input line 455.
-
-
-Package natbib Warning: Citation `Brosch2009' on page 18 undefined on input line 455.
-
-
-Package natbib Warning: Citation `Cox2011' on page 18 undefined on input line 455.
-
-[18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}] [19]
-
-Package natbib Warning: Citation `Specht2021' on page 20 undefined on input line 494.
-
-
-Package natbib Warning: Citation `Sakia1992' on page 20 undefined on input line 497.
-
-[20]
-
-Package natbib Warning: Citation `Specht2021' on page 21 undefined on input line 519.
-
-
-Package natbib Warning: Citation `Maes2016' on page 21 undefined on input line 521.
-
-
-Package natbib Warning: Citation `VanHoutven2021' on page 21 undefined on input line 521.
-
-
-Package natbib Warning: Citation `Bacharach1965' on page 21 undefined on input line 521.
-
-[21]
-
-Package natbib Warning: Citation `Zhao2020' on page 22 undefined on input line 536.
-
-[22{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}]
-
-Package natbib Warning: Citation `Lan2013' on page 23 undefined on input line 544.
-
-
-Package natbib Warning: Citation `Nygaard2016' on page 23 undefined on input line 550.
-
-
-Package natbib Warning: Citation `Leek2012' on page 23 undefined on input line 552.
-
-
-Package natbib Warning: Citation `Johnson2007' on page 23 undefined on input line 552.
-
-
-Package natbib Warning: Citation `Phipson2016' on page 23 undefined on input line 557.
-
-[23] [24]
-
-Package natbib Warning: Citation `McCarthy2017' on page 25 undefined on input line 567.
-
-
-Package natbib Warning: Citation `McInnes2018' on page 25 undefined on input line 572.
-
-[25]
-
-Package natbib Warning: Citation `McInnes2018' on page 26 undefined on input line 587.
-
-[26]
-
-Package natbib Warning: Citation `McCarthy2017' on page 27 undefined on input line 605.
-
-
-Package natbib Warning: Citation `Kullback1951' on page 27 undefined on input line 612.
-
-[27]
-
-Package natbib Warning: Citation `Ritchie2015' on page 28 undefined on input line 623.
-
-
-Package natbib Warning: Citation `Phipson2016' on page 28 undefined on input line 625.
-
-[28]
-
-Package natbib Warning: Citation `Smyth2004' on page 29 undefined on input line 630.
-
-
-Package natbib Warning: Citation `Smyth2004' on page 29 undefined on input line 634.
-
-[29]
-
-Package natbib Warning: Citation `Benjamini1995' on page 30 undefined on input line 636.
-
-
-Package natbib Warning: Citation `Benjamini2001' on page 30 undefined on input line 636.
-
-
-Package natbib Warning: Citation `Holm1979' on page 30 undefined on input line 637.
-
-
-Package natbib Warning: Citation `Pearson1900' on page 30 undefined on input line 642.
-
-
-Package natbib Warning: Citation `Sprent2011' on page 30 undefined on input line 642.
-
-[30]
-
-Package natbib Warning: Citation `Wu2021' on page 31 undefined on input line 669.
-
-
-Package natbib Warning: Citation `Vaeremo2013' on page 31 undefined on input line 674.
-
-[31] [32]
-<screenshots/overview.png, id=313, 1831.84375pt x 981.6675pt>
+[15] [16 <./Thesis_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>] [17] [18{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathsy.enc}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-rm.enc}] [19] [20] [21] [22{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-mathex.enc}] [23] [24] [25] [26] [27] [28] [29] [30] [31] [32]
+<screenshots/overview.png, id=803, 1831.84375pt x 981.6675pt>
 File: screenshots/overview.png Graphic file (type png)
 <use screenshots/overview.png>
 Package pdftex.def Info: screenshots/overview.png  used on input line 691.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-
-LaTeX Warning: Reference `fig:ui-summary' on page 33 undefined on input line 698.
-
-
-Package natbib Warning: Citation `Specht2021' on page 33 undefined on input line 700.
-
 [33 <./screenshots/overview.png>]
-<screenshots/numbers_default.png, id=325, 1831.84375pt x 981.6675pt>
+<screenshots/numbers_default.png, id=816, 1831.84375pt x 981.6675pt>
 File: screenshots/numbers_default.png Graphic file (type png)
 <use screenshots/numbers_default.png>
 Package pdftex.def Info: screenshots/numbers_default.png  used on input line 705.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-
-LaTeX Warning: Reference `fig:ui-numbers-default' on page 34 undefined on input line 712.
-
 [34 <./screenshots/numbers_default.png>]
-<screenshots/mutual_info_default.png, id=333, 1831.84375pt x 981.6675pt>
+<screenshots/mutual_info_default.png, id=825, 1831.84375pt x 981.6675pt>
 File: screenshots/mutual_info_default.png Graphic file (type png)
 <use screenshots/mutual_info_default.png>
 Package pdftex.def Info: screenshots/mutual_info_default.png  used on input line 718.
 (pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
+[35 <./screenshots/mutual_info_default.png>]
+<screenshots/constand_norm_dependency.png, id=833, 1827.82875pt x 997.7275pt>
+File: screenshots/constand_norm_dependency.png Graphic file (type png)
+<use screenshots/constand_norm_dependency.png>
+Package pdftex.def Info: screenshots/constand_norm_dependency.png  used on input line 736.
+(pdftex.def)             Requested size: 486.24097pt x 265.41653pt.
+[36 <./screenshots/constand_norm_dependency.png>]
+<screenshots/mutual_info_quant_norm.png, id=843, 1834.855pt x 997.7275pt>
+File: screenshots/mutual_info_quant_norm.png Graphic file (type png)
+<use screenshots/mutual_info_quant_norm.png>
+Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 750.
+(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
+[37 <./screenshots/mutual_info_quant_norm.png>]
+<screenshots/RI_channel_default.png, id=852, 1831.84375pt x 981.6675pt>
+File: screenshots/RI_channel_default.png Graphic file (type png)
+<use screenshots/RI_channel_default.png>
+Package pdftex.def Info: screenshots/RI_channel_default.png  used on input line 766.
+(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
+[38 <./screenshots/RI_channel_default.png>]
+<screenshots/RI_file_default.png, id=861, 1831.84375pt x 981.6675pt>
+File: screenshots/RI_file_default.png Graphic file (type png)
+<use screenshots/RI_file_default.png>
+Package pdftex.def Info: screenshots/RI_file_default.png  used on input line 779.
+(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
+[39 <./screenshots/RI_file_default.png>]
+<screenshots/RI_st_default.png, id=871, 1831.84375pt x 981.6675pt>
+File: screenshots/RI_st_default.png Graphic file (type png)
+<use screenshots/RI_st_default.png>
+Package pdftex.def Info: screenshots/RI_st_default.png  used on input line 795.
+(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
+[40 <./screenshots/RI_st_default.png>]
+<screenshots/cv_st_default.png, id=879, 1830.84pt x 971.63pt>
+File: screenshots/cv_st_default.png Graphic file (type png)
+<use screenshots/cv_st_default.png>
+Package pdftex.def Info: screenshots/cv_st_default.png  used on input line 809.
+(pdftex.def)             Requested size: 486.25981pt x 258.05893pt.
+[41 <./screenshots/cv_st_default.png>]
+<screenshots/cv_rawfile_default.png, id=891, 1831.84375pt x 981.6675pt>
+File: screenshots/cv_rawfile_default.png Graphic file (type png)
+<use screenshots/cv_rawfile_default.png>
+Package pdftex.def Info: screenshots/cv_rawfile_default.png  used on input line 825.
+(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
+[42 <./screenshots/cv_rawfile_default.png>]
+<screenshots/cv_rawfile_nobs2.png, id=899, 1831.84375pt x 985.6825pt>
+File: screenshots/cv_rawfile_nobs2.png Graphic file (type png)
+<use screenshots/cv_rawfile_nobs2.png>
+Package pdftex.def Info: screenshots/cv_rawfile_nobs2.png  used on input line 839.
+(pdftex.def)             Requested size: 486.24689pt x 261.64078pt.
+[43 <./screenshots/cv_rawfile_nobs2.png>]
+<screenshots/cv_rawfile_nobs10.png, id=907, 1834.855pt x 997.7275pt>
+File: screenshots/cv_rawfile_nobs10.png Graphic file (type png)
+<use screenshots/cv_rawfile_nobs10.png>
+Package pdftex.def Info: screenshots/cv_rawfile_nobs10.png  used on input line 853.
+(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
+[44 <./screenshots/cv_rawfile_nobs10.png>]
+<screenshots/heatmap.png, id=916, 1829.83624pt x 981.6675pt>
+File: screenshots/heatmap.png Graphic file (type png)
+<use screenshots/heatmap.png>
+Package pdftex.def Info: screenshots/heatmap.png  used on input line 873.
+(pdftex.def)             Requested size: 486.2445pt x 260.85963pt.
+[45 <./screenshots/heatmap.png>]
+<screenshots/dim_red_default.png, id=925, 1834.855pt x 997.7275pt>
+File: screenshots/dim_red_default.png Graphic file (type png)
+<use screenshots/dim_red_default.png>
+Package pdftex.def Info: screenshots/dim_red_default.png  used on input line 885.
+(pdftex.def)             Requested size: 486.23427pt x 264.39651pt.
+[46 <./screenshots/dim_red_default.png>]
+<screenshots/dim_red_changed_k.png, id=933, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_changed_k.png Graphic file (type png)
+<use screenshots/dim_red_changed_k.png>
+Package pdftex.def Info: screenshots/dim_red_changed_k.png  used on input line 897.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[47 <./screenshots/dim_red_changed_k.png>]
+<screenshots/dim_red_3d.png, id=941, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_3d.png Graphic file (type png)
+<use screenshots/dim_red_3d.png>
+Package pdftex.def Info: screenshots/dim_red_3d.png  used on input line 909.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[48 <./screenshots/dim_red_3d.png>]
+<screenshots/dim_red_batchC.png, id=949, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_batchC.png Graphic file (type png)
+<use screenshots/dim_red_batchC.png>
+Package pdftex.def Info: screenshots/dim_red_batchC.png  used on input line 921.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+<screenshots/dim_red_batchC_3d.png, id=950, 1831.84375pt x 997.7275pt>
+File: screenshots/dim_red_batchC_3d.png Graphic file (type png)
+<use screenshots/dim_red_batchC_3d.png>
+Package pdftex.def Info: screenshots/dim_red_batchC_3d.png  used on input line 930.
+(pdftex.def)             Requested size: 486.24689pt x 264.83803pt.
+[49 <./screenshots/dim_red_batchC.png> <./screenshots/dim_red_batchC_3d.png>] [50]
+<screenshots/feature.png, id=968, 1832.8475pt x 1002.74625pt>
+File: screenshots/feature.png Graphic file (type png)
+<use screenshots/feature.png>
+Package pdftex.def Info: screenshots/feature.png  used on input line 942.
+(pdftex.def)             Requested size: 486.26163pt x 266.0325pt.
+[51 <./screenshots/feature.png>]
+<screenshots/stat_dependency.png, id=977, 1835.85875pt x 980.66376pt>
+File: screenshots/stat_dependency.png Graphic file (type png)
+<use screenshots/stat_dependency.png>
+Package pdftex.def Info: screenshots/stat_dependency.png  used on input line 960.
+(pdftex.def)             Requested size: 486.24814pt x 259.73997pt.
+[52 <./screenshots/stat_dependency.png>]
+<screenshots/stat_HC_HIV_noMets.png, id=986, 990.70125pt x 1763.58875pt>
+File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
+<use screenshots/stat_HC_HIV_noMets.png>
+Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 974.
+(pdftex.def)             Requested size: 340.37132pt x 605.90923pt.
+[53 <./screenshots/stat_HC_HIV_noMets.png>] [54]
+<screenshots/path_enrich_nw.png, id=998, 1831.84375pt x 995.72pt>
+File: screenshots/path_enrich_nw.png Graphic file (type png)
+<use screenshots/path_enrich_nw.png>
+Package pdftex.def Info: screenshots/path_enrich_nw.png  used on input line 993.
+(pdftex.def)             Requested size: 437.61101pt x 237.86856pt.
+[55 <./screenshots/path_enrich_nw.png>]
+<screenshots/path_enrich_bar.png, id=1008, 1834.855pt x 1002.74625pt>
+File: screenshots/path_enrich_bar.png Graphic file (type png)
+<use screenshots/path_enrich_bar.png>
+Package pdftex.def Info: screenshots/path_enrich_bar.png  used on input line 1007.
+(pdftex.def)             Requested size: 437.63043pt x 239.16455pt.
+[56 <./screenshots/path_enrich_bar.png>]
+<screenshots/go_enrich_dot.png, id=1017, 1830.84pt x 1002.74625pt>
+File: screenshots/go_enrich_dot.png Graphic file (type png)
+<use screenshots/go_enrich_dot.png>
+Package pdftex.def Info: screenshots/go_enrich_dot.png  used on input line 1019.
+(pdftex.def)             Requested size: 437.62265pt x 239.68477pt.
+[57 <./screenshots/go_enrich_dot.png>] [58] [59] [60] [61]
+<Thesis_files/figure-latex/missingness-1.pdf, id=1065, 469.755pt x 325.215pt>
+File: Thesis_files/figure-latex/missingness-1.pdf Graphic file (type pdf)
+<use Thesis_files/figure-latex/missingness-1.pdf>
+Package pdftex.def Info: Thesis_files/figure-latex/missingness-1.pdf  used on input line 1089.
+(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
+[62 <./Thesis_files/figure-latex/missingness-1.pdf>]
+<Thesis_files/figure-latex/cluster-analysis-dendrogram-1.pdf, id=1081, 469.755pt x 325.215pt>
+File: Thesis_files/figure-latex/cluster-analysis-dendrogram-1.pdf Graphic file (type pdf)
+<use Thesis_files/figure-latex/cluster-analysis-dendrogram-1.pdf>
+Package pdftex.def Info: Thesis_files/figure-latex/cluster-analysis-dendrogram-1.pdf  used on input line 1113.
+(pdftex.def)             Requested size: 469.78969pt x 325.23901pt.
+[63 <./Thesis_files/figure-latex/cluster-analysis-dendrogram-1.pdf>]
+<Thesis_files/figure-latex/cluster-analysis-gap-stat-1.pdf, id=1098, 469.755pt x 325.215pt>
+File: Thesis_files/figure-latex/cluster-analysis-gap-stat-1.pdf Graphic file (type pdf)
+<use Thesis_files/figure-latex/cluster-analysis-gap-stat-1.pdf>
+Package pdftex.def Info: Thesis_files/figure-latex/cluster-analysis-gap-stat-1.pdf  used on input line 1126.
+(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
+[64 <./Thesis_files/figure-latex/cluster-analysis-gap-stat-1.pdf>]
+<Thesis_files/figure-latex/cluster-analysis-silh-1.pdf, id=1111, 469.755pt x 325.215pt>
+File: Thesis_files/figure-latex/cluster-analysis-silh-1.pdf Graphic file (type pdf)
+<use Thesis_files/figure-latex/cluster-analysis-silh-1.pdf>
+Package pdftex.def Info: Thesis_files/figure-latex/cluster-analysis-silh-1.pdf  used on input line 1138.
+(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
+<Thesis_files/figure-latex/cluster-analysis-dim-red-1.pdf, id=1113, 469.755pt x 325.215pt>
+File: Thesis_files/figure-latex/cluster-analysis-dim-red-1.pdf Graphic file (type pdf)
+<use Thesis_files/figure-latex/cluster-analysis-dim-red-1.pdf>
+Package pdftex.def Info: Thesis_files/figure-latex/cluster-analysis-dim-red-1.pdf  used on input line 1150.
+(pdftex.def)             Requested size: 437.62744pt x 302.97282pt.
+[65 <./Thesis_files/figure-latex/cluster-analysis-silh-1.pdf>] [66 <./Thesis_files/figure-latex/cluster-analysis-dim-red-1.pdf>] [67] [68] [69] (./Thesis.bbl [70] [71] [72] [73] [74]) [75]
+LaTeX Font Info:    Trying to load font information for T1+lmtt on input line 1198.
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmtt.fd
+File: t1lmtt.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+)
+Overfull \hbox (94.36447pt too wide) in paragraph at lines 1329--1329
+[]\T1/lmtt/m/n/10.95 ## LAPACK: /usr/lib/x86_64-linux-gnu/openblas-pthread/libopenblasp-r0.3.21.so;  LAPACK version 3.11.0[] 
+ []
 
-LaTeX Warning: R
+[76] [77] [78] [79] [80] (./Thesis.lof [81])
+\tf@lof=\write5
+\openout5 = `Thesis.lof'.
+
+[82] 
+enddocument/afterlastpage: lastpage setting LastPage.
+(./Thesis.aux)
+ ***********
+LaTeX2e <2023-06-01> patch level 1
+L3 programming layer <2023-06-30>
+ ***********
+Package rerunfilecheck Info: File `Thesis.out' has not changed.
+(rerunfilecheck)             Checksum: 173442A4159CA9091F8C0B0528A45848;11379.
+ )
+(\end occurred inside a group at level 2)
+
+### semi simple group (level 2) entered at line 154 (\begingroup)
+### semi simple group (level 1) entered at line 74 (\begingroup)
+### bottom level 
+Here is how much of TeX's memory you used:
+ 13222 strings out of 477197
+ 210676 string characters out of 5813669
+ 1929244 words of memory out of 5000000
+ 33629 multiletter control sequences out of 15000+600000
+ 594320 words of font info for 63 fonts, out of 8000000 for 9000
+ 14 hyphenation exceptions out of 8191
+ 75i,9n,79p,1907b,8742s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmex10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmmi8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy6.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmsy8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmtt10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/amsfonts/symbols/msbm10.pfb>
+Output written on Thesis.pdf (87 pages, 4983752 bytes).
+PDF statistics:
+ 1424 PDF objects out of 1440 (max. 8388607)
+ 1224 compressed objects within 13 object streams
+ 355 named destinations out of 1000 (max. 500000)
+ 665 words of extra memory for PDF output out of 10000 (max. 10000000)
+
