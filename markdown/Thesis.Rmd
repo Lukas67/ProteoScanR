@@ -114,9 +114,9 @@ With the growing prominence of single-cell techniques across various omics field
 Introducing ProteoScanR, a state-of-the-art proteomics pipeline integrated into the user-friendly Proteomics Workbench interface. 
 Guided by SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development process of ProteoScanR was thoroughly tested and validated using both bulk and single-cell mass spectrometry data sets. The pipeline implementation in the Proteomics Workbench leverages the power of an interactive environment built in R Shiny, empowering users to discover valuable insights for their specific data set. 
 Within the interactive environment, users have the flexibility to customize cutoffs and thresholds for quality control, as well as employ various approaches for data transformation, normalization, missing value imputation, and batch correction. 
-ProteoScanR and the Proteomics Workbench served as a valuable tool in guiding the identification of significantly expressed proteins in cells under study. Subsequently, the pathway enrichment analysis provided additional biological contexts for a comprehensive understanding of their functional implications.
-The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application.
-https://github.com/Lukas67/ProteoScanR
+ProteoScanR and the Proteomics Workbench serves as a valuable tool in guiding the identification of expressed proteins in cells under study. Subsequently, the pathway enrichment analysis provides additional biological contexts for a comprehensive understanding of their functional implications.
+The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application
+The source code is accessible and can be located at the following URL: https://github.com/Lukas67/ProteoScanR
 
 \pagenumbering{roman}
 
