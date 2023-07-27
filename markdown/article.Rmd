@@ -1,0 +1,57 @@
+---
+title: "article"
+author: "Lukas Gamp"
+date: "`r Sys.Date()`"
+output: pdf_document
+---
+---
+title: " "
+output:
+  bookdown::pdf_document2:
+    toc: false
+#    number_sections: TRUE
+geometry: "left = 2.5cm, right = 2cm, top = 2cm, bottom = 2cm"
+fontsize: 11pt
+header-includes:
+  - \usepackage{float}
+  - \let\origfigure\figure
+  - \let\endorigfigure\endfigure
+  - \renewenvironment{figure}[1][2] {
+      \expandafter\origfigure\expandafter[H]
+    } {
+    \endorigfigure
+    }
+  - \usepackage{sectsty}
+  - \usepackage{paralist}
+  - \usepackage{setspace}\spacing{1.5}
+  - \usepackage{fancyhdr}
+  - \usepackage{lastpage}
+  - \usepackage{dcolumn}
+  - \usepackage{natbib}\bibliographystyle{agsm}
+  - \usepackage[nottoc, numbib]{tocbibind}
+
+bibliography: bibliography.bib
+---
+
+```{r setup, include=FALSE}
+#designed with help of: 
+#https://ourcodingclub.github.io/tutorials/rmarkdown-dissertation/
+
+knitr::opts_chunk$set(echo = TRUE)
+options(tinytex.verbose = TRUE)
+
+#install dependencies
+if (!requireNamespace("tinytex", quietly=TRUE))
+  install.packages("tinytex")
+
+library(tinytex)
+
+#install dependencies
+if (!requireNamespace("DiagrammeR", quietly=TRUE))
+  install.packages("DiagrammeR")
+
+library(DiagrammeR)
+```
+
+
+
