@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  27 JUL 2023 10:45
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  31 JUL 2023 09:42
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -461,15 +461,15 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * layout: <same size as paper>
 * layoutoffset:(h,v)=(0.0pt,0.0pt)
 * modes: 
-* h-part:(L,W,R)=(71.13188pt, 486.25761pt, 56.9055pt)
-* v-part:(T,H,B)=(56.9055pt, 681.15898pt, 56.9055pt)
+* h-part:(L,W,R)=(56.9055pt, 514.71037pt, 42.67912pt)
+* v-part:(T,H,B)=(42.67912pt, 709.61174pt, 42.67912pt)
 * \paperwidth=614.295pt
 * \paperheight=794.96999pt
-* \textwidth=486.25761pt
-* \textheight=681.15898pt
-* \oddsidemargin=-1.1381pt
-* \evensidemargin=-1.1381pt
-* \topmargin=-52.36449pt
+* \textwidth=514.71037pt
+* \textheight=709.61174pt
+* \oddsidemargin=-15.36449pt
+* \evensidemargin=-15.36449pt
+* \topmargin=-66.59087pt
 * \headheight=12.0pt
 * \headsep=25.0pt
 * \topskip=11.0pt
@@ -492,12 +492,12 @@ Package hyperref Info: Link coloring OFF on input line 93.
 \@outlinefile=\write3
 \openout3 = `article.out'.
 
-<fh_header.jpg, id=20, 597.651pt x 112.566pt>
+<fh_header.jpg, id=28, 597.651pt x 112.566pt>
 File: fh_header.jpg Graphic file (type jpg)
 <use fh_header.jpg>
 Package pdftex.def Info: fh_header.jpg  used on input line 95.
-(pdftex.def)             Requested size: 486.2742pt x 91.58846pt.
-<Lukas_Gamp_grey.png, id=21, 96.36pt x 144.54pt>
+(pdftex.def)             Requested size: 514.72675pt x 96.94742pt.
+<Lukas_Gamp_grey.png, id=29, 96.36pt x 144.54pt>
 File: Lukas_Gamp_grey.png Graphic file (type png)
 <use Lukas_Gamp_grey.png>
 Package pdftex.def Info: Lukas_Gamp_grey.png  used on input line 120.
@@ -534,25 +534,44 @@ File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 LaTeX Font Info:    Trying to load font information for U+msb on input line 148.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
-) [1] [2] [3]
-<article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=88, 1228.59pt x 1951.29pt>
+)
+<KI_logo.png, id=47, 199.74625pt x 253.94875pt>
+File: KI_logo.png Graphic file (type png)
+<use KI_logo.png>
+Package pdftex.def Info: KI_logo.png  used on input line 154.
+(pdftex.def)             Requested size: 102.94208pt x 130.87611pt.
+[1 <./KI_logo.png>]
+<article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=71, 1228.59pt x 1951.29pt>
 File: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf Graphic file (type pdf)
 <use article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>
-Package pdftex.def Info: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf  used on input line 179.
-(pdftex.def)             Requested size: 364.69926pt x 579.22826pt.
-[4] [5 <./article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>] [6]
-<screenshots/numbers_default.png, id=133, 1831.84375pt x 981.6675pt>
+Package pdftex.def Info: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf  used on input line 176.
+(pdftex.def)             Requested size: 386.03307pt x 613.11134pt.
+[2] [3 <./article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>] [4]
+<screenshots/numbers_default.png, id=121, 1831.84375pt x 981.6675pt>
 File: screenshots/numbers_default.png Graphic file (type png)
 <use screenshots/numbers_default.png>
-Package pdftex.def Info: screenshots/numbers_default.png  used on input line 200.
-(pdftex.def)             Requested size: 486.24689pt x 260.57504pt.
-[7 <./screenshots/numbers_default.png>]
-<screenshots/stat_HC_HIV_noMets.png, id=143, 990.70125pt x 1763.58875pt>
+Package pdftex.def Info: screenshots/numbers_default.png  used on input line 203.
+(pdftex.def)             Requested size: 514.70166pt x 275.82368pt.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 216.
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
+File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
+) [5{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc} <./screenshots/numbers_default.png>]
+<screenshots/mutual_info_quant_norm.png, id=134, 1834.855pt x 997.7275pt>
+File: screenshots/mutual_info_quant_norm.png Graphic file (type png)
+<use screenshots/mutual_info_quant_norm.png>
+Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 232.
+(pdftex.def)             Requested size: 514.70782pt x 279.87941pt.
+[6 <./screenshots/mutual_info_quant_norm.png>]
+<screenshots/stat_HC_HIV_noMets.png, id=144, 990.70125pt x 1763.58875pt>
 File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
 <use screenshots/stat_HC_HIV_noMets.png>
-Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 212.
-(pdftex.def)             Requested size: 340.37132pt x 605.90923pt.
-[8 <./screenshots/stat_HC_HIV_noMets.png>] (./article.bbl [9]) [10] 
+Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 247.
+(pdftex.def)             Requested size: 360.29535pt x 641.37682pt.
+[7 <./screenshots/stat_HC_HIV_noMets.png>] [8] (./article.bbl [9]) [10] (./article.lof)
+\tf@lof=\write4
+\openout4 = `article.lof'.
+
+[11] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./article.aux)
  ***********
@@ -560,7 +579,7 @@ LaTeX2e <2023-06-01> patch level 1
 L3 programming layer <2023-06-30>
  ***********
 Package rerunfilecheck Info: File `article.out' has not changed.
-(rerunfilecheck)             Checksum: 40D6D6EB374F42BD6A0C020BBC8F07AE;438.
+(rerunfilecheck)             Checksum: E5815B42C85D644AAEAEFEEA185717FB;737.
  )
 (\end occurred inside a group at level 2)
 
@@ -568,18 +587,18 @@ Package rerunfilecheck Info: File `article.out' has not changed.
 ### semi simple group (level 1) entered at line 74 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12222 strings out of 477197
- 186498 string characters out of 5813669
- 1926244 words of memory out of 5000000
- 32963 multiletter control sequences out of 15000+600000
- 587639 words of font info for 59 fonts, out of 8000000 for 9000
+ 12292 strings out of 477197
+ 188290 string characters out of 5813669
+ 1927244 words of memory out of 5000000
+ 33022 multiletter control sequences out of 15000+600000
+ 591003 words of font info for 61 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1199b,8622s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
-Output written on article.pdf (11 pages, 593208 bytes).
+ 75i,6n,79p,1221b,8628s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
+Output written on article.pdf (12 pages, 738049 bytes).
 PDF statistics:
- 196 PDF objects out of 1000 (max. 8388607)
- 162 compressed objects within 2 object streams
- 41 named destinations out of 1000 (max. 500000)
- 58 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 220 PDF objects out of 1000 (max. 8388607)
+ 178 compressed objects within 2 object streams
+ 43 named destinations out of 1000 (max. 500000)
+ 84 words of extra memory for PDF output out of 10000 (max. 10000000)
 

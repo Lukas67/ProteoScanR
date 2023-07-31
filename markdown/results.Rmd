@@ -205,7 +205,7 @@ knitr::include_graphics("screenshots/path_enrich_bar.png")
 The barplot (see figure \@ref(fig:ui-path-enrich-bar)) shows the significance of the two nodes. The count indicates how many proteins are associated with the node of the network. When hovering over the bar the user can read the p-value of the performed Fisher test. The background for the statistical test can be chosen as genome wide (default) or as the set of detected proteins. When choosing the detected proteins as a background no pathway could be considered as statistically significant. 
 
 \newpage
-```{r ui-go-enrich-bar, echo=F, out.width="90%", fig.align='center', fig.cap="Gene ontology enrichment against the complete human proteome. Snapshot dotplot indicating the interaction significance of found proteins"}
+```{r ui-go-enrich-bar, echo=F, out.width="90%", fig.align='center', fig.cap="Protein ontology enrichment against the complete human proteome. Snapshot dotplot indicating the interaction significance of found proteins"}
 knitr::include_graphics("screenshots/go_enrich_dot.png")
 ```
 Ontology enrichment offers a more comprehensive mapping, providing a broader understanding of the data. By allowing users to select a custom protein set collection, they can either narrow down the potential results for a targeted approach or expand their scope for an untargeted analysis.

@@ -166,7 +166,7 @@ quality_control_2 <- boxGrob("quality control 2",
                              box_gp = plot_box_setting,
                              txt_gp = default_txt_setting)
 
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde coefficient of variation to razor proteins\npeptide missing rate",
                        box_gp = opts_box_setting,
                        txt_gp = opts_txt_setting,
                        just="center")
@@ -373,7 +373,7 @@ quality_control_2 <- boxGrob("quality control 2",
                              box_gp = plot_box_setting,
                              txt_gp = default_txt_setting)
 
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde coefficient of variation to razor proteins\npeptide missing rate",
                        box_gp = opts_box_setting,
                        txt_gp = opts_txt_setting,
                        just="center")
