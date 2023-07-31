@@ -1,4 +1,4 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  31 JUL 2023 09:42
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  31 JUL 2023 11:08
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
@@ -552,20 +552,20 @@ File: screenshots/numbers_default.png Graphic file (type png)
 <use screenshots/numbers_default.png>
 Package pdftex.def Info: screenshots/numbers_default.png  used on input line 203.
 (pdftex.def)             Requested size: 514.70166pt x 275.82368pt.
-LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 216.
+LaTeX Font Info:    Trying to load font information for TS1+lmr on input line 217.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ts1lmr.fd
 File: ts1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) [5{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ts1.enc} <./screenshots/numbers_default.png>]
-<screenshots/mutual_info_quant_norm.png, id=134, 1834.855pt x 997.7275pt>
+<screenshots/mutual_info_quant_norm.png, id=135, 1834.855pt x 997.7275pt>
 File: screenshots/mutual_info_quant_norm.png Graphic file (type png)
 <use screenshots/mutual_info_quant_norm.png>
-Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 232.
+Package pdftex.def Info: screenshots/mutual_info_quant_norm.png  used on input line 234.
 (pdftex.def)             Requested size: 514.70782pt x 279.87941pt.
 [6 <./screenshots/mutual_info_quant_norm.png>]
-<screenshots/stat_HC_HIV_noMets.png, id=144, 990.70125pt x 1763.58875pt>
+<screenshots/stat_HC_HIV_noMets.png, id=145, 990.70125pt x 1763.58875pt>
 File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
 <use screenshots/stat_HC_HIV_noMets.png>
-Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 247.
+Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 249.
 (pdftex.def)             Requested size: 360.29535pt x 641.37682pt.
 [7 <./screenshots/stat_HC_HIV_noMets.png>] [8] (./article.bbl [9]) [10] (./article.lof)
 \tf@lof=\write4
@@ -581,24 +581,26 @@ L3 programming layer <2023-06-30>
 Package rerunfilecheck Info: File `article.out' has not changed.
 (rerunfilecheck)             Checksum: E5815B42C85D644AAEAEFEEA185717FB;737.
  )
-(\end occurred inside a group at level 2)
+(\end occurred inside a group at level 4)
 
+### semi simple group (level 4) entered at line 229 (\begingroup)
+### semi simple group (level 3) entered at line 213 (\begingroup)
 ### semi simple group (level 2) entered at line 140 (\begingroup)
 ### semi simple group (level 1) entered at line 74 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12292 strings out of 477197
- 188290 string characters out of 5813669
+ 12294 strings out of 477197
+ 188311 string characters out of 5813669
  1927244 words of memory out of 5000000
- 33022 multiletter control sequences out of 15000+600000
- 591003 words of font info for 61 fonts, out of 8000000 for 9000
+ 33023 multiletter control sequences out of 15000+600000
+ 593998 words of font info for 62 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1221b,8628s stack positions out of 10000i,1000n,20000p,200000b,200000s
-</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
-Output written on article.pdf (12 pages, 738049 bytes).
+ 75i,6n,79p,1221b,8766s stack positions out of 10000i,1000n,20000p,200000b,200000s
+</home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr8.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
+Output written on article.pdf (12 pages, 765728 bytes).
 PDF statistics:
- 220 PDF objects out of 1000 (max. 8388607)
- 178 compressed objects within 2 object streams
+ 225 PDF objects out of 1000 (max. 8388607)
+ 181 compressed objects within 2 object streams
  43 named destinations out of 1000 (max. 500000)
  84 words of extra memory for PDF output out of 10000 (max. 10000000)
 

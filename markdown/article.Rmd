@@ -101,7 +101,7 @@ Introducing ProteoScanR, a state-of-the-art proteomics pipeline integrated into 
 Guided by SCoPE2 \citep{Specht2021, Petelski2021, Vanderaa2021}, the development process of ProteoScanR was thoroughly tested and validated using both bulk and single-cell mass spectrometry data sets. The pipeline implementation in the Proteomics Workbench leverages the power of an interactive environment built in R Shiny, empowering users to discover valuable insights for their specific data set. 
 Within the interactive environment, users have the flexibility to customize cutoffs and thresholds for quality control, as well as employ various approaches for data transformation, normalization, missing value imputation, and batch correction. 
 ProteoScanR and the Proteomics Workbench serves as a valuable tool in guiding the identification of expressed proteins in cells under study. Subsequently, the pathway enrichment analysis provides additional biological contexts for a comprehensive understanding of their functional implications.
-The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application
+The master thesis project serves as a foundation for future advancements in the field of single-cell proteomics. Moreover, the codebase has been designed with robustness and scalability in mind, ensuring ease of maintenance and future expansion of the application.
 The source code is accessible and can be located at the following URL: https://github.com/Lukas67/ProteoScanR
 
 \vspace{1 cm}
@@ -337,11 +337,12 @@ ProteoScanR initially filters the data by false discovery rate (FDR) converted t
 
 The quality control continues with calculating median reporter ion intensity (RI), median coefficient of variation (CV) and filtering according to cutoffs. Subsequently peptides with high missing rate are removed and peptides are aggregated to proteins. 
 
-Preparation for hypothesis testing involves data transformation and normalization. Missing values for proteins in individual channels are handled according to user selection with methods such as the K-nearest neighbor algorithm (=KNN) \citep{Lan2013}. Before statistical analysis, dimensionality reduction techniques can be applied and observed with or without correcting for batch effect by ComBat \citep{Johnson2007}. Furthermore data processing can be validated with an entropy based approach for the conservation of information. 
+Preparation for hypothesis testing involves data transformation and normalization. Missing values for proteins in individual channels are handled according to user selection with methods such as the K-nearest neighbor algorithm (=KNN) \citep{Lan2013}. Before statistical analysis, dimensionality reduction techniques were applied and observed with and without correcting for batch effect by ComBat \citep{Johnson2007}. Furthermore data processing is validated with an entropy based approach for the conservation of information. 
 
 Statistical testing involves differential expression analysis with the R package Limma \citep{Phipson2016}. Hypothesizes can be selected by the user and p-value correction can be employed with different approaches to meet conservative as well as liberal study designs. 
 
-After finding differentially expressed proteins, enrichment elucidates them in biological context by finding over represented proteins. The protein enrichment analysis can be employed in selected contexts such as pathways, cell-types or custom ontologies. The pathway enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the entire “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. For custom ontologies the protein enrichment analysis is done using the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which can be either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties. 
+After finding differentially expressed proteins, enrichment elucidates them in biological context by finding over represented proteins. The protein enrichment analysis is employed in selected contexts such as pathways, cell-types or custom ontologies. The pathway enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the entire “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. For custom ontologies the protein enrichment analysis undertaken with the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which is either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties. 
+
 
 \newpage
 # Results
@@ -352,20 +353,22 @@ knitr::include_graphics("screenshots/numbers_default.png")
 The ProteoScanR pipeline is employed in the proteomics workbench. Users find settings for the pre-processing on the left hand side of the interface (see figure \@ref(fig:ui-numbers-default)). The main panel shows the data in different aspects and helps the user finding a good fit for the methods applied to their individual dataset. 
 
 As seen in figure \@ref(fig:ui-numbers-default) the aspects shown in the main panel include:
+\spacing{1}
 \begin{scriptsize}
 \begin{itemize}
-\item Overview showing the individual processing steps of the analysis pipeline
-\item Barchart showing the number of peptide spectrum matches, peptides and proteins
-\item Mutual information intra- and inter- groupwise
-\item Reporter ion intensity with factor selection to highlight
-\item Median coefficient of variation for razor proteins and correlation heatmap for protein expression
-\item Dimensionality reduction analysis with principle component analysis (PCA) and Uniform Manifold Approximation and Projection (UMAP)
-\item Feature wise output for an individual protein over the course of the pipeline.
-\item Statistics module
-\item Pathway enrichment
-\item Protein set ontology enrichment 
+\item \textbf{Overview:} Summary showing the individual processing steps of the analysis pipeline
+\item \textbf{Summary Barplot:} Barchart showing the number of peptide spectrum matches, peptides and proteins
+\item \textbf{Normalization validation:} Mutual information intra- and inter- groupwise
+\item \textbf{Reporter ion intensity:} Includes factor selection to create boxplots indicating a factor
+\item \textbf{Median coefficient of variation and correlation:} Variation of peptides for razor proteins and correlation heatmap for protein expression
+\item \textbf{Dimensionality reduction:} Analysis with principle component analysis (PCA) and Uniform Manifold Approximation and Projection (UMAP)
+\item \textbf{Feature wise output:} Visualization of an individual protein over the course of the pipeline.
+\item \textbf{Statistics module:} Differential expression analysis
+\item \textbf{Pathway enrichment:} Over-representation analysis for differentially expressed proteins in the context of pathways.
+\item \textbf{Protein set ontology enrichment:}  Over-representation analysis for differentially expressed proteins in a user selected context.
 \end{itemize}
 \end{scriptsize}
+\spacing{1.5}
 
 \newpage
 ```{r ui-mutual-info-quant-norm, echo=F, out.width="100%", fig.align='center', fig.cap="Mutual information with quantile normalization"}
