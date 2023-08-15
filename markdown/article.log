@@ -1,11 +1,11 @@
-This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.7.18)  15 AUG 2023 09:38
+This is pdfTeX, Version 3.141592653-2.6-1.40.25 (TeX Live 2023) (preloaded format=pdflatex 2023.8.15)  15 AUG 2023 11:17
 entering extended mode
  restricted \write18 enabled.
  %&-line parsing enabled.
 **article.tex
 (./article.tex
 LaTeX2e <2023-06-01> patch level 1
-L3 programming layer <2023-06-30>
+L3 programming layer <2023-08-11>
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/article.cls
 Document Class: article 2023/05/17 v1.4n Standard LaTeX document class
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/base/size11.clo
@@ -312,6 +312,106 @@ Package tocbibind Info: The document has section divisions on input line 50.
 
 Package tocbibind Note: Using section or other style headings.
 
+) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape.sty
+Package: pdflscape 2022-10-27 v0.13 Display of landscape pages in PDF
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/pdflscape/pdflscape-nometadata.sty
+Package: pdflscape-nometadata 2022-10-28 v0.13 Display of landscape pages in PDF (HO)
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/graphics/lscape.sty
+Package: lscape 2020/05/28 v3.02 Landscape Pages (DPC)
+)
+Package pdflscape Info: Auto-detected driver: pdftex on input line 81.
+)) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/tools/multicol.sty
+Package: multicol 2023/03/30 v1.9f multicolumn formatting (FMi)
+\c@tracingmulticols=\count289
+\mult@box=\box63
+\multicol@leftmargin=\dimen179
+\c@unbalance=\count290
+\c@collectmore=\count291
+\doublecol@number=\count292
+\multicoltolerance=\count293
+\multicolpretolerance=\count294
+\full@width=\dimen180
+\page@free=\dimen181
+\premulticols=\dimen182
+\postmulticols=\dimen183
+\multicolsep=\skip77
+\multicolbaselineskip=\skip78
+\partial@page=\box64
+\last@line=\box65
+\mc@boxedresult=\box66
+\maxbalancingoverflow=\dimen184
+\mult@rightbox=\box67
+\mult@grightbox=\box68
+\mult@firstbox=\box69
+\mult@gfirstbox=\box70
+\@tempa=\box71
+\@tempa=\box72
+\@tempa=\box73
+\@tempa=\box74
+\@tempa=\box75
+\@tempa=\box76
+\@tempa=\box77
+\@tempa=\box78
+\@tempa=\box79
+\@tempa=\box80
+\@tempa=\box81
+\@tempa=\box82
+\@tempa=\box83
+\@tempa=\box84
+\@tempa=\box85
+\@tempa=\box86
+\@tempa=\box87
+\@tempa=\box88
+\@tempa=\box89
+\@tempa=\box90
+\@tempa=\box91
+\@tempa=\box92
+\@tempa=\box93
+\@tempa=\box94
+\@tempa=\box95
+\@tempa=\box96
+\@tempa=\box97
+\@tempa=\box98
+\@tempa=\box99
+\@tempa=\box100
+\@tempa=\box101
+\@tempa=\box102
+\@tempa=\box103
+\@tempa=\box104
+\@tempa=\box105
+\@tempa=\box106
+\c@minrows=\count295
+\c@columnbadness=\count296
+\c@finalcolumnbadness=\count297
+\last@try=\dimen185
+\multicolovershoot=\dimen186
+\multicolundershoot=\dimen187
+\mult@nat@firstbox=\box107
+\colbreak@box=\box108
+\mc@col@check@num=\count298
+) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/blindtext/blindtext.sty
+Package: blindtext 2012/01/06 V2.0 blindtext-Package
+(/home/lukas/.TinyTeX/texmf-dist/tex/latex/tools/xspace.sty
+Package: xspace 2014/10/28 v1.13 Space after command names (DPC,MH)
+)
+\c@blindtext=\count299
+\c@Blindtext=\count300
+\c@blind@countparstart=\count301
+\blind@countxx=\count302
+\blindtext@numBlindtext=\count303
+\blind@countyy=\count304
+\c@blindlist=\count305
+\c@blindlistlevel=\count306
+\c@blindlist@level=\count307
+\blind@listitem=\count308
+\c@blind@listcount=\count309
+\c@blind@levelcount=\count310
+\blind@mathformula=\count311
+\blind@Mathformula=\count312
+\c@blind@randomcount=\count313
+\c@blind@randommax=\count314
+\c@blind@pangramcount=\count315
+\c@blind@pangrammax=\count316
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/hyperref/hyperref.sty
 Package: hyperref 2023-07-08 v7.01b Hypertext links for LaTeX
 (/home/lukas/.TinyTeX/texmf-dist/tex/generic/ltxcmds/ltxcmds.sty
@@ -345,11 +445,11 @@ Package: gettitlestring 2019/12/15 v1.6 Cleanup title references (HO)
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/kvoptions/kvoptions.sty
 Package: kvoptions 2022-06-15 v3.15 Key value format for package options (HO)
 ))
-\c@section@level=\count289
+\c@section@level=\count317
 )
-\@linkdim=\dimen179
-\Hy@linkcounter=\count290
-\Hy@pagecounter=\count291
+\@linkdim=\dimen188
+\Hy@linkcounter=\count318
+\Hy@pagecounter=\count319
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/hyperref/pd1enc.def
 File: pd1enc.def 2023-07-08 v7.01b Hyperref: PDFDocEncoding definition (HO)
 Now handling font encoding PD1 ...
@@ -357,7 +457,7 @@ Now handling font encoding PD1 ...
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/generic/intcalc/intcalc.sty
 Package: intcalc 2019/12/15 v1.3 Expandable calculations with integers (HO)
 )
-\Hy@SavedSpaceFactor=\count292
+\Hy@SavedSpaceFactor=\count320
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/hyperref/puenc.def
 File: puenc.def 2023-07-08 v7.01b Hyperref: PDF Unicode definition (HO)
 Now handling font encoding PU ...
@@ -371,21 +471,21 @@ Package hyperref Info: Plain pages OFF on input line 4182.
 Package hyperref Info: Backreferencing OFF on input line 4187.
 Package hyperref Info: Implicit mode ON; LaTeX internals redefined.
 Package hyperref Info: Bookmarks ON on input line 4434.
-\c@Hy@tempcnt=\count293
+\c@Hy@tempcnt=\count321
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/url/url.sty
 \Urlmuskip=\muskip17
 Package: url 2013/09/16  ver 3.4  Verb mode for urls, etc.
 )
 LaTeX Info: Redefining \url on input line 4772.
-\XeTeXLinkMargin=\dimen180
+\XeTeXLinkMargin=\dimen189
 (/home/lukas/.TinyTeX/texmf-dist/tex/generic/bitset/bitset.sty
 Package: bitset 2019/12/09 v1.3 Handle bit-vector datatype (HO)
 (/home/lukas/.TinyTeX/texmf-dist/tex/generic/bigintcalc/bigintcalc.sty
 Package: bigintcalc 2019/12/15 v1.5 Expandable calculations on big integers (HO)
 ))
-\Fld@menulength=\count294
-\Field@Width=\dimen181
-\Fld@charsize=\dimen182
+\Fld@menulength=\count322
+\Field@Width=\dimen190
+\Fld@charsize=\dimen191
 Package hyperref Info: Hyper figures OFF on input line 6051.
 Package hyperref Info: Link nesting OFF on input line 6056.
 Package hyperref Info: Hyper index ON on input line 6059.
@@ -397,9 +497,9 @@ Package hyperref Info: PDF/A mode OFF on input line 6081.
 Package: atbegshi-ltx 2021/01/10 v1.0c Emulation of the original atbegshi
 package with kernel methods
 )
-\Hy@abspage=\count295
-\c@Item=\count296
-\c@Hfootnote=\count297
+\Hy@abspage=\count323
+\c@Item=\count324
+\c@Hfootnote=\count325
 )
 Package hyperref Info: Driver (autodetected): hpdftex.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/hyperref/hpdftex.def
@@ -408,8 +508,8 @@ File: hpdftex.def 2023-07-08 v7.01b Hyperref driver for pdfTeX
 Package: atveryend-ltx 2020/08/19 v1.0a Emulation of the original atveryend package
 with kernel methods
 )
-\Fld@listcount=\count298
-\c@bookmark@seq@number=\count299
+\Fld@listcount=\count326
+\c@bookmark@seq@number=\count327
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/rerunfilecheck/rerunfilecheck.sty
 Package: rerunfilecheck 2022-07-10 v1.10 Rerun checks for auxiliary files (HO)
 (/home/lukas/.TinyTeX/texmf-dist/tex/generic/uniquecounter/uniquecounter.sty
@@ -417,36 +517,36 @@ Package: uniquecounter 2019/12/15 v1.4 Provide unlimited unique counter (HO)
 )
 Package uniquecounter Info: New unique counter `rerunfilecheck' on input line 285.
 )
-\Hy@SectionHShift=\skip77
+\Hy@SectionHShift=\skip79
 )
-LaTeX Font Info:    Trying to load font information for T1+lmr on input line 93.
+LaTeX Font Info:    Trying to load font information for T1+lmr on input line 97.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/t1lmr.fd
 File: t1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 ) (/home/lukas/.TinyTeX/texmf-dist/tex/latex/l3backend/l3backend-pdftex.def
 File: l3backend-pdftex.def 2023-04-19 L3 backend support: PDF output (pdfTeX)
-\l__color_backend_stack_int=\count300
-\l__pdf_internal_box=\box63
+\l__color_backend_stack_int=\count328
+\l__pdf_internal_box=\box109
 ) (./article.aux)
 \openout1 = `article.aux'.
 
-LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
-LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 93.
-LaTeX Font Info:    ... okay on input line 93.
+LaTeX Font Info:    Checking defaults for OML/cmm/m/it on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMS/cmsy/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OT1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for T1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for TS1/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for OMX/cmex/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for U/cmr/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PD1/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
+LaTeX Font Info:    Checking defaults for PU/pdf/m/n on input line 97.
+LaTeX Font Info:    ... okay on input line 97.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/epstopdf-pkg/epstopdf-base.sty
 Package: epstopdf-base 2020-01-24 v2.11 Base part for package epstopdf
 Package epstopdf-base Info: Redefining graphics rule for `.eps' on input line 485.
@@ -487,104 +587,116 @@ File: epstopdf-sys.cfg 2010/07/13 v1.3 Configuration of (r)epstopdf for TeX Live
 * \@reversemarginfalse
 * (1in=72.27pt=25.4mm, 1cm=28.453pt)
 
-Package hyperref Info: Link coloring OFF on input line 93.
+Package hyperref Info: Link coloring OFF on input line 97.
 (./article.out) (./article.out)
 \@outlinefile=\write3
 \openout3 = `article.out'.
 
-<fh_header.jpg, id=24, 597.651pt x 112.566pt>
+<fh_header.jpg, id=8, 597.651pt x 112.566pt>
 File: fh_header.jpg Graphic file (type jpg)
 <use fh_header.jpg>
-Package pdftex.def Info: fh_header.jpg  used on input line 95.
+Package pdftex.def Info: fh_header.jpg  used on input line 99.
 (pdftex.def)             Requested size: 514.72675pt x 96.94742pt.
-<Lukas_Gamp_grey.png, id=25, 96.36pt x 144.54pt>
+<Lukas_Gamp_grey.png, id=9, 96.36pt x 144.54pt>
 File: Lukas_Gamp_grey.png Graphic file (type png)
 <use Lukas_Gamp_grey.png>
-Package pdftex.def Info: Lukas_Gamp_grey.png  used on input line 120.
+Package pdftex.def Info: Lukas_Gamp_grey.png  used on input line 124.
 (pdftex.def)             Requested size: 96.36415pt x 144.54623pt.
 [1
 
 {/home/lukas/.TinyTeX/texmf-var/fonts/map/pdftex/updmap/pdftex.map}{/home/lukas/.TinyTeX/texmf-dist/fonts/enc/dvips/lm/lm-ec.enc} <./fh_header.jpg> <./Lukas_Gamp_grey.png>]
-LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 148.
+LaTeX Font Info:    Trying to load font information for OT1+lmr on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/ot1lmr.fd
 File: ot1lmr.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OML+lmm on input line 148.
+LaTeX Font Info:    Trying to load font information for OML+lmm on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omllmm.fd
 File: omllmm.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 148.
+LaTeX Font Info:    Trying to load font information for OMS+lmsy on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omslmsy.fd
 File: omslmsy.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
-LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 148.
+LaTeX Font Info:    Trying to load font information for OMX+lmex on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/lm/omxlmex.fd
 File: omxlmex.fd 2015/05/01 v1.6.1 Font defs for Latin Modern
 )
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <10.95> on input line 148.
+(Font)              <10.95> on input line 152.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <8> on input line 148.
+(Font)              <8> on input line 152.
 LaTeX Font Info:    External font `lmex10' loaded for size
-(Font)              <6> on input line 148.
-LaTeX Font Info:    Trying to load font information for U+msa on input line 148.
+(Font)              <6> on input line 152.
+LaTeX Font Info:    Trying to load font information for U+msa on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsa.fd
 File: umsa.fd 2013/01/14 v3.01 AMS symbols A
 )
-LaTeX Font Info:    Trying to load font information for U+msb on input line 148.
+LaTeX Font Info:    Trying to load font information for U+msb on input line 152.
 (/home/lukas/.TinyTeX/texmf-dist/tex/latex/amsfonts/umsb.fd
 File: umsb.fd 2013/01/14 v3.01 AMS symbols B
 )
-<KI_logo.png, id=43, 199.74625pt x 253.94875pt>
+<KI_logo.png, id=27, 199.74625pt x 253.94875pt>
 File: KI_logo.png Graphic file (type png)
 <use KI_logo.png>
-Package pdftex.def Info: KI_logo.png  used on input line 154.
+Package pdftex.def Info: KI_logo.png  used on input line 158.
 (pdftex.def)             Requested size: 102.94208pt x 130.87611pt.
-[1 <./KI_logo.png>]
-<article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=67, 1228.59pt x 1951.29pt>
+[1 <./KI_logo.png>] [2]
+<article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf, id=60, 1228.59pt x 1951.29pt>
 File: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf Graphic file (type pdf)
 <use article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>
-Package pdftex.def Info: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf  used on input line 176.
-(pdftex.def)             Requested size: 386.03307pt x 613.11134pt.
-[2] [3 <./article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>] [4]
-<screenshots/numbers_default.png, id=117, 1831.84375pt x 981.6675pt>
+Package pdftex.def Info: article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf  used on input line 189.
+(pdftex.def)             Requested size: 172.39511pt x 273.804pt.
+[3
+
+ <./article_files/figure-latex/data-processing-pipeline-flowchart-vertical-1.pdf>]
+<screenshots/numbers_default.png, id=96, 1831.84375pt x 981.6675pt>
 File: screenshots/numbers_default.png Graphic file (type png)
 <use screenshots/numbers_default.png>
-Package pdftex.def Info: screenshots/numbers_default.png  used on input line 203.
+Package pdftex.def Info: screenshots/numbers_default.png  used on input line 220.
 (pdftex.def)             Requested size: 514.70166pt x 275.82368pt.
-<screenshots/stat_HC_HIV_noMets.png, id=120, 990.70125pt x 1763.58875pt>
+[4
+
+ <./screenshots/numbers_default.png>]
+<screenshots/stat_HC_HIV_noMets.png, id=105, 990.70125pt x 1763.58875pt>
 File: screenshots/stat_HC_HIV_noMets.png Graphic file (type png)
 <use screenshots/stat_HC_HIV_noMets.png>
-Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 219.
-(pdftex.def)             Requested size: 308.82242pt x 549.74771pt.
-[5 <./screenshots/numbers_default.png>] [6 <./screenshots/stat_HC_HIV_noMets.png>] [7] (./article.bbl [8]) [9] 
+Package pdftex.def Info: screenshots/stat_HC_HIV_noMets.png  used on input line 239.
+(pdftex.def)             Requested size: 279.84338pt x 498.16093pt.
+
+Overfull \vbox (9.1797pt too high) has occurred while \output is active []
+
+[5
+
+ <./screenshots/stat_HC_HIV_noMets.png>] (./article.bbl [6
+
+]) [7] 
 enddocument/afterlastpage: lastpage setting LastPage.
 (./article.aux)
  ***********
 LaTeX2e <2023-06-01> patch level 1
-L3 programming layer <2023-06-30>
+L3 programming layer <2023-08-11>
  ***********
 Package rerunfilecheck Info: File `article.out' has not changed.
-(rerunfilecheck)             Checksum: 7DBB9C24C35FBE8E40D3257F42C0079D;612.
+(rerunfilecheck)             Checksum: 10ACE95021128359F9F895650A0D17CE;103.
  )
 (\end occurred inside a group at level 2)
 
-### semi simple group (level 2) entered at line 140 (\begingroup)
+### semi simple group (level 2) entered at line 144 (\begingroup)
 ### semi simple group (level 1) entered at line 74 (\begingroup)
 ### bottom level 
 Here is how much of TeX's memory you used:
- 12226 strings out of 477197
- 186601 string characters out of 5813669
- 1927244 words of memory out of 5000000
- 32969 multiletter control sequences out of 15000+600000
+ 12613 strings out of 477149
+ 194164 string characters out of 5813031
+ 1928254 words of memory out of 5000000
+ 33396 multiletter control sequences out of 15000+600000
  587639 words of font info for 59 fonts, out of 8000000 for 9000
  14 hyphenation exceptions out of 8191
- 75i,6n,79p,1221b,8624s stack positions out of 10000i,1000n,20000p,200000b,200000s
+ 75i,6n,79p,1221b,8993s stack positions out of 10000i,1000n,20000p,200000b,200000s
 </home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmbx12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr10.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmr12.pfb></home/lukas/.TinyTeX/texmf-dist/fonts/type1/public/lm/lmri10.pfb>
-Output written on article.pdf (10 pages, 600606 bytes).
+Output written on article.pdf (8 pages, 600268 bytes).
 PDF statistics:
- 187 PDF objects out of 1000 (max. 8388607)
- 152 compressed objects within 2 object streams
- 39 named destinations out of 1000 (max. 500000)
- 71 words of extra memory for PDF output out of 10000 (max. 10000000)
+ 155 PDF objects out of 1000 (max. 8388607)
+ 122 compressed objects within 2 object streams
+ 29 named destinations out of 1000 (max. 500000)
+ 39 words of extra memory for PDF output out of 10000 (max. 10000000)
 

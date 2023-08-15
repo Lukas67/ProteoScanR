@@ -22,6 +22,11 @@ header-includes:
   - \usepackage{dcolumn}
   - \usepackage{natbib}\bibliographystyle{agsm}
   - \usepackage[nottoc, numbib]{tocbibind}
+  - \usepackage{pdflscape}
+  - \newcommand{\blandscape}{\begin{landscape}}
+  - \newcommand{\elandscape}{\end{landscape}}
+  - \usepackage{multicol,blindtext}
+  
 
 bibliography: bibliography.bib
 ---
@@ -114,7 +119,14 @@ This project was performed at the systems virology lab at the Karolinska Institu
 \end{centering}
 
 \newpage
-# Introduction
+
+\begin{centering}
+
+{\bf Introduction}
+
+\end{centering}
+
+
 The central dogma underpins genetic information's transformation into functional proteins \citep{Cobb2017}. Proteins have various functions, such as providing structural integrity, catalyzing chemical reactions, and regulating cellular functions \citep{Karahalil2016}. Omics fields like genomics, transcriptomics, proteomics, and metabolomics provide an holistic  view of biomolecules. These proteins are comprehensively studied through proteomics to unveil intricate biological networks.
 
 Higher organisms are composed of specialized cells organized into tissues, such as skin, muscle, and blood. Each tissue consists of cells with specific functions, resulting in variations in protein expression. Bulk proteomics is a technique used to analyze the protein composition of a sample, which in case of a tissue contains various cell types. Taking tissue samples can lead to an averaging effect across the entire cellular ensemble, making it difficult to discern specific cell types. To overcome this limitation, cell sorting techniques were employed and enabled targeted single-cell proteomics (SCP) \citep{Liou2015, Sutermaster2019}. Single-cell proteomics reflects the protein ensemble of a specific cell type at a particular time, providing a focused perspective on the studied field compared to bulk methods \citep{Maes2020}.
@@ -123,7 +135,15 @@ Mass spectrometry enables qualitative and quantitative analysis of the entire re
 
 With advancements in mass spectrometry technology and computational methods, proteomic analysis has emerged as a powerful tool for investigating complex protein samples. However, analyzing proteomic data poses challenges in data processing, statistical analysis, and interpretation. This thesis aims to address these challenges by exploring computational methods for downstream analysis of proteomics data. It is important to acknowledge that downstream analysis in proteomics lacks a standardized approach, and the selection of computational methods depends on the specific dataset and research objectives. ProteoScanR comprises a series of steps to streamline the data in an interactive environment, called Proteomics Workbench. This user-friendly interface will enable researchers, including those with limited computational expertise, to navigate and comprehend the data effectively.
 
-# Materials and methods
+\newpage
+\blandscape
+\begin{centering}
+
+{\bf Materials and methods}
+
+\end{centering}
+\begin{multicols}{3}
+
 ```{r data-processing-pipeline-flowchart-vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="75%", fig.align='center', fig.cap= "Flowchart presenting the processing by ProteoScanR. Gold: techniques which involve explanatory data analysis. Yellow: Adjustable features. Blue: Inputs"}
 library(Gmisc, quietly = TRUE)
 library(glue)
@@ -331,8 +351,8 @@ output
 # dim_red_actions
 ```
 
-\newpage
-The flowchart (figure \@ref(fig:data-processing-pipeline-flowchart-vertical)) describes the processes involved in the ProteoScanR pipeline. 
+
+The flowchart describes the processes involved in the ProteoScanR pipeline. 
 ProteoScanR initially filters the data by false discovery rate (FDR) converted to q-value (provided by MaxQuant \citep{Cox2011}), according to precursor ion fraction (PIF) \citep{Tannous2020, Specht2021} and subsequently aggregates peptide spectrum matches to peptides. 
 
 The quality control continues with calculating median reporter ion intensity (RI), median coefficient of variation (CV) and filtering according to cutoffs. Subsequently peptides with high missing rate are removed and peptides are aggregated to proteins. 
@@ -343,54 +363,47 @@ Statistical testing involves differential expression analysis with the R package
 
 After finding differentially expressed proteins, enrichment elucidates them in biological context by finding over represented proteins. The protein enrichment analysis is employed in selected contexts such as pathways, cell-types or custom ontologies. The pathway enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the entire “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. For custom ontologies the protein enrichment analysis undertaken with the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which is either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties. 
 
+\end{multicols}
+\elandscape
 
 \newpage
-# Results
+\begin{centering}
+
+{\bf Results}
+
+\end{centering}
+
 ```{r ui-numbers-default, echo=F, out.width="100%", fig.align='center', fig.cap="Barchart showing the number of peptide spectrum matches, peptides and proteins"}
 knitr::include_graphics("screenshots/numbers_default.png")
 ```
 
 The ProteoScanR pipeline is employed in the proteomics workbench. Users find settings for the pre-processing on the left hand side of the interface (see figure \@ref(fig:ui-numbers-default)). The main panel shows the data in different aspects and helps the user finding a good fit for the methods applied to their individual dataset. 
 
-<!-- As seen in figure \@ref(fig:ui-numbers-default) the aspects shown in the main panel include: -->
-<!-- \spacing{1} -->
-<!-- \begin{scriptsize} -->
-<!-- \begin{itemize} -->
-<!-- \item \textbf{Overview:} Summary showing the individual processing steps of the analysis pipeline -->
-<!-- \item \textbf{Summary Barplot:} Barchart showing the number of peptide spectrum matches, peptides and proteins -->
-<!-- \item \textbf{Normalization validation:} Mutual information intra- and inter- groupwise -->
-<!-- \item \textbf{Reporter ion intensity:} Includes factor selection to create boxplots indicating a factor -->
-<!-- \item \textbf{Median coefficient of variation and correlation:} Variation of peptides for razor proteins and correlation heatmap for protein expression -->
-<!-- \item \textbf{Dimensionality reduction:} Analysis with principle component analysis (PCA) and Uniform Manifold Approximation and Projection (UMAP) -->
-<!-- \item \textbf{Feature wise output:} Visualization of an individual protein over the course of the pipeline. -->
-<!-- \item \textbf{Statistics module:} Differential expression analysis -->
-<!-- \item \textbf{Pathway enrichment:} Over-representation analysis for differentially expressed proteins in the context of pathways. -->
-<!-- \item \textbf{Protein set ontology enrichment:}  Over-representation analysis for differentially expressed proteins in a user selected context. -->
-<!-- \end{itemize} -->
-<!-- \end{scriptsize} -->
-<!-- \spacing{1.5} -->
-
-<!-- \newpage -->
-<!-- ```{r ui-mutual-info-quant-norm, echo=F, out.width="100%", fig.align='center', fig.cap="Mutual information with quantile normalization"} -->
-<!-- knitr::include_graphics("screenshots/mutual_info_quant_norm.png") -->
-<!-- ``` -->
-
 Beforehand normalization was tested with applying logarithmic transformation to the base 2 and performing column median row mean normalization (not shown in figure). The mutual information (MI) within the healthy control (HC) group's sample type exhibited a reduction towards the lower edge of the interquartile range (IQR).
 
 After performing a logarithmic transformation to the base 2 and quantile normalization, the mutual information (MI) within the healthy control (HC) group's sample type exhibits a minor reduction in the interquartile range (IQR). However, it should be noted that there is an increase in the number of outliers compared to the raw data.
 When switching to the quantile normalization the loss of mutual information between sample types decreased. Therefore the advised normalization technique for this particular data set would be the quantile normalization compared to the default method. 
 
-```{r ui-stat-HC-HIV-noMets, echo=F, out.width="60%", fig.align='center', fig.cap="Statistics module in portrait mode"}
+\blandscape
+\begin{multicols}{2}
+
+```{r ui-stat-HC-HIV-noMets, echo=F, out.width="80%", fig.align='center', fig.cap="Statistics module in portrait mode"}
 knitr::include_graphics("screenshots/stat_HC_HIV_noMets.png")
 ```
 
 By comparing the log10-transformed and quantile-normalized expression values between the HIV group without metabolic syndrome and the healthy control (HC) group (see figure \@ref(fig:ui-stat-HC-HIV-noMets)), six differentially expressed proteins were identified. The Venn diagram indicates significantly up/down regulated proteins. The Volcano represents -log10(adjusted p values) against log2 fold changes (logFC).
-<!-- These proteins include P68133 (Actin, alpha skeletal muscle), P47914 (60S ribosomal protein L29), P25311 (Zinc-alpha-2-glycoprotein), O60506 (Heterogeneous nuclear ribonucleoprotein Q), P31153 (S-adenosylmethionine synthase isoform type-2), and P46777 (60S ribosomal protein L5). The remaining 652 proteins have been identified as not significantly up/down regulated in the comparison analysis. These proteins did not exhibit statistically significant differences in expression between the compared groups or conditions. -->
 
-# Discussion and conclusion
+\begin{centering}
+
+{\bf Discussion and conclusion}
+
+\end{centering}
+
 The Proteomics Workbench interface and the ProteoScanR pipeline demonstrated how interactive engagement with the data not only enhances the experience of biologists but also improves the comprehension of the underlying significance of a biological dataset. By utilizing an entropy-based visualization approach, the conservation of information can be validated, allowing users to select appropriate methods and adjust thresholds, cutoffs, and techniques accordingly. With the selection of factors to indicate over multiple plots, biases can be identified on various levels. Additionally, the analysis can be examined on an individual protein basis, enabling the identification of suspicious results and closer validation of significant candidates. The statistics module provides users with a simple tool to assess and visualize the results, offering clarity to dense scatter plots through hover functions. Enrichment mapping links statistically significant proteins to either the KEGG pathway database or individual research data sets, depending on user selection. These final results place the data in a biological context, which can be explored interactively in graphical visualizations.
 
-In conclusion, the ProteoScanR pipeline and Proteomics Workbench interface provide a user-friendly and efficient approach for proteomic data analysis, enabling biologists to address their research questions and validate computations. Future perspectives include deploying the application on a server for global accessibility, leveraging artificial intelligence techniques, and implementing clustering approaches to further enhance annotation and understanding of cellular heterogeneity and functional characteristics.
+
+\end{multicols}
+\elandscape
 
 \newpage
 ```{r biblio, child = 'bibliography.Rmd'}
