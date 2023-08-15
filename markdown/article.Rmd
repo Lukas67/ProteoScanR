@@ -22,6 +22,9 @@ header-includes:
   - \usepackage{dcolumn}
   - \usepackage{natbib}\bibliographystyle{agsm}
   - \usepackage[nottoc, numbib]{tocbibind}
+  - \usepackage{pdflscape}
+  - \newcommand{\blandscape}{\begin{landscape}}
+  - \newcommand{\elandscape}{\end{landscape}}
 
 bibliography: bibliography.bib
 ---
@@ -123,6 +126,8 @@ Mass spectrometry enables qualitative and quantitative analysis of the entire re
 
 With advancements in mass spectrometry technology and computational methods, proteomic analysis has emerged as a powerful tool for investigating complex protein samples. However, analyzing proteomic data poses challenges in data processing, statistical analysis, and interpretation. This thesis aims to address these challenges by exploring computational methods for downstream analysis of proteomics data. It is important to acknowledge that downstream analysis in proteomics lacks a standardized approach, and the selection of computational methods depends on the specific dataset and research objectives. ProteoScanR comprises a series of steps to streamline the data in an interactive environment, called Proteomics Workbench. This user-friendly interface will enable researchers, including those with limited computational expertise, to navigate and comprehend the data effectively.
 
+\newpage
+\blandscape
 # Materials and methods
 ```{r data-processing-pipeline-flowchart-vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="75%", fig.align='center', fig.cap= "Flowchart presenting the processing by ProteoScanR. Gold: techniques which involve explanatory data analysis. Yellow: Adjustable features. Blue: Inputs"}
 library(Gmisc, quietly = TRUE)
@@ -331,7 +336,6 @@ output
 # dim_red_actions
 ```
 
-\newpage
 The flowchart (figure \@ref(fig:data-processing-pipeline-flowchart-vertical)) describes the processes involved in the ProteoScanR pipeline. 
 ProteoScanR initially filters the data by false discovery rate (FDR) converted to q-value (provided by MaxQuant \citep{Cox2011}), according to precursor ion fraction (PIF) \citep{Tannous2020, Specht2021} and subsequently aggregates peptide spectrum matches to peptides. 
 
@@ -343,6 +347,7 @@ Statistical testing involves differential expression analysis with the R package
 
 After finding differentially expressed proteins, enrichment elucidates them in biological context by finding over represented proteins. The protein enrichment analysis is employed in selected contexts such as pathways, cell-types or custom ontologies. The pathway enrichment analysis is performed using the R Bioconductor package clusterProfiler \citep{Wu2021}. The analysis utilizes the entire “Kyoto Encyclopedia of Genes and Genomes” (KEGG) database, which is accessed through a function that maps the UniProt IDs to corresponding pathways. For custom ontologies the protein enrichment analysis undertaken with the R bioconductor package piano \citep{Vaeremo2013}. In opposite to the pathway enrichment, piano maps proteins to a pre-selected gene collection set, which is either downloaded from gsea-msigdb.org or custom made for the particular experiment and explains conditions, phenotype or other desired properties. 
 
+\elandscape
 
 \newpage
 # Results
