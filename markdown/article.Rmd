@@ -410,7 +410,4 @@ The Proteomics Workbench interface and the ProteoScanR pipeline demonstrates how
 ```{r biblio, child = 'bibliography.Rmd'}
 ```
 
-<!-- \newpage -->
-<!-- \listoffigures -->
-
 
