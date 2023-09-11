@@ -5,19 +5,61 @@ output: pdf_document
 # Materials and Methods
 
 ## Wetlab - Materials and Methods
-For testing and development of the ProteoScanR pipeline the following materials and methods were performed. For the sample preparation protocol see appendix. 
+For testing and development of the ProteoScanR pipeline the following materials and methods were applied. 
 
 ### Celltypes
-Macrophages from 12 healthy donors and 12 HIV patients with metabolic syndrome and 12 HIV patients without metabolic syndrome. Cell sorting was performed with FACSAria Fusion (BD Biosciences). 
+Macrophages from 12 healthy donors and 12 HIV patients with metabolic syndrome and 12 HIV patients without metabolic syndrome were isolated. Cell sorting was performed with FACSAria Fusion (BD Biosciences) by auto fluorescence. 
+
+#### Cells sorting protocol
+\begin{enumerate}
+\item 96 single cells from each donor were sorted into a single plate. Each well contained a single cell. As such, 12 different plates containing single cells from 12 different donors were prepared. 
+\item Carrier plates were also prepared. In the carrier plates, 100 cells from one donor were sorted into each well. 24 such wells (3 columns) were prepared for each donor.
+\end{enumerate}
+
 
 ### Digestion
 Protein digestion was performed using trypsin (Promega, Madison, WA) buffered in Triethylammonium bicarbonate buffer (TEAB). Reagents were handled with MANTIS automatic dispenser (Formulatrix, Bedford, MA).
 
+#### Digestion protocol
+\begin{enumerate}
+\item Prepare 25 ng/ $\mu$L trypsin in 100 mmol/L Triethylammonium bicarbonate buffer (TEAB).
+\item Add 25 ng/$\mu$L trypsin: 2 $\mu$L to the carrier samples, 1 $\mu$L to the single cell samples.
+\item Seal the plates.
+\item Centrifuge (2 min at 120 G).
+\item Incubate overnight at 37 °C.
+\end{enumerate}
+
+
 ### Labeling
-Samples of test dataset were labeled with 12-plex TMTpro (Thermo Fisher) in anhydrous acetonitril (ACN) solution.
+Samples of the test data set were labeled with 12-plex TMTpro (Thermo Fisher) in anhydrous acetonitril (ACN) solution.
+
+#### Labeling protocol
+\begin{enumerate}
+\item Let the TMTpro labels come to room temperature so that all the condensation on the tube is gone. Dissolve the TMTpro reagents in anhydrous acetonitril (ACN) to obtain a concentration of 10 $\mu$g/$\mu$L.
+\item Add 1 $\mu$L of TMTpro reagents according to the tables. For one set of plates, you will need 16 $\mu$L of each label. It is recommended to aliquot a slightly larger volume, of around 20 $\mu$L.
+\item Seal the plates.
+\item Centrifuge for 2 minutes at 120 G.
+\item Incubate for 1 hour at room temperature.
+\item Prepare a 5% hydroxylamine solution in water.
+\item Add 1 $\mu$L of the 5% hydroxylamine solution to each well.
+\item Seal the plates.
+\item Centrifuge for 2 minutes at 120 G.
+\item Incubate for 1 hour at room temperature.
+\item Cover the plates with cap strips.
+\end{enumerate}
 
 ### Pooling
 Carrier proteome was added to the 36 TMTpro sets before pooling sample types for each of the 36 MS-runs.
+
+#### Pooling protocol
+\begin{enumerate}
+\item Wash a 10 $\mu$L glass microsyringe five times with ACN.
+\item Use the microsyringe to combine TMTpro-labeled samples into 36 LC autosampler vials with built-in glass inserts.
+\item Combine six carrier wells from each sample and add the carrier proteome to the 36 TMTpro sets.
+\item Combine the first set by taking well A1 from the first single-cell plate, well A2 from the second plate, well A3 from the third plate, and so on. For the next set, take well A1 from the second plate, well A2 from the third plate, and so on. Combine 12 sets following this scheme. Combine the next 24 sets by following the same scheme for rows B and C.
+\item Vacuum centrifuge the combined sets to dryness.
+\item Dissolve the dried samples in 7 $\mu$L of buffer A and transfer them to LC-MS/MS for further analysis.
+\end{enumerate}
 
 ### Liquid chromatography
 In order to separate peptides according to their chemical properties, size or species a liquid chromatography (LC) is recommended before ionization. For the reference data used for developing the pipeline the following intrumentation was used. 
@@ -36,6 +78,7 @@ For the reference data used for developing the pipeline an Orbitrap™ Fusion™
 ## Drylab - Computational methods
 
 ### Hardware
+Data was analysed using commercially available hardware, find details below:
 Lenovo Laptop X360 with:
 Intel(R) Core(TM) i5-6200U CPU @ 2.30GHz
 8 GB RAM
@@ -76,7 +119,7 @@ For the data-acquisition Thermo Fisher acquisition software was used.
 Raw-file analysis of the data was done with  MaxQuantCmd 2.2.0.0 \citep{Cox2008}.
 The default settings were used. TMTpro labels were corrected according to the isotopical distribution of the Lot-number provided by Thermo Fisher.
 
-```{r data_processing_pipeline_flowchart_vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="80%", fig.align='center', fig.cap="Flowchart presenting the processing by ProteoScanR"}
+```{r data-processing-pipeline-flowchart-vertical, echo=FALSE, fig.height=27, fig.width=17, out.width="80%", fig.align='center', fig.cap= "Flowchart presenting the processing by ProteoScanR"}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -123,7 +166,7 @@ quality_control_2 <- boxGrob("quality control 2",
                              box_gp = plot_box_setting,
                              txt_gp = default_txt_setting)
 
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde coefficient of variation to razor proteins\npeptide missing rate",
                        box_gp = opts_box_setting,
                        txt_gp = opts_txt_setting,
                        just="center")
@@ -330,7 +373,7 @@ quality_control_2 <- boxGrob("quality control 2",
                              box_gp = plot_box_setting,
                              txt_gp = default_txt_setting)
 
-qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde covariance to razor proteins\npeptide missing rate",
+qc2_content <- boxGrob("filter by:\nreporter ion intensity cutoff\npepitde coefficient of variation to razor proteins\npeptide missing rate",
                        box_gp = opts_box_setting,
                        txt_gp = opts_txt_setting,
                        just="center")
@@ -508,7 +551,7 @@ Example fo basic parameters and derivations include:
 
 ### Object oriented programming
 
-In order to streamline the analysis of multiple experiments, object oriented programming was applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis \citep{Vanderaa2021}.
+In order to streamline the analysis of multiple experiments and software development, object oriented programming was applied. The approach in R is to create a so called Q-feature object, which contains all variables and metadata in a hierarchical structure. The structure enables sub setting for further analysis \citep{Vanderaa2021}.
 
 ### Zero values
 Peptides with low abundance are often set to zero during analysis. However, assigning a value of zero may incorrectly suggest that the sample does not contain the respective peptide. Given that it is highly unlikely for a biological cell of a comparable type and function to not contain a particular protein, replacing the zero value with "not applicable" (NA) is crucial for understanding and interpreting MS data. NA values will be managed in missing value handling later on the protein level.
@@ -520,19 +563,19 @@ Peptide sequences matching to the reverse protein sequences (=decoy database) ar
 During mass spectrometry, the ions detected in MS1 are further fragmented through collision during multiple MS runs. The resulting product ions are derived from precursor ions (also known as mother ions or parental ions). Contaminant peptides can co-migrate in this process and were distinguished by the lower fraction of their respective precursor ions \citep{Tannous2020}. These peptides need to be filtered out during the analysis pipeline. A cutoff value, referenced in the SCoPE2 pipeline \citep{Specht2021}, is applied in the user interface, but it can be adjusted.
 
 ### Filter by q-value
-The next step for quality control is the exclusion of samples with a high false discovery rate (FDR). When applying multiple statistical testing (e.g. t-Test) the obtained p-values can be considered as biased, because the probability to observe a significant will iteratively increase with each test performed. Corrections in statistics are an approach to compensate for the multiplicity of testing. There are many ways to do this compensation like the Bonferroni method or Benjamini-Hochberg`s FDR. In Mass spectrometry the common “way to go” is calculating a false discovery rate, by dividing false PSMs (=hit of the decoy database) through the total number of PSMs above the peptide-spectrum matching score. The peptides spectrum matching score is defined as $-10 * log(p)$. Whereas the p-value is defined that the hit is done by chance. The calculation of the score is highly dependent on the data acquisition method used. MaxQuant uses Andromeda, an integrated search engine. Proteome Discoverer from Thermo Fisher utilizes different engines such as Mascot or Minora. As published by J.Cox in 2011 Mascot and Andromeda showed similar performance when comparing FDR values as a function of coverage. However the observed performance can be lower when dealing with a decreased coverage \citep{Cox2011}.The threshold for accepting an FDR of an individual PSM is described as q-value. 
+The next step for quality control is the exclusion of spectra with a high false discovery rate (FDR). When applying multiple statistical testing (e.g. t-Test) the obtained p-values can be considered as biased, because the probability to observe a significant result will iteratively increase with each test performed. Corrections in statistics are an approach to compensate for the multiplicity of testing. There are many ways to do this compensation like the Bonferroni method or Benjamini-Hochberg`s FDR. Many search engines face that problem by calculating the false discovery rate, by dividing false PSMs (=hit of the decoy database) with the total number of PSMs above the peptide-spectrum matching score. The peptides spectrum matching score is defined as $-10 * log(p)$. Whereas the p-value is defined that the hit is done by chance. The calculation of the score is highly dependent on the data acquisition method used. MaxQuant uses Andromeda \citep{Cox2011}, an integrated search engine. Proteome Discoverer from Thermo Fisher utilizes different engines such as Mascot \citep{Brosch2009}. As published by J.Cox in 2011 Mascot and Andromeda showed similar performance when comparing FDR values as a function of coverage. However the observed performance can be lower when dealing with a decreased coverage \citep{Cox2011}.The threshold for accepting an FDR of an individual PSM is described as q-value. 
 
 ### Peptide spectrum match (PSM) aggregation to peptides 
-In data science, aggregation refers to a row-wise operation that merges data based on a particular column using a specific function. In the context of processing from PSMs to unique peptides, the desired column is the PSM sequence. To account for different distributions across multiple assays, the median of the channel is used as the function to aggregate multiple matches into one.
+In data science, aggregation refers to a row-wise operation that merges data based on a particular column using a specific function. In the context of processing of PSMs to unique peptides, the desired column is the peptide sequence. To account for different distributions across multiple assays, the median of the channel is used as the function to aggregate multiple matches into one.
 
 ### Join assays
-Sample size is often a limiting factor in hypothesis testing. A strict quality control and the fact that TMT reagents are only available up to 18-plex can reduce the number of observed samples below the critical threshold, leading to an early end of analyses. To overcome this limitation, the provided software is capable of processing multiple runs simultaneously, allowing for testing of multiple batches and increasing the number of samples that can be included in the analysis. For further processing the runs are joined in one object at the peptide level.
+Sample size is often a limiting factor in hypothesis testing. A strict quality control and the fact that TMT reagents are only available up to 18-plex can reduce the number of observed samples below the critical threshold, leading to diminished statistical power. To overcome this limitation, the provided software is capable of processing multiple runs simultaneously, allowing for testing of multiple batches and increasing the number of samples that can be included in the analysis. For further processing the runs are joined in one object at the peptide level.
 
 ### Calculate median reporter ion intensity (RI) and filter
-Columns which do not meet the desired intensity can be filtered by a threshold set on the RI. The median RI can also be used to check if an entire channel has a lower detection level. This can be due two reasons. One is the expression level of the given proteins in a cell. Meaning, that the expression of the observed cell type is simply lower than the other type. Another one could be a spillage of TMT detection in other channels due incorrect or missing correction of the TMT isotopes. The correction values can be found on the vendor`s webpage (in this case Thermo Fisher) and correction needs to be set up in MaxQuant.
+Columns which do not meet the desired intensity can be filtered by a threshold set on the RI. The median RI can also be used to check if an entire channel has a lower detection level. This can be due two reasons. One is the expression level of the given proteins in a sample. Meaning, that the expression of the observed sample type is simply lower than in the other type. Another one could be a spillage of TMT detection in other channels due incorrect or missing correction of the TMT isotopes. The correction values can be found on the vendor`s webpage (in this case Thermo Fisher) and correction needs to be set up in MaxQuant.
 
 ### Calculate median coefficient of variation (CV) and filter
-Depending having a bulk sample or single-cell sample choosing a minimum of observed peptides and a cutoff value for the CV, changes the level of confidence in the peptide data. The coefficient of variation of a peptide is considered as the ratio of the standard deviation to the mean and describes the relationship of the observed peptide signal over multiple proteins (=razor proteins). Peptides having a high coefficient of variation over many razor proteins are considered as noise and need to be filtered out before statistical analysis.
+Depending having a bulk sample or single-cell sample choosing a minimum of observed peptides and a cutoff value for the CV, changes the level of confidence in the peptide data. The coefficient of variation of a peptide is defined as the ratio of the standard deviation to the mean and describes the relationship of the observed peptide signal over multiple proteins (=razor proteins). Peptides having a high coefficient of variation over many razor proteins are considered as noise and need to be filtered out before statistical analysis.
 
 ### Remove peptides with high missing rate
 Although missing value imputation can be performed during the analysis of multiple batches, peptides with missing detections across channels can be problematic for quantification. The proteomic composition of a biological sample is similar between replicates and even across groups. However, the threshold of missingness (described as a fraction of the row) can be set in the user interface and adjusted.
@@ -545,7 +588,7 @@ Data transformation applies a function to each value of a matrix or array, so th
 $$
 y_i = f(x_i)
 $$
-Depending on the distribution of the values in the observed expression set, different transformations can be applied to fulfill assumptions for statistical testing. In the shiny application, various procedures are implemented and can be further expanded upon request from the user. The macrophage analysis done by Specht et al. mentioned in their SCoPE2 publication \citep{Specht2021} uses the logarithm to the base 2 to spread a compacted distribution and remove skewness in the dataset. This transformation was used as a reference when comparing methods. However, using the logarithm to the base 10 may be an easy way to recalculate expression data in the mind and will also be facilitated by other transformation methods such as the boxcox method, which is also implemented in the application.
+Depending on the distribution of the values in the observed expression set, different transformations can be applied to fulfill assumptions for statistical testing. In the shiny application, various procedures are implemented and can be further expanded upon request from the user. The macrophage analysis done by Specht et al. mentioned in their SCoPE2 publication \citep{Specht2021} uses the logarithm to the base 2 to spread a compacted distribution and remove skewness in the dataset. This transformation was used as a reference when comparing methods. However, using the logarithm to the base 10 has the same effect and improves the interpretability of the values. Furthermore the log10 transformation will also be facilitated by other transformation methods such as the boxcox method, which is also implemented in the application.
 When observing a wide distribution of small and large values of the expression set in a histogram, a square root transformation can help increase the variability of smaller values and decrease the variability of larger values.
 Depending on the distribution, the user has to decide which transformation to consider and verify that statistical assumptions are met after application with visualizations such as histograms, qq-plots, and MA-plots.
 For statistically inexperienced users, the boxcox transformation can help with this decision. Developed in 1964 by Box and Cox \citep{Sakia1992}, this method applies a linear model against 1 on the data to determine the statistical parameter lambda by the maximum likelihood method. The log-likelihood method takes the 95% confidence interval for the parameter lambda and the final lambda is chosen as the value with the highest log-likelihood value. 
@@ -570,7 +613,7 @@ The term normalization is ambiguous in data-science and will be explained briefl
 Depending on the algorithms later used in the data processing, the method of choice for normalization can change the results significantly. The K-nearest neighbor (K-NN) clustering algorithm, for instance relies on the distances between distinct data points by minimizing variance of the squared euclidean distances. This method will be applied in the missing value imputation, which will be the next step applied to the data. 
 The first normalization method available in the user interface is column-wise median and row-wise mean normalization. This method was chosen by Specht et al in the SCoPE2 publication 2021 \citep{Specht2021} and worked as a reference during the development process to benchmark other methods. When dividing each value of an expression set by the median of the particular column, the procedure is considered as a column-wise median normalization. Although the mean-normalization works the same way but takes the mean as the second variable. In the analysis pipeline both procedures were applied on the dataset. However when the logarithm as the transformation method was chosen as transformation method, ProteoScanR automatically switches from a division to a subtraction, since:
 $\log_a \left(\frac{u}{v}\right)=\log_a u-\log_a v$. After applying this normalization method, each value can be interpreted as a distance or fraction of the mean or median of the corresponding column or row, enabling fair comparisons between features and samples.
-The second method for normalization included is the CONSTANd method, which was proven suitable for relative quantification in the field of proteomics \citep{Maes2016, VanHoutven2021}, but can also be applied on RNAseq data. CONSTANd uses a technique called matrix raking, which employs the RAS algorithm. The expression set reflects the non-negative real $(m, n)$ matrix $A$ were the bi proportional constrained matrix problem will be solved by finding the $(m, n)$ matrix $B$ which equals to $diag(x) * A *diag(y)$ . Whereas $x \in \mathbb{R}^{m}$ and $y \in \mathbb{R}^{n}$. The solution to this problem involves finding the row sum of $B=u_i$ and the column sum of $B=v_j$, where $i$ and $j$ denote the row and column indices of the matrix, respectively \citep{Bacharach1965}. In other words, the matrix will be alternatively manipulated on rows and columns until the mean of both equals 1. In order to apply the method and yield true results, one has to consider 3 major assumptions between sample types. This assumption can be observed in the MA-plot which indicates the differences of two samples. Given the intensities of two samples, $R$ and $G$, visualized on a graph with the x-axis as $M=\log_2(\frac{R}{G})$ and the y-axis as $A=\frac{1}{2}\log_2(RG)$. A comparison between all sample types of identically processed sets is needed before calculation and the assumptions must be fulfilled.
+The second method for normalization included is the CONSTANd method, which was proven suitable for relative quantification in the field of proteomics \citep{Maes2016, VanHoutven2021}, but can also be applied on RNAseq data. CONSTANd uses a technique called matrix raking, which employs the RAS ($K=RAS$) algorithm. The expression set reflects the non-negative real $(m, n)$ matrix $A$ were the bi proportional constrained matrix problem will be solved by finding the $(m, n)$ matrix $K$ which equals to $diag(x) * A *diag(y)$, so that $K=diag(x) * A *diag(y)= RAS$. Whereas $x \in \mathbb{R}^{m}$, $y \in \mathbb{R}^{n}$ and $R$ denotes for the row multiplier and $S$ for the column multiplier. The solution to this problem involves finding the row sum of $K=u_i$ and the column sum of $K=v_j$, where $i$ and $j$ denote the row and column indices of the matrix, respectively \citep{Bacharach1965}. In other words, the matrix will be alternatingly manipulated on rows and columns until the mean of both equals 1. In order to apply the method and yield true results, one has to consider 3 major assumptions between sample types. These assumption can be observed in the MA-plot which indicates the differences of two samples. Given the intensities of two samples, $R$ and $G$, visualized on a graph with the x-axis as $M=\log_2(\frac{R}{G})$ and the y-axis as $A=\frac{1}{2}\log_2(RG)$. A comparison between all sample types of identically processed sets is needed before calculation and the assumptions must be fulfilled.
 
 \begin{itemize}
 \item{\textbf{1}} \textbf{The majority of proteins are not differentially expressed}
@@ -589,12 +632,12 @@ Another method developed in the application is the quantile normalization. Quant
 However if the dataset already consists of balanced features and samples or the user wants to benchmark the methods applied, normalization can be skipped also, by setting to "none".
 
 ### Missing value handling
-When analyzing multiple batches simultaneously, it is possible to encounter situations where a particular protein is not detected in one of the batches. From a biological perspective, it is highly unlikely that a cell completely lacks a single protein, as it would imply a complete loss of function for that protein. Therefore, an intensity value of 0 is close to impossible for most proteins. In order to handle this dark space in the expression set, several methods can be chosen in the application. 
-A variety of function employs replacing the missing values with the mean or median of the rest of the matrix. This procedure introduces no bias in the data if the missingness is low, although differential expression for the sample carrying the missing feature can not be expected as well. Even a more conservative approach is dropping the rows for the feature with the missing value in one of the observed samples. 
-A common practice in proteomics is utilizing the K-nearest neighbor algorithm (=KNN), which imputes the missing values by a euclidean metrics of the neighboring values in the columns where the feature is not missing. $K$ denotes for the count of neighboring values of a gene and can be selected upon preference. The euclidean distance between two points is defined as $d = \sqrt{a^2 * b^2}$, the $K$ nearest neighbors average value will be assigned to the intensity of the missing feature. Since the average is a statistical metric which can be biased easily by skewed distributions, normalization is an important task before performing missing value imputation. KNN was benchmarked  for the regression of protein abundance intensities and showed an Area under the Curve (AUC) above 0.7 when testing on a human proteome test set \citep{Lan2013}.
+When analyzing multiple batches simultaneously, it is possible to encounter situations where a particular protein is not detected in one of the batches. In order to handle this dark space in the expression set, several methods can be chosen in the application. 
+A variety of function employs replacing the missing values with the mean or median of the rest of the matrix (total mean/median). This procedure introduces no bias in the data if the missingness is low, although differential expression for the sample carrying the missing feature can not be expected as well. An even more conservative approach is dropping the rows for the feature with the missing value in one of the observed samples. 
+A common practice in proteomics is utilizing the K-nearest neighbor algorithm (=KNN), which imputes the missing values according to an euclidean metric of the neighboring values in the columns where the feature is not missing. $K$ denotes for the count of neighboring values of a protein which are considered and can be selected upon preference. The euclidean distance between two points is defined as $d = \sqrt{a^2 * b^2}$, the $K$ nearest neighbors average value will be assigned to the intensity of the missing feature. Since the average is a statistical metric which can be biased easily by skewed distributions, normalization is an important task before performing missing value imputation. KNN was benchmarked  for the regression of protein abundance intensities and showed an Area under the Curve (AUC) above 0.7 when testing on a human proteome test set \citep{Lan2013}.
 
 ### Batch correction 
-Since mass spectrometry experiments are highly influenced by several factors, such as sample processing, the technician, manufacturer and production of the device, the reagents etc., working in multiple batches introduces further variance in the protein data. This variance would overshadow the biological differences across sample types when performing dimensionality reduction. A common misconception in biology is, that batches need to be corrected before differential expression analysis, which is the final aim of ProteoScanR. It appears convenient to remove the batch effect before performing any statistical analysis, which is in turn prone to errors especially if the sample groups are not split equally between batches. In this case, group differences influence the batch effect reducing statistical power after the correction. These both effects are so called interdependent. The opposite could happen if the experimental design is heavily unbalanced leading to group differences induced by batch correction. 
+Since mass spectrometry experiments are highly influenced by several factors, such as sample processing, the technician, manufacturer and production of the device, the reagents etc., working in multiple batches introduces further variance in the protein data. This variance can overshadow the biological differences across sample types when performing dimensionality reduction. A common misconception in biology is, that batches need to be corrected before differential expression analysis, which is the final aim of ProteoScanR. It appears convenient to remove the batch effect before performing any statistical analysis, which is in turn prone to errors especially if the sample groups are not split equally between batches. In this case, group differences influence the batch effect reducing statistical power after the correction. Both of these effects are called interdependent. The opposite could happen if the experimental design is heavily unbalanced leading to group differences induced by batch correction. 
 Finally it is recommended to include the batch factor should in the linear model as a co-factor and statistically quantify it \citep{Nygaard2016}.
 However it could be of interest to observe biological relevance of the factor of interest in the dimensionality reduction visualization, so a batch correction option was included to meet this need.
 To address the non-biological experimental variations, also known as technical factors, the R package sva \citep{Leek2012} with the ComBat function \citep{Johnson2007} was used. 
@@ -605,14 +648,14 @@ The detection algorithm for confounding effects is facilitated by QR matrix deco
 By comparing the rank of matrix $A$ with the number of biologically relevant factors, it is possible to determine the presence of confounding effects in the dataset. The rank is defined as the maximum number of linearly independent columns. The same approach is used in the limma package \citep{Phipson2016} to identify non-solvable coefficients in experimental designs.
 
 ### Dimensionality reduction
-After cleaning the data and crystallizing from impurities such as noise and unwanted effects, the biological differences between sample types can be obtained. Proteomic data consists of multi dimensions (=features) which are overall hard to understand by a glance. An approach to observe the differences without a closer sight of exact effect on the proteinaceous ensemble, but still keep a high level of information can be dimensionality reduction. After the cleaning procedures any additional effect caused by technical or biological replication should be removed, however it could be found be highlighting according to the particular factor. This makes the dimensionality reduction a useful tool before starting any statistical analysis by checking for involuntarily introduced bias. 
+After cleaning the data and crystallizing from impurities such as noise and unwanted effects, the biological differences between sample types can be obtained. Proteomic data consists of multiple dimensions (=features) which are overall hard to understand at a glance. An approach to observe the differences without a closer sight of exact effect on the proteinaceous ensemble, but still keeping a high level of information can be dimensionality reduction. After the cleaning procedures any additional effect caused by technical or biological replication should be removed in advance (e.g. batch correction) or observed in particular with this technique. This makes the dimensionality reduction a useful tool before starting any statistical analysis by checking for involuntarily introduced bias. 
 
 #### Principle component analysis (PCA)
-The most common approach in data science for any kind of high dimensional data is the PCA. For ProteoScanR the bioconductor package scater \citep{McCarthy2017} was used. Every principle component can be understood as a vector pointing in a specific direction derived as the eigenvector from the covariance matrix of the expression set. The covariance matrix indicates for the co linearity between the variance of all elements compared. After calculating the covariance matrix the eigenvectors for the covariance matrix will be obtained by solving the quadratic equations to obtain the eigenvalues $\lambda$. Since $A v = \lambda v$ the eigenvector $v$ can be obtained by solving the equation for each element of the vector. The eigenvectors $v$ never changes is direction and explains the covariance within the dataset and so also the mathematical differences between the samples. The eigenvectors are sorted according to their eigenvalues in decreasing order and therefore decreasing explained variance. For graphical visualizations the principle components are plotted against each other. The first two components, which explain the majority of variance in the dateset highlight the difference between samples. 
+The most common approach for dimensionality reduction in data science for any kind of high dimensional data is the PCA. For ProteoScanR the bioconductor package scater \citep{McCarthy2017} was used. Every principle component can be understood as a vector pointing in a specific direction derived as the eigenvector from the covariance matrix of the expression set. The covariance matrix indicates for the co linearity between the variance of all elements compared. After calculating the covariance matrix the eigenvectors for the covariance matrix will be obtained by solving the quadratic equations to obtain the eigenvalues $\lambda$. Since $A v = \lambda v$ the eigenvector $v$ can be obtained by solving the equation for each element of the vector. The eigenvectors $v$ never changes direction and explains the covariance within the dataset and therefore also the mathematical differences between the samples. The eigenvectors are sorted according to their eigenvalues in decreasing order and therefore decreasing explained variance. For graphical visualizations the principle components are plotted against each other. The first two components, which explain the majority of variance in the dateset highlight the difference between samples. 
 
 #### Uniform manifold approximation & projection (UMAP)
 UMAP \citep{McInnes2018} is a dimensionality reduction technique that was developed in recent years and is based on Riemann geometry. It shares similarities to the  t-distributed stochastic neighbor embedding (t-SNE) in terms of graphical visualization. Riemann geometry is a mathematical framework that deals with three dimensional functions using volumes, areas and vectors, which are also concept of topological data analysis. 
-Before performing UMAP, three assumptions need to be considered:
+Before performing UMAP, three assumptions need to be considered \citep{McInnes2018}:
 
 \begin{enumerate}
 \item There exists a manifold on which the data would be uniformly distributed.
@@ -625,7 +668,7 @@ $\rightarrow$ In other words, similar samples will have a similar proteinaceous 
 goal.
 $\rightarrow$ This means that the homeomorphic structure (the property of being able to transform one shape into another without tearing or gluing) is locally preserved, and local values in the dataset can be compared with each other.
 \end{enumerate}
-\citep{McInnes2018}
+
 
 The UMAP algorithm begins by constructing a graph with a defined neighborhood parameter, typically denoted as $k$, which can be selected computationally. UMAP employs the k-nearest neighbor descent algorithm (NN-descent). Similar to the k-nearest neighbor algorithm (KNN), used in the missing value imputation part of this project, NN-descent recursively iterates to find the smallest distance to the respective neighbors within the defined neighborhood size $k$. Increasing the value of $k$ gradually strengthens the clustering of the data, but at a certain point, fine structure may be lost, and only rough estimates of the underlying principle can be observed.
 The mathematical graph in UMAP is defined by nodes connected by edges, with each node internally connected to at least one other node. Edges are distinguished from each other not only by their connection but also by their importance, which is often referred to as weight. Whereas the weight function is calculated as 
@@ -690,7 +733,7 @@ The table is expected to be populated by the values as follows:
 \end{center} 
 
 Under the null hypothesis $H_{0}$ states that the distribution and population of the table is random and there is no clear tendency with significant evidence. Against that the alternative hypothesis $H_{A}$ says that there is an underlying tendency the table is populated. 
-This leads to the test statistics, the observed values (=$O$) in the table are significantly different to the expected (=$E=\frac{(A+B \lor C+D)}{N}$ ones. One approach is approximating $\chi^2= \sum_{i=1}^{n} \frac{(O_i - E_i)^2}{E_i}$ and deriving the p-value by the area under the density curve of the $\chi^2$ distribution $Q = \sum_{i=1}^{k} Z_{i}^{2}$. In the distribution $k$ is defined by the degrees of freedom (=df), what can be obtained by $k=(columns-1)*(rows-1)=df$ of the table. Another approach to obtain an exact p-value would be Fisher`s exact test, which states that the margins are distributed according to the hypergeometric distributions. The test statistic leads directly to the p-value with no need for approximation: 
+This leads to the test statistics, the observed values (=$O$) in the table are significantly different to the expected (=$E=\frac{(A+B \lor C+D)}{N}$ ones. One approach is approximating $\chi^2= \sum_{i=1}^{n} \frac{(O_i - E_i)^2}{E_i}$ and deriving the p-value by the area under the density curve of the $\chi^2$ distribution $Q = \sum_{i=1}^{k} Z_{i}^{2}$. In the distribution $k$ is defined by the degrees of freedom (=df), which can be obtained by $k=(columns-1)*(rows-1)=df$ of the table. Another approach to obtain an exact p-value would be Fisher`s exact test, which states that the margins are distributed according to the hypergeometric distributions. The test statistic leads directly to the p-value with no need for approximation: 
 $p=1-\sum_{i=0}^{A-1}\frac{\binom{B}{i}\binom{D-B}{A+C-i}}{\binom{D}{A+C}}$
 Here D denotes either for the background distribution which can be the total number of proteins obtained in the experiment, all proteins with annotation or a custom selected background. The background indicates all proteins which could be positive tested for in the observed sample. The above mentioned three options are implemented in the user interface.
 After obtaining the p-values for each protein set, the subsequent critical step involves the correction for multiple testing, considering the inherent risk of false positive results. Multiple testing correction methods adjust the significance thresholds to account for the increased probability of detecting false positives when performing multiple statistical tests. In this protein set enrichment analysis, the user is provided with a selection of established correction methods, akin to those commonly utilized in the field of differential expression analysis, ensuring robust and reliable interpretation of the results. 

@@ -5,6 +5,6 @@ output: pdf_document
 
 \section*{Acknowledgements}
 
-In addition to my faithful feline companion, Apollo, who took care of my place in Austria while I was working on this project in Stockholm, I am deeply grateful to all the members of Ujjwal Neogi's research group. 
+Beside my faithful feline companion, Apollo, who took care of my place in Austria while I worked on this project in Stockholm, I extend my deep gratitude to all the members of Ujjwal Neogi's research group. Their consistent guidance and support throughout this project have been truly invaluable, and I am profoundly appreciative of their expertise and assistance.
 
-Their unwavering guidance and support throughout this project have been truly invaluable, and I am profoundly thankful for their expertise and assistance.
+Furthermore, I wish to express my gratitude to Gerhard Dürnberger, my internal supervisor, for his unwavering support and feedback on my master thesis, along with his precious time devoted to our meetings.
