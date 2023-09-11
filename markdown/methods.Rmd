@@ -283,7 +283,7 @@ output
 # dim_red_actions
 ```
 
-```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=14, fig.width=45, include=FALSE}
+```{r data_processing_pipeline_flowchart_horizontal, eval=FALSE, fig.height=14, fig.width=45, include=F}
 library(Gmisc, quietly = TRUE)
 library(glue)
 library(htmlTable)
@@ -361,7 +361,7 @@ missing_value_handling <- boxGrob("missing value handling",
                                   box_gp = plot_box_setting,
                                   txt_gp = default_txt_setting)
 
-missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median\nreplace with 0",
+missing_value_opts <- boxGrob("options:\nKNN\ndrop rows\nreplace with mean\nreplace with median",
                               box_gp = opts_box_setting,
                               txt_gp = opts_txt_setting,
                               just="center")
